@@ -7,14 +7,14 @@
 | Plex | Verified | Media server and playback | Host network, port 32400 |
 | Radarr | Verified | Movie management and import | 7878 |
 | Sonarr | Verified | TV management and import | 8989 |
-| Prowlarr | Verified for current indexers | Indexer management and ARR synchronization | 9696 |
-| qBittorrent | Verified | Active torrent downloader and fallback | 8080; peer 6881 TCP/UDP |
-| Kometa | Manual runs verified | Plex metadata and collection automation | No Web UI |
-| SABnzbd | Component-tested | Usenet downloader | Host 8081 to container 8080 |
-| Eweka | Component-tested | Usenet provider | External SSL service |
-| NZBGeek | Blocked | Candidate NZB indexer | Account or membership issue |
+| Prowlarr | Verified | Indexer management and ARR synchronization | 9696 |
+| qBittorrent | Verified | Torrent downloader and fallback | 8080; peer 6881 TCP/UDP |
+| Kometa | Verified manually | Plex metadata and collection automation | No Web UI |
+| SABnzbd | Verified | Usenet downloader | Host 8081 to container 8080 |
+| Eweka | Verified | Usenet provider | External SSL service |
+| NZBGeek | Verified | NZB indexer synchronized through Prowlarr | External service |
 
-Exact image versions should be captured from the live host before a versioned deployment document is added. Kometa logs showed version 2.4.5 during a verified run; the Compose image tags may still be floating.
+The laptop deployment is now treated as a **known-good pre-migration source**. Application and container upgrades are intentionally deferred until after desktop migration.
 
 ## Logical directory layout
 
@@ -43,8 +43,6 @@ Exact image versions should be captured from the live host before a versioned de
 └── arr_backup
 ```
 
-The physical disk and filesystem behind `/data` require fresh verification before migration.
-
 ## Important volume mappings
 
 | Service | Host path | Container path |
@@ -60,11 +58,11 @@ The physical disk and filesystem behind `/data` require fresh verification befor
 | qBittorrent | `/data/torrents` | `/downloads` |
 | SABnzbd | `/data/usenet` | `/data/usenet` |
 
-Each application also maps its directory under `/data/docker/<service>` to `/config`.
+Each application also maps `/data/docker/<service>` to `/config`.
 
-## Torrent path
+## Acquisition paths
 
-The operational path is:
+### Torrent fallback
 
 ```text
 Radarr / Sonarr
@@ -76,55 +74,97 @@ Radarr / Sonarr
 → Plex
 ```
 
-Torrents remain the intended fallback for Czech and Slovak releases. Exact qBittorrent categories, hardlink behavior, seeding policy, and ARR scoring rules have not been captured.
+Torrents remain the intended fallback, especially for Czech and Slovak releases.
 
-## Usenet path
+### Usenet — end-to-end verified
 
-Current component-level state:
-
-- Eweka subscription is active.
-- SABnzbd connected successfully to `news.eweka.nl` over SSL on port 563.
-- SABnzbd uses `/data/usenet/incomplete` and `/data/usenet/complete`.
-- Categories `movies` and `tv` map to their respective completed subdirectories.
-- Radarr and Sonarr can reach SABnzbd at `sabnzbd:8080` and both connection tests passed.
-- Adding `sabnzbd` to SABnzbd's host whitelist resolved an internal `403 Forbidden` response.
-
-The complete path remains unverified:
+The complete Usenet workflow is now verified for both movies and TV:
 
 ```text
-ARR search
-→ Prowlarr NZB indexer
-→ SABnzbd queue
-→ Eweka download
-→ category path
+Radarr / Sonarr
+→ Prowlarr / NZBGeek
+→ SABnzbd
+→ Eweka
+→ /data/usenet/complete/<category>
 → ARR import
-→ Plex scan
+→ /data/media
+→ Plex
 ```
 
-NZBGeek returned `Trial Account Only`; account recovery, membership activation, or another indexer is required.
+Verified details:
 
-## Plex and Kometa
+- Eweka connection succeeds over SSL on port 563.
+- SABnzbd uses `/data/usenet/incomplete` and `/data/usenet/complete`.
+- Categories `movies` and `tv` map to their respective completed subdirectories.
+- Radarr and Sonarr reach SABnzbd at `sabnzbd:8080`.
+- Adding the Docker hostname `sabnzbd` to SABnzbd's host whitelist resolved an earlier internal `403 Forbidden` response.
+- NZBGeek is active in Prowlarr and synchronized to both Radarr and Sonarr.
+- A real movie completed the full Radarr → Usenet → import → Plex path.
+- A real TV episode completed the full Sonarr → Usenet → import → Plex path.
 
-Verified Kometa behavior:
+One operational lesson was captured during the movie test: avoid manually triggering `Refresh & Scan` while a large ARR import is still copying. Doing so created a duplicate database record for one physical movie file. The false record was removed while Radarr was stopped, the valid imported record was preserved, and a fresh Radarr backup was created afterward.
 
-- Connected to TMDb.
-- Connected to Plex after replacing container-local `127.0.0.1` with `<HOST_LAN_IP>`.
-- Created `Newly Released`.
-- Created five director collections during a manual run.
-- Created an unwanted director separator.
+## Plex
 
-The verified configuration intent includes director `depth: 10` and `limit: 5`. The next change is to add `use_separator: false`, run Kometa, and remove the existing separator if needed.
+Libraries are configured as:
 
-Persistent scheduling is not verified. All proven executions used a one-off command:
+```text
+Movies   -> /movies
+TV Shows -> /tv
+```
+
+Verified library settings:
+
+- `Scan my library automatically` enabled.
+- `Run a partial scan when changes are detected` enabled.
+- `Empty trash automatically after every scan` disabled before migration to reduce risk if storage is temporarily unavailable.
+
+A Sonarr-imported episode appeared in Plex successfully after the TV library was added.
+
+For some 4K WEB-DL playback on a Samsung S90F client, forcing Direct Play previously removed visible stuttering. The root cause was not fully diagnosed.
+
+## Kometa
+
+Kometa is currently run manually as a one-off Compose job:
 
 ```bash
 cd /data/docker
 docker compose run --rm kometa --run
 ```
 
-A rotating `Director Spotlight` is planned but not implemented.
+Verified behavior:
 
-## Playback observation
+- Connects to TMDb.
+- Connects to Plex using a LAN endpoint represented publicly as `<HOST_LAN_IP>`.
+- Creates `Newly Released`.
+- Creates five dynamic director collections.
+- Director collection configuration uses `depth: 10` and `limit: 5`.
+- `use_separator: false` was applied and verified; the unwanted `Director Collections` separator is no longer present.
 
-For some 4K WEB-DL media on a Samsung S90F Plex client, forcing Direct Play removed visible stuttering. The root cause remains unknown because video, audio, subtitles, network behavior, and Plex Dashboard decisions were not captured during the event.
+Persistent Kometa scheduling remains unverified. A rotating `Director Spotlight` remains planned and is intentionally deferred until after migration.
 
+## Pre-migration backup and freeze
+
+Fresh application-native backups exist for:
+
+- Radarr
+- Sonarr
+- Prowlarr
+
+A consistent private archive of the entire `/data/docker` tree was created while all services were stopped:
+
+```text
+/data/arr_backup/docker-stack-pre-migration-2026-08-23.tar.gz
+```
+
+The archive is approximately 662 MiB and was verified with a full `tar -tzf` read. It contains private application state and credentials and must never be committed to this repository.
+
+After the snapshot, all persistent services were restarted and verified `Up` with `docker compose ps`.
+
+The laptop should now be treated as frozen: normal use is allowed, but configuration changes, upgrades, new services, and feature work should wait until the desktop copy is stable.
+
+## Deferred cleanup
+
+The current Compose file still contains an obsolete top-level `version` attribute. Docker Compose ignores it and emits a warning. Removing it is intentionally deferred until after migration.
+
+There is currently no `.env` file. Secret extraction into `.env`, a public-safe `.env.example`, and further Compose hardening are also deferred until the migrated stack is stable.

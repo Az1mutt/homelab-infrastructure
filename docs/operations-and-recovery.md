@@ -2,7 +2,7 @@
 
 ## Safe read-only inventory
 
-These commands are intended for future evidence collection. Review outputs for private identifiers before publishing them.
+These commands are intended for evidence collection. Review outputs for private identifiers before publishing them.
 
 ```bash
 cat /etc/os-release
@@ -25,15 +25,24 @@ sudo ufw status verbose
 find /data/arr_backup -maxdepth 2 -type f -printf '%TY-%Tm-%Td %TH:%TM %s %p\n'
 ```
 
-SMART commands are read-only, but device paths must still be resolved deliberately. Extended tests and surface tests belong to the migration procedure, not casual discovery.
+SMART reads are non-destructive, but device paths must still be resolved deliberately. Extended tests and destructive disk preparation belong to the migration procedure.
 
 ## Confirmed recovery evidence
 
-- Radarr, Sonarr, and Prowlarr were restored successfully from backups.
-- The backup location is `/data/arr_backup`.
-- Sonarr recovered from a `database disk image is malformed` failure through restore.
-- Radarr state recovered, although records for deleted media required cleanup.
-- Prowlarr settings and synchronization recovered.
+- Radarr, Sonarr, and Prowlarr have all been restored successfully from application backups in the past.
+- Sonarr previously recovered from a `database disk image is malformed` failure through restore.
+- A fresh native backup was created for Radarr, Sonarr, and Prowlarr immediately before the 2026-08-23 migration freeze.
+- A full consistent snapshot of `/data/docker` was created while every persistent container was stopped:
+
+```text
+/data/arr_backup/docker-stack-pre-migration-2026-08-23.tar.gz
+```
+
+- The archive is approximately 662 MiB.
+- The archive was validated with a complete `tar -tzf` read.
+- After the snapshot, all persistent services were started again and verified `Up`.
+
+The full archive contains private application configuration and credentials. It is a recovery artifact, not a repository artifact.
 
 ## Historical incident
 
@@ -43,42 +52,46 @@ This incident drives three migration rules:
 
 1. Copy before cutover; do not treat a move as the first safety mechanism.
 2. Verify file counts, sizes, representative playback, and checksums where appropriate.
-3. Keep the source host and independent configuration backups until acceptance is complete.
+3. Keep the source state and independent configuration backups until acceptance is complete.
 
-## Current backup gap
+## Current backup boundary
 
-Confirmed recovery exists for ARR application state, but the following are not yet documented as automatically and independently backed up:
+The immediate media-application recovery position is materially improved because the complete Docker application state is now archived. The following remain outside a mature automated backup design:
 
-- Compose definitions and environment files;
-- Plex configuration and metadata;
-- qBittorrent, Kometa, and SABnzbd configuration;
-- all application databases and logs;
-- the target system disk;
-- personal photos and documents;
-- media data;
-- off-host or off-site copies;
-- retention, integrity checks, and restore drills.
+- automated off-host retention of the private Docker-stack archive;
+- target system-disk backup;
+- personal photos/documents;
+- bulk media backup or parity strategy;
+- retention policy and scheduled integrity checks;
+- formal restore drills on the target server.
 
-## Backup priority
+Downloaded media may have a lower backup priority if it can be reacquired, but that policy should remain explicit.
 
-Highest priority:
+## Migration restore order
 
-- Compose and sanitized templates;
-- application configuration and databases;
-- credentials in a separate secure system;
-- personal photos and documents;
-- project repositories.
+Recommended sequence:
 
-Downloaded media may have a lower backup priority if it can be reacquired, but that choice must be explicit.
+1. Verify storage identity and mounts.
+2. Verify the private snapshot and source directories are readable.
+3. Restore `/data/docker` or equivalent target appdata without changing versions where avoidable.
+4. Start Plex and validate library access.
+5. Start qBittorrent and SABnzbd; validate paths.
+6. Start Prowlarr; validate indexers/app synchronization.
+7. Start Radarr and Sonarr; validate databases, root folders, profiles, and download clients.
+8. Run Kometa manually.
+9. Perform a small real Usenet acceptance test.
+10. Perform a representative torrent fallback test.
+11. Reboot and verify mounts and service recovery.
 
 ## Recovery acceptance
 
 A recovery design is credible only after it demonstrates:
 
-- a configuration backup stored outside the server;
-- restoration of at least one representative service;
+- a configuration backup stored independently from the active application state;
+- restoration of representative services on the target;
 - documented secret restoration without committing secrets;
 - persistent mounts and services surviving reboot;
 - a defined recovery point and retention policy;
 - a rollback procedure for migration.
 
+The 2026-08-23 archive is the current rollback point for the media application layer, but it does not by itself constitute a complete disaster-recovery system.

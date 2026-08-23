@@ -6,27 +6,29 @@ The project is both a practical home infrastructure build and a public engineeri
 
 ## Project status
 
-**Current phase:** hardware preparation and migration planning.
+**Current phase:** source-stack freeze and desktop migration preparation.
 
-- The active stack still runs on an Ubuntu laptop.
-- Plex, Radarr, Sonarr, Prowlarr, qBittorrent, Kometa, and SABnzbd have verified component-level functionality.
-- Eweka connectivity and the Radarr/Sonarr connections to SABnzbd have been tested.
-- The complete Usenet workflow is blocked until a working NZB indexer is available.
-- The target desktop has not yet been installed or configured.
-- A Toshiba MG09ACA18TE 18 TB disk has been acquired; local acceptance testing is pending.
-- Ubuntu Server 24.04 LTS has been selected for the target platform.
+- The active media stack still runs on the Ubuntu laptop and is now treated as a known-good frozen source.
+- Plex, Radarr, Sonarr, Prowlarr, qBittorrent, Kometa, SABnzbd, Eweka, and NZBGeek have verified working integrations.
+- Real movie and TV Usenet workflows have completed end to end through Plex.
+- Fresh Radarr, Sonarr, and Prowlarr backups exist.
+- A full private Docker-stack archive was created while services were stopped and was read-verified.
+- The target desktop already runs Ubuntu Server with working SSH and Wi-Fi.
+- The Toshiba MG09 18 TB disk is attached and undergoing acceptance testing before storage preparation.
+- Final filesystem, mounts, permissions, and media-stack restoration on the desktop remain pending.
 
 Status details and evidence boundaries are tracked in [Current state](docs/current-state.md).
 
 ## Architecture at a glance
 
-The current system uses Docker Compose to provide a local media-management pipeline:
+The current source system uses Docker Compose to provide a local media-management pipeline:
 
 ```mermaid
 flowchart TD
-    Request["Radarr / Sonarr"] --> Indexers["Prowlarr"]
-    Indexers --> Torrent["qBittorrent"]
-    Indexers -. "NZB indexer blocked" .-> Usenet["SABnzbd + Eweka"]
+    Request["Radarr / Sonarr"] --> Prowlarr
+    Prowlarr --> Torrent["Torrent indexers → qBittorrent"]
+    Prowlarr --> NZB["NZBGeek"]
+    NZB --> Usenet["SABnzbd → Eweka"]
     Torrent --> Library["Media library"]
     Usenet --> Library
     Library --> Plex["Plex"]
@@ -42,7 +44,7 @@ See [Architecture](docs/architecture.md) for current and target boundaries.
 | [Current state](docs/current-state.md) | Verified, planned, blocked, and unknown items |
 | [Architecture](docs/architecture.md) | Current topology and target platform boundaries |
 | [Hardware and storage](docs/hardware-and-storage.md) | Host inventory, disk evidence, and storage risks |
-| [Media stack](docs/media-stack.md) | Services, paths, Plex/Kometa, torrent, and Usenet behavior |
+| [Media stack](docs/media-stack.md) | Services, paths, Plex/Kometa, torrent, Usenet, and freeze state |
 | [Operations and recovery](docs/operations-and-recovery.md) | Safe checks, backups, recovery evidence, and risks |
 | [Migration plan](docs/migration-plan.md) | Staged laptop-to-desktop migration and acceptance criteria |
 | [Roadmap](docs/roadmap.md) | Now, next, blocked, later, and open decisions |
@@ -51,18 +53,18 @@ See [Architecture](docs/architecture.md) for current and target boundaries.
 
 ## Repository principles
 
-- Keep the current laptop stack available until the target has passed acceptance checks.
+- Keep the laptop state intact until the desktop passes acceptance checks.
 - Separate confirmed implementation from plans and assumptions.
 - Prefer read-only discovery before changing disks, filesystems, mounts, or services.
 - Use persistent disk identifiers such as UUIDs; never depend on `/dev/sdX` naming.
-- Treat storage capacity, redundancy, and backup as three different concerns.
-- Never commit credentials, tokens, public IP addresses, private hostnames, disk serial numbers, or unsanitized configuration exports.
+- Restore the known-good stack before combining migration with upgrades or refactors.
+- Treat storage capacity, redundancy, and backup as separate concerns.
+- Never commit credentials, tokens, public IP addresses, private identifiers, disk serial numbers, or unsanitized configuration exports/backups.
 
 ## Near-term objective
 
-Build a safe target platform, verify both disks, install Ubuntu Server, establish persistent storage and SSH, deploy a low-risk pilot service, and then migrate the media stack incrementally with a tested rollback path.
+Move the existing external source disk to the desktop, finish safe storage preparation, establish persistent mounts and permissions, restore the known-good Docker stack incrementally, and validate Plex, Usenet, torrent fallback, and Kometa before enabling post-migration improvements.
 
 ## Scope boundary
 
-This repository documents infrastructure state and planned implementation. It does not claim that target-server services, storage layouts, backup automation, monitoring, remote access, or full Usenet automation exist until evidence is added.
-
+This repository documents verified infrastructure state and planned implementation. It does not claim that the desktop media stack, final storage layout, automated backups, monitoring, remote access, or post-migration automation are complete until evidence is added.

@@ -2,94 +2,179 @@
 
 ## Objective
 
-Move the working Docker media stack from the Lenovo laptop to the target desktop without destroying the source, losing configuration, or presenting an untested target as production-ready.
+Move the verified Docker media stack from the Lenovo laptop to the dedicated desktop without losing configuration, corrupting storage, or treating an untested target as production-ready.
+
+The source laptop is now a **known-good frozen baseline** with verified backups and successful real-world acquisition tests.
 
 ## Guardrails
 
-- Keep the laptop operational until the target passes all acceptance criteria.
-- Begin with read-only hardware and disk discovery.
+- Keep the laptop state intact until the target passes acceptance criteria.
+- Begin storage work with read-only discovery.
 - Do not format a disk until its identity and intended role are confirmed.
-- Never use `/dev/sdX` names as persistent mount identifiers.
-- Back up configuration before changing the source or target.
-- Migrate incrementally and retain a rollback point after every stage.
+- Never depend on `/dev/sdX` names for persistent mounts.
+- Preserve the existing `/data/...` logical path convention where practical to reduce application changes.
+- Restore first, improve later: do not combine migration with upgrades or config refactors.
+- Treat the full Docker-stack archive as private because it contains credentials.
 
-## Phase 1 — Physical preparation
+## Source freeze completed
 
-1. Identify the correct drive rails, brackets, and native 3.5-inch positions.
-2. Securely mount or safely stage the system and data disks.
-3. Confirm airflow around the 18 TB enterprise disk.
-4. Inspect SATA data cables and power connectors.
-5. Obtain and install a compatible PCIe Wi-Fi adapter, or use temporary Ethernet.
-6. Record motherboard, RAM, CPU, SATA-port, and expansion details.
+Before migration, the following were verified:
 
-## Phase 2 — Base platform
+- Radarr real Usenet movie workflow through Plex.
+- Sonarr real Usenet TV workflow through Plex.
+- NZBGeek synchronization through Prowlarr.
+- SABnzbd and Eweka download path.
+- Plex Movies and TV libraries plus automatic partial scanning.
+- Kometa manual execution with current director collections and `use_separator: false`.
+- Fresh native backups for Radarr, Sonarr, and Prowlarr.
+- Full stopped-stack archive at `/data/arr_backup/docker-stack-pre-migration-2026-08-23.tar.gz`.
+- Archive integrity checked with `tar -tzf`.
+- All persistent services restarted successfully after backup.
 
-1. Inspect BIOS/UEFI and boot configuration.
-2. Install Ubuntu Server 24.04 LTS on the intended system disk.
-3. Configure LAN access and verify SSH.
-4. Collect hardware and storage inventory.
-5. Investigate the 1 TB versus 100 GB capacity discrepancy.
-6. Capture local SMART baselines for both disks.
+## Phase 1 — Move and identify storage
 
-No service migration begins if disk identity, capacity, or health remains ambiguous.
+1. Stop the laptop Compose stack.
+2. Power the laptop off cleanly.
+3. Move the existing external HDD to the desktop.
+4. On the desktop, begin with read-only inventory such as `lsblk` and `findmnt`.
+5. Positively identify:
+   - the system disk,
+   - the Toshiba 18 TB disk,
+   - the migrated external HDD.
+6. Do not format, repartition, or recursively change permissions until identity is certain.
 
-## Phase 3 — Data-disk acceptance
+## Phase 2 — Finish target storage preparation
 
-1. Run the 18 TB extended SMART self-test.
-2. Run a full-surface read test.
-3. Monitor temperature and UDMA CRC count.
-4. Decide whether an empty-disk destructive burn-in is justified.
-5. Select the filesystem.
-6. Create and label the filesystem only after explicit confirmation.
-7. Configure persistent UUID-based mounting.
-8. Reboot and verify the mount.
+1. Confirm the 18 TB SMART self-test result.
+2. Decide the final filesystem and role of the 18 TB disk.
+3. Create persistent UUID-based mounts only after explicit confirmation.
+4. Verify mounts across reboot.
+5. Establish the permissions/UID/GID policy.
+6. Verify the old external source disk is readable and contains:
 
-## Phase 4 — Runtime foundation
+```text
+/data/docker
+/data/media
+/data/torrents
+/data/usenet
+/data/arr_backup
+```
 
-1. Install Docker Engine and the Docker Compose plugin.
-2. Define appdata and bulk-data paths.
-3. Establish UID/GID and permissions policy.
-4. Establish `.env` and secret-management rules.
-5. Deploy one low-risk pilot service.
-6. Reboot and verify automatic recovery.
+Confirm the private recovery archive exists before service restoration.
 
-## Phase 5 — Media-stack migration
+## Phase 3 — Runtime foundation
 
-1. Capture the live Compose configuration and exact image versions from the laptop.
-2. Sanitize a repository version and keep secrets outside Git.
-3. Back up all application configuration.
-4. Migrate one service at a time.
-5. Verify mounts, ownership, ports, service health, and logs after each service.
-6. Copy media and downloads; do not delete the source copy.
-7. Validate torrent download and ARR import.
-8. Add a working NZB indexer and validate Usenet end to end.
-9. Validate Plex library access and Direct Play from the Samsung TV.
-10. Verify Kometa manual and scheduled behavior.
+1. Install or verify Docker Engine and the Docker Compose plugin.
+2. Restore/copy the known-good `/data/docker` state without changing application versions if avoidable.
+3. Validate Compose before startup:
 
-## Phase 6 — Cutover and stabilization
+```bash
+docker compose config -q
+```
 
-1. Reboot the target and confirm all required mounts and services.
-2. Validate SSH access and LAN endpoints.
-3. Run representative download, import, playback, and collection tests.
-4. Create an independent configuration backup.
-5. Document rollback and restore.
-6. Keep the laptop unchanged for an agreed stabilization period.
-7. Retire it from normal service only after the target remains stable.
+4. Do not refactor secrets into `.env` during the migration itself.
+5. Do not remove the obsolete Compose `version` attribute during the migration itself.
+
+Those are post-migration cleanup tasks.
+
+## Phase 4 — Restore services in layers
+
+Recommended order:
+
+1. **Storage visibility** — verify expected files and directories.
+2. **Plex** — verify Movies, TV, and representative playback.
+3. **qBittorrent and SABnzbd** — verify paths and connectivity.
+4. **Prowlarr** — verify indexers and ARR application connections.
+5. **Radarr and Sonarr** — verify databases, root folders, download clients, profiles, and existing media.
+6. **Kometa** — run manually and verify collections.
+
+Avoid starting every service at once if a staged restore makes path or permission problems easier to isolate.
+
+## Phase 5 — Acceptance tests
+
+### Plex
+
+- Movies visible.
+- TV Shows visible.
+- Representative playback succeeds.
+- New imports appear automatically.
+
+### Usenet
+
+Run one small real test and verify:
+
+```text
+ARR
+→ Prowlarr / NZBGeek
+→ SABnzbd
+→ Eweka
+→ import
+→ Plex
+```
+
+### Torrent fallback
+
+Run one small representative torrent test if appropriate and verify import.
+
+### Kometa
+
+Run:
+
+```bash
+cd /data/docker
+docker compose run --rm kometa --run
+```
+
+Verify `Newly Released` and the dynamic director collections appear without the removed separator.
+
+### Reboot
+
+Reboot the desktop and verify:
+
+- storage mounts persist,
+- SSH returns,
+- required containers recover,
+- applications still see their data.
+
+## Phase 6 — Stabilization
+
+Keep the reproduced configuration stable for a short observation period before introducing enhancements.
+
+During stabilization, do not:
+
+- upgrade Radarr, Sonarr, or Prowlarr;
+- redesign quality profiles;
+- add new indexers without troubleshooting need;
+- add monitoring, agents, Watchtower, or VPN routing;
+- redesign Kometa;
+- refactor Compose/secrets.
+
+## Post-migration cleanup
+
+Only after the desktop is stable:
+
+- remove the obsolete Compose `version` field;
+- extract appropriate secrets into local `.env`;
+- add a safe `.env.example` with placeholders;
+- verify `.env` is ignored by Git;
+- sanitize and document Compose publicly;
+- decide update policy;
+- verify or implement Kometa scheduling;
+- add Director Spotlight and other collection automation;
+- add monitoring/dashboarding and future agents.
 
 ## Completion criteria
 
 Migration is complete only when:
 
 - the desktop boots without local intervention;
-- SSH remains available;
-- disks are securely mounted and their health is understood;
+- SSH is available;
 - persistent mounts survive reboot;
-- Docker Compose starts all required services;
-- service configuration is preserved;
-- torrent and Usenet download/import paths work;
-- Plex serves expected libraries and representative playback succeeds;
-- Kometa behavior is understood and repeatable;
-- configuration is backed up outside the target;
-- rollback and recovery procedures are documented;
-- the laptop is no longer required for normal operation.
-
+- the known media files are visible;
+- Docker Compose starts required services;
+- Radarr and Sonarr retain their configuration;
+- both Usenet and torrent acquisition/import paths work;
+- Plex serves Movies and TV and representative playback succeeds;
+- Kometa manual execution is repeatable;
+- the private recovery point is preserved;
+- rollback is documented and the laptop is no longer needed for normal operation.
