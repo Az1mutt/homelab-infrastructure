@@ -2,94 +2,72 @@
 
 ## Now
 
-- Move the existing external HDD from the frozen laptop source to the desktop.
-- Identify all disks read-only and confirm the old source disk, system disk, and 18 TB Toshiba disk.
-- Complete the 18 TB SMART acceptance step before destructive storage preparation.
-- Decide final filesystem and mount layout.
-- Configure persistent UUID-based mounts.
-- Verify permissions and access to the existing `/data` tree.
-- Install or validate Docker Engine and Docker Compose on the desktop.
-- Restore the known-good media stack incrementally.
+- Complete application-level validation on the desktop.
+- Finish Sonarr TRaSH/Recyclarr configuration in the media workstream using the same quality philosophy as Radarr.
+- Confirm new ARR torrent imports create real hardlinks on ext4.
+- Revalidate Kometa manually on the desktop.
+- Keep the old source disk intact until final acceptance.
 
-## Migration checkpoint
+## Current checkpoint
 
-The source media stack is ready for migration:
+The desktop cutover is operational:
 
-- Radarr Usenet workflow verified end to end.
-- Sonarr Usenet workflow verified end to end.
-- NZBGeek active through Prowlarr.
-- SABnzbd + Eweka verified with real downloads.
-- Plex Movies and TV libraries verified.
-- Plex automatic library scanning verified.
-- Kometa manual run verified with `use_separator: false`.
-- Fresh Radarr, Sonarr, and Prowlarr backups created.
-- Full private Docker-stack archive created and read-verified.
-- Laptop configuration is frozen as the rollback source.
+- 18 TB ext4 data disk mounted persistently at `/data`.
+- Docker Engine and Compose operational.
+- Plex, Radarr, Sonarr, Prowlarr, qBittorrent and SABnzbd running.
+- Migration data validated.
+- Private recovery archive checksum matched source/target.
+- Real Radarr post-migration download/import completed.
+- 26 NTFS-era duplicate media/torrent sets converted to hardlinks.
+- Approximately 711.6 GiB reclaimed.
+- Recyclarr introduced for reproducible TRaSH configuration.
+- Radarr consolidated onto one UHD profile with 1080p fallback.
+- Automatic acquisition is Usenet-first; torrents are manual fallback.
 
 ## Next
 
-- Restore Plex and validate existing media/playback.
-- Restore qBittorrent and SABnzbd and validate paths.
-- Restore Prowlarr and ARR integrations.
-- Restore Radarr and Sonarr and verify root folders, profiles, and download clients.
-- Run a small real Usenet test on the desktop.
-- Run a representative torrent fallback test.
-- Run Kometa manually and verify collections.
-- Reboot the desktop and verify mounts, SSH, and service recovery.
-- Observe the reproduced stack before adding new features.
-
-## Blocked / waiting
-
-| Item | Blocker |
-|---|---|
-| Destructive 18 TB preparation | SMART acceptance must finish and exact target must be confirmed |
-| Media-stack cutover | Final desktop mounts, permissions, and Docker runtime are not ready yet |
-| Post-migration enhancements | Desktop stack must first pass migration acceptance |
+- Receive the media-workstream completion handoff.
+- Retire/unmount the old rollback source disk.
+- Replace the temporary migration-version override with the permanent image pin/update policy.
+- Remove the obsolete Compose `version` field.
+- Extract appropriate secrets into local-only configuration and add safe public examples.
+- Harden backup/restore procedures and retention.
+- Refresh public documentation to reflect the desktop as the production host.
 
 ## After migration stabilization
 
-- Remove the obsolete Compose `version` field.
-- Refactor appropriate secrets into a local `.env`.
-- Add `.env.example` with placeholders and keep `.env` ignored.
-- Publish a sanitized Compose example.
-- Update containers under a defined update policy.
-- Verify persistent Kometa scheduling.
-- Add rotating `Director Spotlight` or related Kometa automation.
-- Improve CZ/SK and dual-audio quality/custom-format rules.
-- Diagnose qBittorrent performance if fallback performance remains poor.
-- Add monitoring and a dashboard.
-- Consider controlled update automation.
-- Consider VPN routing for qBittorrent if there is a clear requirement.
-- Develop media-focused agents only after the base platform is stable.
+- Add monitoring/dashboarding.
+- Define controlled container-update automation.
+- Improve Kometa scheduling and collection automation.
+- Refine CZ/SK handling only if real usage justifies more automation.
+- Diagnose qBittorrent performance only if fallback performance remains a real issue.
+- Consider VPN routing for qBittorrent only if there is a clear requirement.
 
 ## Later infrastructure work
 
-- Move system/appdata to an SSD if appropriate.
+- Move system/appdata to SSD if appropriate.
 - Replace the budget-class PSU before major disk expansion.
 - Improve chassis airflow.
-- Add another large disk and choose backup, mirror, parity, or capacity role deliberately.
+- Add another large disk and choose backup, mirror, parity or capacity role deliberately.
 - Replace Wi-Fi with Ethernet.
-- Consider Immich, Paperless-ngx, Ollama, and Open WebUI after the base platform is stable.
+- Consider 2.5 GbE after the broader network upgrade.
+- Consider HBA/SATA expansion when storage growth requires it.
 
 ## Optional backlog
 
 - UPS
-- 2.5 GbE
 - HBA or SATA expansion controller
 - mergerfs or another pooling layer
 - SnapRAID or alternative parity design
 - VPN-based remote access
 - infrastructure-as-code automation
 - storage-focused replacement chassis
+- media-focused agents after the base platform is stable
 
 ## Open decisions
 
-- ext4, XFS, or btrfs for the bulk-data disk
-- final appdata and bulk-data mount paths
-- UID/GID and permissions model
-- Docker network strategy
-- update policy
-- backup tooling, retention, and frequency
+- permanent container version/update policy
+- backup tooling, retention and frequency
 - monitoring stack
 - purpose of a future second large disk
 - timing of SSD and PSU replacement
