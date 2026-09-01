@@ -1,79 +1,97 @@
 # Architecture
 
-The project currently has two distinct platforms: a working laptop-hosted media stack and a dedicated desktop that has been prepared as the migration target. They must not be described as one production system until cutover is complete.
+The dedicated Ubuntu Server desktop is now the operational homelab host. The previous notebook/external-disk environment is retained only as migration rollback material until final acceptance.
 
-## Current source architecture
+## Current architecture
 
 ```mermaid
 flowchart TD
+    Admin["Administration client"] -->|"SSH / browser over LAN"| Server["Ubuntu Server desktop"]
+    Server --> SystemDisk["System disk"]
+    Server --> DataDisk["18 TB ext4 data disk mounted at /data"]
+    Server --> Docker["Docker Compose"]
+
     ARR["Radarr / Sonarr"] --> Prowlarr
-    Prowlarr --> TorrentIndexers["Torrent indexers"]
-    TorrentIndexers --> qBittorrent
-    qBittorrent --> TorrentPaths["/data/torrents"]
     Prowlarr --> NZB["NZBGeek"]
     NZB --> SABnzbd
     SABnzbd --> Eweka
     SABnzbd --> UsenetPaths["/data/usenet"]
-    TorrentPaths --> ARR
+
+    Prowlarr --> TorrentIndexers["Torrent indexers"]
+    TorrentIndexers --> qBittorrent
+    qBittorrent --> TorrentPaths["/data/torrents"]
+
     UsenetPaths --> ARR
+    TorrentPaths --> ARR
     ARR --> Media["/data/media"]
     Media --> Plex
     Kometa --> Plex
-    Plex --> TV["Samsung S90F"]
 ```
 
-Both acquisition paths are verified. Torrents remain the fallback path; Usenet has been verified end to end for both Radarr and Sonarr.
+## Acquisition policy
 
-### Network model
+The automatic/default path is:
+
+```text
+Radarr / Sonarr
+→ Prowlarr / NZBGeek
+→ SABnzbd
+→ Eweka
+→ ARR import
+→ Plex
+```
+
+Torrent indexers remain available for Interactive Search/manual fallback.
+
+CZ/SK torrent sources are treated as manual exceptions unless future usage justifies more automation.
+
+## Network model
 
 - Plex uses host networking.
-- The other services use the Compose bridge unless later inspection shows otherwise.
-- Radarr and Sonarr reach SABnzbd at `sabnzbd:8080`.
-- Prowlarr reaches sibling ARR applications through Docker service DNS rather than `localhost`.
-- SABnzbd is exposed on host port `8081`; qBittorrent uses host port `8080`.
-- The specific Docker hostname `sabnzbd` is allowed by SABnzbd's host whitelist.
-- No public internet exposure, reverse proxy, or remote-access design is documented.
+- Other media services use the Compose bridge.
+- Service-to-service communication uses Docker DNS where appropriate.
+- No public internet exposure or reverse proxy is documented.
+- Wi-Fi is currently operational; Ethernet remains the preferred long-term transport.
 
-## Service endpoints
+## Storage model
 
-All addresses are placeholders and represent LAN-only access.
-
-| Service | Endpoint |
-|---|---|
-| Plex | `http://<HOST_LAN_IP>:32400` |
-| Radarr | `http://<HOST_LAN_IP>:7878` |
-| Sonarr | `http://<HOST_LAN_IP>:8989` |
-| Prowlarr | `http://<HOST_LAN_IP>:9696` |
-| qBittorrent | `http://<HOST_LAN_IP>:8080` |
-| SABnzbd | `http://<HOST_LAN_IP>:8081` |
-| Kometa | No Web UI |
-
-## Target desktop platform
-
-```mermaid
-flowchart TD
-    Admin["Administration client"] -->|"SSH / browser over LAN"| Server["Ubuntu Server desktop: homelab"]
-    Server --> SystemDisk["~1 TB WDC system disk"]
-    Server --> DataDisk["Toshiba MG09 18 TB data disk"]
-    Server --> Docker["Docker Compose"]
-    Docker --> Services["Migrated homelab services"]
+```text
+/data
+├── arr_backup
+├── docker
+├── media
+│   ├── movies
+│   └── tv
+├── torrents
+└── usenet
 ```
 
-The target is no longer hypothetical: Ubuntu Server is installed, SSH works, Wi-Fi survives reboot, and the 18 TB disk is physically attached. The media stack itself has not yet been restored there.
+The 18 TB data disk is ext4.
 
-### Intended responsibility split
+The old external NTFS disk remains a temporary rollback source only.
 
-| Layer | Intended responsibility |
-|---|---|
-| System disk | Ubuntu, Docker runtime, Compose and potentially appdata depending on final storage decision |
-| 18 TB data disk | Bulk media/download storage after acceptance and filesystem preparation |
-| Existing external disk | Migration source and temporary rollback/data source during cutover |
-| Docker Compose | Reproducible service definitions and persistent mounts |
-| SSH | Normal headless administration |
-| LAN | Initial service access; Ethernet preferred long-term |
+## Hardlink behavior
 
-Final filesystems, mount paths, permissions, UID/GID strategy, Docker networks, and backup tooling remain open decisions.
+The old NTFS source did not provide the intended media/torrent hardlink behavior.
 
-## Migration boundary
+After migration to ext4, verified duplicate media/torrent payloads were converted to real hardlinks. Future ARR torrent imports are expected to use this filesystem capability directly.
 
-The architectural goal during migration is **reproduction before redesign**. Preserve the existing logical `/data/...` paths where practical, restore known-good application state, validate acquisition and playback, and only then perform Compose cleanup, `.env` extraction, upgrades, monitoring, or additional automation.
+## Application-version boundary
+
+A temporary migration Compose override pins known-good application versions.
+
+This preserves the architectural principle:
+
+**migration first, upgrades later.**
+
+The permanent image pin/update strategy remains a post-migration infrastructure decision.
+
+## Media configuration layer
+
+Recyclarr is deployed as a separate Compose project for reproducible TRaSH-based media quality configuration.
+
+Radarr currently uses a single main UHD profile with 1080p fallback. Sonarr is intended to follow the same philosophy using Sonarr-specific TRaSH definitions.
+
+## Remaining migration boundary
+
+The architecture is operational on the desktop, but final closure still depends on media-application acceptance and retirement of the old rollback source.
