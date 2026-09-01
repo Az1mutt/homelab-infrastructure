@@ -4,177 +4,116 @@
 
 Move the verified Docker media stack from the Lenovo laptop to the dedicated desktop without losing configuration, corrupting storage, or treating an untested target as production-ready.
 
-The source laptop is now a **known-good frozen baseline** with verified backups and successful real-world acquisition tests.
+## Current result
 
-## Guardrails
+The bulk migration and desktop cutover are complete.
 
-- Keep the laptop state intact until the target passes acceptance criteria.
-- Begin storage work with read-only discovery.
-- Do not format a disk until its identity and intended role are confirmed.
-- Never depend on `/dev/sdX` names for persistent mounts.
-- Preserve the existing `/data/...` logical path convention where practical to reduce application changes.
-- Restore first, improve later: do not combine migration with upgrades or config refactors.
-- Treat the full Docker-stack archive as private because it contains credentials.
+Verified so far:
 
-## Source freeze completed
+- the 18 TB data disk is ext4 and mounted persistently at `/data`;
+- the old external source disk was mounted read-only during cutover;
+- Docker application state, media, torrents, Usenet directories and ARR backups were copied;
+- recovery archive checksum matched between source and target;
+- Docker Engine and Compose are operational on the desktop;
+- Plex, Radarr, Sonarr, Prowlarr, qBittorrent and SABnzbd start successfully;
+- local HTTP smoke tests pass;
+- a real Radarr post-migration download/import completed;
+- NTFS-era duplicate payloads were converted to ext4 hardlinks.
 
-Before migration, the following were verified:
+## Guardrails retained until closure
 
-- Radarr real Usenet movie workflow through Plex.
-- Sonarr real Usenet TV workflow through Plex.
-- NZBGeek synchronization through Prowlarr.
-- SABnzbd and Eweka download path.
-- Plex Movies and TV libraries plus automatic partial scanning.
-- Kometa manual execution with current director collections and `use_separator: false`.
-- Fresh native backups for Radarr, Sonarr, and Prowlarr.
-- Full stopped-stack archive at `/data/arr_backup/docker-stack-pre-migration-2026-08-23.tar.gz`.
-- Archive integrity checked with `tar -tzf`.
-- All persistent services restarted successfully after backup.
+- Keep the old source disk intact until the media workstream finishes application validation.
+- Do not remove the temporary migration-version override yet.
+- Do not combine migration closure with broad application upgrades.
+- Do not expose private backups, API keys, migration logs or local identifiers in the repository.
+- Continue to treat the full Docker-stack archive as private recovery material.
 
-## Phase 1 — Move and identify storage
+## Completed phases
 
-1. Stop the laptop Compose stack.
-2. Power the laptop off cleanly.
-3. Move the existing external HDD to the desktop.
-4. On the desktop, begin with read-only inventory such as `lsblk` and `findmnt`.
-5. Positively identify:
-   - the system disk,
-   - the Toshiba 18 TB disk,
-   - the migrated external HDD.
-6. Do not format, repartition, or recursively change permissions until identity is certain.
+### Phase 1 — Move and identify storage
+Completed.
 
-## Phase 2 — Finish target storage preparation
+The source disk was attached to the desktop and mounted read-only. The OS disk, target 18 TB disk and source external disk were positively identified before destructive actions.
 
-1. Confirm the 18 TB SMART self-test result.
-2. Decide the final filesystem and role of the 18 TB disk.
-3. Create persistent UUID-based mounts only after explicit confirmation.
-4. Verify mounts across reboot.
-5. Establish the permissions/UID/GID policy.
-6. Verify the old external source disk is readable and contains:
+### Phase 2 — Prepare target storage
+Completed.
 
-```text
-/data/docker
-/data/media
-/data/torrents
-/data/usenet
-/data/arr_backup
-```
+The 18 TB disk was initialized with GPT, formatted ext4, mounted persistently at `/data`, and verified.
 
-Confirm the private recovery archive exists before service restoration.
+### Phase 3 — Runtime foundation
+Completed.
 
-## Phase 3 — Runtime foundation
+Docker Engine and Docker Compose were installed. The migrated Compose file parsed successfully before service startup.
 
-1. Install or verify Docker Engine and the Docker Compose plugin.
-2. Restore/copy the known-good `/data/docker` state without changing application versions if avoidable.
-3. Validate Compose before startup:
+### Phase 4 — Restore services
+Completed for persistent services.
 
-```bash
-docker compose config -q
-```
+Plex, Prowlarr, qBittorrent, Radarr, SABnzbd and Sonarr are running on the desktop.
 
-4. Do not refactor secrets into `.env` during the migration itself.
-5. Do not remove the obsolete Compose `version` attribute during the migration itself.
+Kometa remains a manual one-shot service and still needs explicit post-cutover validation.
 
-Those are post-migration cleanup tasks.
+### Phase 5 — Acceptance tests
+Partially complete.
 
-## Phase 4 — Restore services in layers
+Completed:
 
-Recommended order:
+- service startup;
+- local HTTP smoke tests;
+- migrated application state visible in the UIs;
+- real Radarr post-migration download/import.
 
-1. **Storage visibility** — verify expected files and directories.
-2. **Plex** — verify Movies, TV, and representative playback.
-3. **qBittorrent and SABnzbd** — verify paths and connectivity.
-4. **Prowlarr** — verify indexers and ARR application connections.
-5. **Radarr and Sonarr** — verify databases, root folders, download clients, profiles, and existing media.
-6. **Kometa** — run manually and verify collections.
+Still required before final closure:
 
-Avoid starting every service at once if a staged restore makes path or permission problems easier to isolate.
+- Sonarr real acquisition/import check if not already captured by the media workstream;
+- representative qBittorrent manual fallback check;
+- Kometa manual run;
+- fresh-import hardlink verification;
+- final reboot/operational confidence check if the media workstream considers it necessary.
 
-## Phase 5 — Acceptance tests
+## Version-pinning decision during migration
 
-### Plex
+The source Compose used untagged or `latest` images for several services.
 
-- Movies visible.
-- TV Shows visible.
-- Representative playback succeeds.
-- New imports appear automatically.
+A fresh pull produced newer releases than the notebook had been running. To avoid combining migration with application/database upgrades, the last known-good versions were recovered from logs and pinned in a temporary Compose override.
 
-### Usenet
+The permanent version/update policy is a post-migration decision.
 
-Run one small real test and verify:
+## Hardlink repair
 
-```text
-ARR
-→ Prowlarr / NZBGeek
-→ SABnzbd
-→ Eweka
-→ import
-→ Plex
-```
+Because the old storage was NTFS, duplicate media/torrent payloads existed instead of usable hardlinks.
 
-### Torrent fallback
+After migration to ext4, 26 exact duplicate sets were converted to hardlinks, reclaiming about 711.6 GiB while preserving both media and torrent paths.
 
-Run one small representative torrent test if appropriate and verify import.
+## Media behavior after cutover
 
-### Kometa
+Automatic acquisition is now Usenet-first.
 
-Run:
+Torrent indexers remain available for Interactive Search/manual fallback, including exceptional CZ/SK releases.
 
-```bash
-cd /data/docker
-docker compose run --rm kometa --run
-```
+Recyclarr now manages the main Radarr TRaSH profile. Sonarr will follow the same overall quality philosophy using Sonarr-specific definitions.
 
-Verify `Newly Released` and the dynamic director collections appear without the removed separator.
+## Migration closure
 
-### Reboot
+The migration should be considered formally complete only after:
 
-Reboot the desktop and verify:
-
-- storage mounts persist,
-- SSH returns,
-- required containers recover,
-- applications still see their data.
-
-## Phase 6 — Stabilization
-
-Keep the reproduced configuration stable for a short observation period before introducing enhancements.
-
-During stabilization, do not:
-
-- upgrade Radarr, Sonarr, or Prowlarr;
-- redesign quality profiles;
-- add new indexers without troubleshooting need;
-- add monitoring, agents, Watchtower, or VPN routing;
-- redesign Kometa;
-- refactor Compose/secrets.
+- Plex playback and scans are stable;
+- Radarr and Sonarr acquisition/import are stable;
+- qBittorrent manual fallback is stable;
+- new torrent imports create expected hardlinks;
+- Prowlarr synchronization is stable;
+- Kometa manual execution is stable;
+- rollback media is no longer required;
+- the temporary migration-version override is replaced with the permanent image update policy;
+- recovery and rollback documentation reflect the desktop as the production host.
 
 ## Post-migration cleanup
 
-Only after the desktop is stable:
+After closure:
 
 - remove the obsolete Compose `version` field;
-- extract appropriate secrets into local `.env`;
-- add a safe `.env.example` with placeholders;
-- verify `.env` is ignored by Git;
-- sanitize and document Compose publicly;
-- decide update policy;
-- verify or implement Kometa scheduling;
-- add Director Spotlight and other collection automation;
-- add monitoring/dashboarding and future agents.
-
-## Completion criteria
-
-Migration is complete only when:
-
-- the desktop boots without local intervention;
-- SSH is available;
-- persistent mounts survive reboot;
-- the known media files are visible;
-- Docker Compose starts required services;
-- Radarr and Sonarr retain their configuration;
-- both Usenet and torrent acquisition/import paths work;
-- Plex serves Movies and TV and representative playback succeeds;
-- Kometa manual execution is repeatable;
-- the private recovery point is preserved;
-- rollback is documented and the laptop is no longer needed for normal operation.
+- extract appropriate secrets into local-only config/env files;
+- add safe public examples;
+- define container update policy;
+- improve backup automation and retention;
+- add monitoring/dashboarding;
+- continue storage/network expansion as separate infrastructure work.
