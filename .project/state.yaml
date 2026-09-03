@@ -1,0 +1,69 @@
+schema_version: "0.2"
+
+project:
+  name: "Homelab & Media Stack"
+  workstream: "Infrastructure, Migration & GitHub"
+  owner: "Homelab Infrastructure specialist chat"
+
+status: "active"
+phase: "post-migration-stabilization"
+
+current_gate: >
+  Complete the remaining media-application acceptance checks on the desktop
+  so the migration can be formally closed and the old rollback source disk
+  can be retired safely.
+
+current_state: >
+  The dedicated Ubuntu Server desktop is operational and now hosts the media
+  stack. The 18 TB Toshiba data disk is formatted as ext4 and persistently
+  mounted at /data. Plex, Radarr, Sonarr, Prowlarr, qBittorrent and SABnzbd
+  are running on the desktop. Migration data and the recovery archive were
+  validated, a real Radarr post-migration download/import completed
+  successfully, and 26 NTFS-era duplicate media/torrent sets were converted
+  to hardlinks, reclaiming approximately 711.6 GiB. The old external source
+  disk remains attached read-only as rollback media. A temporary Compose
+  override pins known-good application versions until migration closure.
+
+exact_next_action: >
+  Receive the media-workstream completion handoff after application-level
+  validation, including confirmation of new ARR torrent hardlinks on ext4
+  and Kometa revalidation, then decide whether the old rollback source disk
+  can be retired.
+
+blockers:
+  - "Formal infrastructure migration closure depends on completion of the remaining media-workstream acceptance checks."
+
+dependencies:
+  - project: "Homelab & Media Stack"
+    workstream: "Plex, Kometa & Media Automation"
+    dependency: >
+      Complete application-level validation on the desktop, confirm new ARR
+      torrent imports create real hardlinks on ext4, and revalidate Kometa.
+
+important_open_loops:
+  - "Retire or unmount the old rollback source disk after final acceptance."
+  - "Choose a permanent container image pin/update policy."
+  - "Remove or replace the temporary migration-version override."
+  - "Remove the obsolete Compose version field after closure."
+  - "Extract appropriate secrets into local-only configuration and publish safe examples only."
+  - "Harden backup/restore procedures, retention, and restore drills."
+  - "Add monitoring/dashboarding only after migration closure."
+
+portfolio:
+  milestone: true
+  signal: >
+    Completed a staged notebook-to-desktop Ubuntu Server migration with
+    rollback preservation, data validation, Docker service reproduction,
+    physical-layer performance troubleshooting, filesystem migration to ext4,
+    and verified hardlink recovery reclaiming approximately 711.6 GiB.
+
+verification:
+  last_verified: "2026-09-01"
+  sources:
+    - "docs/current-state.md"
+    - "docs/roadmap.md"
+    - "docs/migration-milestone-2026-09-01.md"
+
+sync:
+  status: "synced"
+  storage: ".project/state.yaml"
