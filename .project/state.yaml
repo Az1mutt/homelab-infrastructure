@@ -2,67 +2,110 @@ schema_version: "0.2"
 
 project:
   name: "Homelab & Media Stack"
-  workstream: "Infrastructure, Migration & GitHub"
-  owner: "Homelab Infrastructure specialist chat"
+  workstream: "Plex, Kometa & Media Automation"
+  owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "post-migration-stabilization"
+phase: "post-migration-media-stabilization"
 
 current_gate: >
-  Complete the remaining media-application acceptance checks on the desktop
-  so the migration can be formally closed and the old rollback source disk
-  can be retired safely.
+  Remove or materially reduce the verified storage-I/O contention caused by
+  SABnzbd download/repair/unpack activity sharing the 18 TB media disk with
+  Plex, then rerun media acceptance under load and hand the project back to
+  infrastructure for formal migration closure.
 
 current_state: >
-  The dedicated Ubuntu Server desktop is operational and now hosts the media
-  stack. The 18 TB Toshiba data disk is formatted as ext4 and persistently
-  mounted at /data. Plex, Radarr, Sonarr, Prowlarr, qBittorrent and SABnzbd
-  are running on the desktop. Migration data and the recovery archive were
-  validated, a real Radarr post-migration download/import completed
-  successfully, and 26 NTFS-era duplicate media/torrent sets were converted
-  to hardlinks, reclaiming approximately 711.6 GiB. The old external source
-  disk remains attached read-only as rollback media. A temporary Compose
-  override pins known-good application versions until migration closure.
+  The dedicated Ubuntu Server desktop is operational and the media stack is
+  functioning end to end. Sonarr now has a TRaSH/Recyclarr-managed
+  WEB-2160p (Alternative) profile with 1080p and 720p fallback, and real
+  Usenet failures have demonstrated the intended retry/blocklist/fallback
+  behavior. Kometa 2.4.8 was revalidated after the Plex server was reclaimed
+  and Plex/TMDb credentials were rotated; Tautulli was re-authorized and is
+  healthy. A local Netdata troubleshooting dashboard is deployed. Under a
+  heavy SAB workload, the 18 TB data disk was observed at about 98% disk
+  utilization with CPU iowait around 69% while download throughput was only
+  around 30 MB/s, strongly confirming the shared media-disk I/O bottleneck
+  behind Plex stutter and degraded SAB performance. Kometa phase-1 Home
+  configuration for Newly Released has been applied, but its TV-side visual
+  acceptance is still pending. nzb360 was configured for the local services,
+  but paid feature unlocks were deferred.
 
 exact_next_action: >
-  Receive the media-workstream completion handoff after application-level
-  validation, including confirmation of new ARR torrent hardlinks on ext4
-  and Kometa revalidation, then decide whether the old rollback source disk
-  can be retired.
+  Inspect the 1 TB system disk and LVM layout before changing storage:
+  run "lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINTS,MODEL", "sudo vgs", and
+  "sudo lvs". If sufficient unused capacity is confirmed, hand the actual
+  LV/filesystem creation to the infrastructure workstream and use the new
+  volume as SABnzbd scratch storage for incomplete/complete download,
+  repair and unpack work, leaving final media on the 18 TB data disk.
 
 blockers:
-  - "Formal infrastructure migration closure depends on completion of the remaining media-workstream acceptance checks."
+  - >
+    SABnzbd scratch work currently shares the 18 TB media disk with Plex and
+    can saturate that disk, producing very high iowait and playback/download
+    degradation.
+  - >
+    Fresh free-capacity/LVM-layout evidence for the 1 TB system disk has not
+    yet been collected, so the proposed SAB scratch volume is not yet safe to
+    implement.
+  - >
+    Formal migration closure criteria are slightly conflicted: the earlier
+    infrastructure state expected a new ARR torrent-import hardlink test,
+    while the media workstream explicitly deferred that test as unnecessary
+    for the current workflow. This must be resolved at handoff rather than
+    silently treated as complete.
 
 dependencies:
   - project: "Homelab & Media Stack"
+    workstream: "Infrastructure, Migration & GitHub"
+    dependency: >
+      Confirm and, if appropriate, create the dedicated LVM/filesystem on the
+      separate 1 TB physical disk; later perform formal migration closure,
+      source-disk retirement, version-pin cleanup, backup hardening, and
+      public-safe infrastructure documentation.
+  - project: "Homelab & Media Stack"
     workstream: "Plex, Kometa & Media Automation"
     dependency: >
-      Complete application-level validation on the desktop, confirm new ARR
-      torrent imports create real hardlinks on ext4, and revalidate Kometa.
+      Re-test SAB/Plex behavior after any scratch-storage change and complete
+      the remaining media-side acceptance observations before handoff.
 
 important_open_loops:
-  - "Retire or unmount the old rollback source disk after final acceptance."
-  - "Choose a permanent container image pin/update policy."
-  - "Remove or replace the temporary migration-version override."
-  - "Remove the obsolete Compose version field after closure."
-  - "Extract appropriate secrets into local-only configuration and publish safe examples only."
+  - "Freshly inspect the 1 TB system-disk/LVM free space."
+  - "If safe, move SAB incomplete and complete/repair/unpack scratch work to a dedicated volume on the separate 1 TB physical disk."
+  - "Repeat the Netdata/Tautulli playback test under heavy SAB activity after the storage change."
+  - "Visually confirm Newly Released on Plex Home and Movies > Recommended."
+  - "Continue Kometa v2 after acceptance: Trending/Popular, Director Spotlight, seasonal spotlight, then tune Home-row order on the TV client."
+  - "Resolve whether a fresh torrent hardlink import test is still a formal closure requirement."
+  - "Retire or unmount the old rollback source disk only after formal acceptance."
+  - "Replace the temporary migration-version override with the permanent image pin/update policy."
   - "Harden backup/restore procedures, retention, and restore drills."
-  - "Add monitoring/dashboarding only after migration closure."
+  - "Verify whether the previously planned SAB API/NZB-key rotation is still outstanding."
+  - "Keep nzb360 premium unlock/subscription deferred unless the mobile cockpit proves worth paying for."
+  - "Later media backlog remains Bazarr, Trakt/PlexTraktSync, Seerr, controlled remote access, and media agents."
+
+stale_or_unknown:
+  - "Current unused capacity and free extents on the 1 TB system disk are unknown until the next lsblk/vgs/lvs check."
+  - "The old rollback source disk was known to be retained read-only at the 2026-09-01 checkpoint, but its attachment state has not been freshly re-verified in this workstream."
+  - "TV-client reauthentication after Plex token invalidation was not explicitly re-verified here."
+  - "Kometa Newly Released Home/Recommended visibility is configured and the run passed, but the final TV-side visual result has not yet been confirmed."
+  - "The 2026-09-01 documentation statements that Sonarr TRaSH and Kometa revalidation were still pending are stale."
+  - "The 2026-09-01 roadmap assumption that monitoring would only be added after migration closure is stale: Tautulli and local Netdata are already deployed."
 
 portfolio:
   milestone: true
   signal: >
-    Completed a staged notebook-to-desktop Ubuntu Server migration with
-    rollback preservation, data validation, Docker service reproduction,
-    physical-layer performance troubleshooting, filesystem migration to ext4,
-    and verified hardlink recovery reclaiming approximately 711.6 GiB.
+    The project now demonstrates evidence-driven homelab operations beyond
+    basic service deployment: reproducible TRaSH/Recyclarr policy, resilient
+    Usenet failure handling, secure Plex/Kometa/Tautulli credential recovery,
+    and historical performance diagnosis that isolated a real storage-I/O
+    contention problem using Netdata and Tautulli.
 
 verification:
-  last_verified: "2026-09-01"
+  last_verified: "2026-09-08"
   sources:
     - "docs/current-state.md"
     - "docs/roadmap.md"
     - "docs/migration-milestone-2026-09-01.md"
+    - "Verified project-chat evidence through 2026-09-06; current 1 TB LVM capacity remains pending."
 
 sync:
   status: "synced"
