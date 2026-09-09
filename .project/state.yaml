@@ -6,53 +6,50 @@ project:
   owner: "Homelab Infrastructure specialist chat"
 
 status: "active"
-phase: "post-migration-stabilization-and-movie-intelligence-foundation"
+phase: "migration-closed-post-migration-operations-and-movie-intelligence"
 
 current_gate: >
-  Operationalize the verified Movie Intelligence foundation with a low-frequency
-  ČSFD ratings sync, while formal migration closure remains gated on fresh
-  application-level acceptance evidence from the media workstream.
+  Transition from migration work into routine post-migration operations:
+  operationalize the verified Movie Intelligence foundation with a
+  low-frequency ČSFD ratings sync, then continue non-blocking infrastructure
+  hardening and cleanup.
 
 current_state: >
-  The desktop homelab remains the intended production host, but host/runtime
-  details last documented on 2026-09-01 have not been freshly revalidated in
-  this workstream and must be treated as stale/unknown where time-sensitive.
-  A new local Movie Intelligence foundation is verified on the desktop:
+  The notebook-to-desktop homelab migration is formally closed as of
+  2026-09-09 based on owner acceptance in this specialist workstream. The
+  dedicated Ubuntu Server desktop remains the production target and the
+  migration milestone no longer depends on additional media-workstream
+  acceptance to be considered complete. Previously outstanding checks such as
+  ARR torrent hardlink behavior, Kometa revalidation, rollback-source
+  retirement, permanent image pinning, secrets hardening, backup maturity and
+  monitoring are now post-migration operational follow-ups rather than closure
+  blockers. A local Movie Intelligence foundation is verified on the desktop:
   SQLite media.db is in WAL mode with 682 unique movies, 556 watched/rated,
-  126 watchlist, and 0 rows in both states. A one-time private ČSFD watchlist
-  bootstrap parsed 142 source items across three pages; 132 movie-like items
-  were considered for import and 10 series/season items were excluded for a
-  future SerialZone path. Six watchlist items already existed as watched, so
-  watched status correctly took precedence. The public ČSFD ratings sync is
-  working and a repeat run was idempotent at the data-identity level
-  (556 seen, 0 added, 556 existing rows processed). A SQLite-aware pre-import
-  backup was created and the bootstrap completed without duplicates.
-  GitHub PR #3 for the desktop migration milestone is confirmed merged on
-  2026-09-01.
+  126 watchlist, and 0 rows in both states. The one-time private ČSFD
+  watchlist bootstrap parsed 142 source items across three pages; 132
+  movie-like items were considered for import and 10 series/season items were
+  excluded for a future SerialZone path. Six watchlist items already existed
+  as watched, so watched status correctly took precedence. The public ČSFD
+  ratings sync works and a repeat run processed 556 existing rows with
+  0 additions, confirming no duplicate creation.
 
 exact_next_action: >
   Confirm the concrete low-frequency ČSFD ratings-sync cadence, then create and
-  verify a systemd service/timer for scripts/sync_csfd.mjs; do not schedule it
-  daily.
+  verify a systemd service/timer for scripts/sync_csfd.mjs; daily scheduling is
+  explicitly unnecessary.
 
-blockers:
-  - >
-    Formal migration closure is blocked on fresh media-workstream acceptance
-    evidence. The latest known requirement set (ARR torrent hardlink behavior
-    on ext4 and Kometa revalidation) is from 2026-09-01 and is stale/unknown
-    until a new handoff is received.
+blockers: []
 
 dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Plex, Kometa & Media Automation"
     dependency: >
-      Provide a fresh completion handoff for application-level desktop
-      validation, especially ARR torrent hardlinks on ext4 and Kometa status.
-      Current dependency status is stale/unknown since 2026-09-01.
+      Continue media-specific follow-ups such as Sonarr TRaSH/Recyclarr,
+      Kometa and ARR hardlink validation as non-blocking post-migration work.
   - component: "Movie Intelligence"
     dependency: >
-      node-csfd-api and better-sqlite3 are installed and verified; systemd timer
-      scheduling remains planned, with cadence intentionally much lower than daily.
+      node-csfd-api and better-sqlite3 are installed and verified; systemd
+      scheduling remains planned with cadence intentionally much lower than daily.
 
 important_open_loops:
   - "Choose and deploy the low-frequency ČSFD ratings sync cadence; verify a scheduled run and logging."
@@ -60,29 +57,29 @@ important_open_loops:
   - "Keep the one-time ČSFD private watchlist export out of GitHub; it contains private/session-adjacent page data."
   - "Future TV/series ingestion should use a separate SerialZone importer; 10 series/season items were intentionally excluded from the film bootstrap."
   - "Design controlled/idempotent agent operations for add-to-watchlist, mark-watched and future Radarr synchronization instead of unrestricted DB writes."
-  - "Retire/unmount the old rollback source disk only after fresh migration-closure evidence; its current attachment state is stale/unknown."
-  - "Replace the temporary migration-version override with a permanent container image pin/update policy; current override status has not been freshly revalidated since 2026-09-01."
-  - "Continue secrets hardening, backup/restore maturity and later infrastructure monitoring after migration closure."
+  - "Retire/unmount the old rollback source disk when convenient now that migration closure is accepted."
+  - "Replace the temporary migration-version override with a permanent container image pin/update policy."
+  - "Continue secrets hardening, backup/restore maturity and later infrastructure monitoring as post-migration operations."
 
 portfolio:
   milestone: true
   signal: >
-    Built a source-agnostic local movie-intelligence data layer on SQLite,
-    implemented an idempotent ČSFD ratings ingestion path, merged a private
-    watchlist bootstrap with external-ID deduplication and watched-over-watchlist
-    precedence, and verified a clean 682-movie state. This adds an auditable
-    foundation for future media agents, Radarr integration and multi-source
-    enrichment while preserving privacy and rollback safety.
+    Formally closed the staged notebook-to-desktop Ubuntu Server migration and
+    moved the project into post-migration operations. The platform now also
+    hosts a source-agnostic local movie-intelligence data layer on SQLite with
+    verified ČSFD ratings ingestion, private watchlist bootstrap,
+    external-ID deduplication and watched-over-watchlist precedence, creating
+    a practical foundation for future media agents and Radarr integration.
 
 verification:
-  last_verified: "2026-09-08"
+  last_verified: "2026-09-09"
   sources:
+    - "Owner acceptance in specialist chat 2026-09-09: migration can be formally closed."
     - "Specialist-chat command output 2026-09-06: media.db sanity check = 682 total / 556 watched / 126 watchlist / 0 both."
     - "Specialist-chat command output 2026-09-06: repeat ČSFD ratings sync = 556 seen / 0 added / 556 existing rows processed."
     - "Specialist-chat import verification 2026-09-06: SQLite-aware pre-import backup created and one-time watchlist bootstrap completed."
     - "Specialist-chat parsed private watchlist snapshot 2026-09-06: 142 source items / 132 movie-like / 10 series-or-season excluded."
     - "GitHub verification 2026-09-08: PR #3 'Document desktop migration milestone' is merged (merged 2026-09-01)."
-    - "docs/current-state.md and docs/roadmap.md snapshot dated 2026-09-01; time-sensitive migration details from these files are stale/unknown unless separately refreshed."
 
 sync:
   status: "pending"
