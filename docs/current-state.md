@@ -1,7 +1,7 @@
 # Current State
 
-**Snapshot date:** 2026-09-01  
-**Project phase:** desktop cutover complete; application validation and migration closure in progress
+**Snapshot date:** 2026-09-09  
+**Project phase:** migration closed; post-migration operations and Movie Intelligence foundation active
 
 This document is the concise source of truth for what exists, what has been verified, and what remains planned.
 
@@ -16,81 +16,80 @@ This document is the concise source of truth for what exists, what has been veri
 | Unknown | Evidence is insufficient |
 | Historical | Past event, not necessarily current configuration |
 
+## Migration status
+
+The notebook-to-desktop migration is **formally closed as of 2026-09-09** by owner acceptance in the infrastructure workstream.
+
+This changes the project boundary:
+
+- migration acceptance is no longer an active gate;
+- the desktop remains the production homelab target;
+- remaining media checks and infrastructure hardening are post-migration follow-ups, not closure blockers;
+- the old rollback source disk can now be retired/unmounted when convenient after any final user-desired spot checks.
+
 ## Desktop platform
+
+The last detailed host/runtime snapshot was captured on 2026-09-01. The following remain the latest known verified values, but time-sensitive runtime details should be refreshed before making claims that require current live state.
 
 | Item | Status | Current knowledge |
 |---|---|---|
 | Host | Verified | Dedicated Ubuntu Server desktop |
 | Operating system | Verified | Clean Ubuntu Server installation |
 | SSH | Verified | Remote administration works |
-| Network | Verified | Wi-Fi stable; Ethernet remains preferred long-term |
+| Network | Verified historically | Wi-Fi stable; Ethernet remains preferred long-term |
 | System disk | Verified | Existing ~1 TB WDC disk hosts the OS |
 | Data disk | Verified | Toshiba MG09 18 TB disk |
 | Data filesystem | Verified | ext4 |
 | Persistent mount | Verified | `/data` |
-| Docker Engine | Verified | 29.7.2 |
-| Docker Compose | Verified | v5.5.0 |
-| Media stack | Verified running | Plex, Radarr, Sonarr, Prowlarr, qBittorrent, SABnzbd |
-| Kometa | Verified historically / pending post-cutover recheck | Manual one-shot workflow remains the intended execution model |
-| Recyclarr | Verified | Separate Compose project managing Radarr TRaSH configuration |
+| Docker Engine | Verified historically | 29.7.2 |
+| Docker Compose | Verified historically | v5.5.0 |
+| Media stack | Verified historically | Plex, Radarr, Sonarr, Prowlarr, qBittorrent, SABnzbd |
+| Kometa | Post-migration follow-up | Revalidation remains useful but is not a migration-closure blocker |
+| Recyclarr | Verified historically | Separate Compose project managing Radarr TRaSH configuration |
 
-## Storage state
+## Storage and migration outcome
 
-The 18 TB data disk is mounted persistently at:
-
-```text
-/data
-```
-
-Post-migration usage after hardlink cleanup was approximately:
-
-```text
-1.1T used
-16T available
-7% used
-```
-
-The source external disk remains attached read-only during the rollback window.
-
-## Migration validation
-
-Verified:
+Verified migration results include:
 
 - source disk mounted read-only before copying;
 - private pre-migration Docker-stack archive readable;
 - source and target recovery archive SHA-256 matched;
-- media copy completed with exit code 0;
-- media dry-run found no remaining changes;
-- torrent copy completed with exit code 0;
-- torrent dry-run found no remaining changes;
+- media and torrent copy verification completed successfully;
 - Compose parsed successfully before first boot;
-- all six persistent media services started successfully;
-- all local HTTP smoke tests responded as expected;
-- a real Radarr post-migration download/import completed successfully.
+- persistent media services started successfully;
+- local HTTP smoke tests responded as expected;
+- a real Radarr post-migration download/import completed successfully;
+- 26 NTFS-era duplicate media/torrent sets were converted to ext4 hardlinks;
+- approximately 711.6 GiB was reclaimed;
+- a representative hardlink pair shared the same inode with link count 2.
 
-## Application-version safety
+## Movie Intelligence
 
-A temporary migration override pins the last known-good application versions used during cutover.
+A new local Movie Intelligence foundation is verified on the desktop.
 
-This is intentional: a normal pull showed newer releases than the notebook had been running, so migration and application upgrades were kept separate.
-
-The temporary override remains until migration closure.
-
-## Hardlink state
-
-The previous NTFS layout contained duplicate media and torrent payloads rather than effective hardlinks.
-
-After migration to ext4:
+Current SQLite state:
 
 ```text
-26 duplicate sets
-26 converted to hardlinks
-0 skipped
-0 failed
-~711.6 GiB reclaimed
+682 unique movies
+556 watched/rated
+126 watchlist
+0 in both states
 ```
 
-A representative pair was verified to share the same inode with link count 2.
+Implementation details:
+
+- SQLite database: source-agnostic `media.db`;
+- WAL mode enabled;
+- `node-csfd-api` used for ČSFD ratings ingestion;
+- `better-sqlite3` used for application-side DB access;
+- one-time private ČSFD watchlist bootstrap completed;
+- 142 source watchlist items parsed across three pages;
+- 132 movie-like items considered for import;
+- 10 series/season items excluded for a future SerialZone importer;
+- six watchlist items were already watched and therefore remained watched-only;
+- repeat ČSFD ratings sync processed 556 existing rows with 0 new additions.
+
+The private ČSFD HTML export is not repository material.
 
 ## Acquisition policy
 
@@ -100,48 +99,22 @@ Current intended behavior:
 - Torrent indexers are manual/Interactive Search fallback.
 - CZ/SK torrent sources are also manual unless a future real use case justifies automation.
 
-## TRaSH / Recyclarr
+## Post-migration follow-ups
 
-Radarr now uses one main TRaSH-backed profile:
+These remain useful, but they no longer block migration closure:
 
-```text
-UHD Bluray + WEB
-```
-
-The intended hierarchy is:
-
-```text
-Bluray-2160p
-WEB 2160p
-Bluray-1080p
-WEB 1080p
-```
-
-Existing movies were bulk-assigned to this profile without running mass searches/upgrades.
-
-Sonarr is intended to follow the same philosophy using Sonarr-specific TRaSH definitions.
-
-## Recovery state
-
-The old source disk remains the physical rollback source.
-
-A private consistent application-state archive remains available under `/data/arr_backup`.
-
-The private migration session log is not repository material.
-
-## Remaining open issues
-
-- Complete application-level validation in the media workstream.
-- Confirm new ARR torrent imports create hardlinks automatically on ext4.
-- Revalidate Kometa on the desktop.
-- Decide when the old source disk can be retired.
-- Choose permanent container image pin/update policy.
-- Remove or replace the temporary migration override.
-- Remove the obsolete Compose `version` attribute after closure.
-- Extract appropriate secrets into local environment/config files without exposing them publicly.
-- Implement mature automated backup/retention and restore drills.
-- Add monitoring/dashboarding only after migration closure.
+- choose a low-frequency ČSFD ratings sync cadence and deploy a systemd timer;
+- revalidate Kometa and ARR torrent hardlink behavior when convenient;
+- finish Sonarr TRaSH/Recyclarr configuration in the media workstream;
+- retire/unmount the old rollback source disk;
+- choose a permanent container image pin/update policy;
+- remove or replace the temporary migration override if still present;
+- remove the obsolete Compose `version` attribute if still present;
+- extract appropriate secrets into local-only configuration;
+- mature backup/restore retention and restore drills;
+- add monitoring/dashboarding;
+- later design controlled agent operations for watchlist, watched state and Radarr actions.
 
 ## Evidence boundary
 
-This snapshot reflects the verified state after desktop cutover and initial application validation. It does not claim that final migration closure, automated off-host backup, monitoring, remote access, or future storage expansion are complete.
+Migration closure is verified by explicit owner acceptance on 2026-09-09. Some lower-level runtime details have not been freshly rechecked since the 2026-09-01 migration snapshot; refresh them before treating those time-sensitive values as current.
