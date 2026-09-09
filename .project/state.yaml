@@ -1,99 +1,64 @@
 schema_version: "0.2"
 
+state_scope: "project_rollup"
+
 project:
   name: "Homelab & Media Stack"
-  workstream: "Plex, Kometa & Media Automation"
-  owner: "Plex, Kometa & Media Automation specialist chat"
+  owner: "Project OS rollup"
 
 status: "active"
 phase: "migration-acceptance-closure"
 
 current_gate: >
-  Finish the one remaining real torrent acceptance check, then hand the media
-  workstream back to infrastructure for formal migration closure and an
-  explicit decision on the old rollback disk. The known SAB-vs-Plex disk-I/O
-  contention is now treated as a post-closure optimization, not a migration
-  blocker.
+  Complete the media workstream's final torrent import/hardlink acceptance
+  check, then let the infrastructure workstream formally close the desktop
+  migration and decide the disposition of the old rollback disk.
 
 current_state: >
   The dedicated Ubuntu Server desktop is operational and the media stack is
-  functioning end to end. Plex has been reclaimed and works again on the TV
-  clients. Kometa 2.4.8 is revalidated, its Newly Released Home/Recommended
-  configuration is visibly working, and Tautulli is re-authorized and healthy.
-  Radarr and Sonarr use TRaSH/Recyclarr-managed quality policies; Sonarr real
-  Usenet failures have demonstrated the intended blocklist/retry/fallback
-  behavior. Netdata is deployed and confirmed that heavy SAB activity can
-  saturate the 18 TB media disk and drive very high iowait, but remediation
-  is deferred to a future scratch-storage redesign, likely using SSD rather
-  than consuming the current 1 TB system disk. The old external rollback disk
-  is still attached read-only and will be deliberately dispositioned during
-  migration closure. SAB API/NZB credentials were rotated after the accidental
-  screenshot disclosure. nzb360 is configured locally but paid unlocks remain
-  deferred. A real torrent has now been grabbed; its download is still in
-  progress, so the final post-download import/hardlink acceptance check is
-  pending.
+  functioning end to end. Infrastructure migration is substantially complete.
+  Media validation has progressed through Plex, Kometa, Tautulli, TRaSH/
+  Recyclarr, Usenet fallback behavior and monitoring. One live torrent
+  import/hardlink acceptance check remains before formal migration closure.
+  Infrastructure-specific cleanup such as rollback-disk disposition, permanent
+  image pin/update policy and backup hardening remains owned by the
+  Infrastructure workstream.
 
 exact_next_action: >
-  Wait for the currently grabbed torrent to finish. Then verify that the
-  torrent remains available to qBittorrent for seeding, that Radarr/Sonarr
-  imports the media successfully, and that the torrent-side and media-side
-  files share the same inode/link count on ext4. If that passes, issue the
-  media-workstream completion handoff to infrastructure for formal migration
-  closure.
+  Media Automation completes the in-progress torrent import/hardlink test and
+  records its result in its workstream state. If it passes, Infrastructure
+  refreshes its workstream state and performs formal migration closure.
 
 blockers:
-  - >
-    The current torrent download has not finished yet, so the final
-    post-migration torrent import/hardlink acceptance check cannot be verified.
+  - "Final migration closure waits on the media workstream's torrent import/hardlink acceptance check."
 
-dependencies:
-  - project: "Homelab & Media Stack"
-    workstream: "Infrastructure, Migration & GitHub"
-    dependency: >
-      After media acceptance passes, close the migration formally, decide what
-      to do with the old read-only rollback disk, remove/replace temporary
-      migration pinning, and continue backup/version-policy/public-safe
-      infrastructure cleanup.
-  - project: "Homelab & Media Stack"
-    workstream: "Plex, Kometa & Media Automation"
-    dependency: >
-      Complete the in-progress torrent acceptance check and provide the
-      verified completion handoff.
+workstreams:
+  - id: "infrastructure"
+    path: ".project/workstreams/infrastructure.yaml"
+    owner: "Homelab Infrastructure specialist chat"
+  - id: "media-automation"
+    path: ".project/workstreams/media-automation.yaml"
+    owner: "Plex, Kometa & Media Automation specialist chat"
 
-important_open_loops:
-  - "Complete the in-progress torrent download and verify automatic import plus ext4 hardlink behavior."
-  - "After acceptance, decide with infrastructure whether to unmount, archive, repurpose, or wipe the old rollback disk."
-  - "Replace the temporary migration-version override with the permanent image pin/update policy."
-  - "Harden backup/restore procedures, retention, and restore drills."
-  - "Treat SAB scratch separation as a future performance optimization, likely on SSD; exact device/layout is not yet decided."
-  - "Repeat Netdata/Tautulli load testing after any future SAB scratch-storage redesign."
-  - "Iterate Kometa v2 based on how the Home/Recommended experience looks in practice rather than committing now to a fixed row sequence."
-  - "Keep nzb360 premium unlock/subscription deferred for now, but revisit if the mobile cockpit proves useful."
-  - "Later media backlog remains Bazarr, Trakt/PlexTraktSync, Seerr, controlled remote access, and media agents."
-
-stale_or_unknown:
-  - "Exact future SAB scratch device, size and filesystem are undecided; SSD is currently the likely direction."
-  - "The old rollback disk is confirmed still attached read-only, but its final disposition is intentionally undecided until migration closure."
-  - "The 2026-09-08 state that TV reauthentication and Kometa Home visibility were unverified is stale; both are now confirmed."
-  - "The 2026-09-08 state that SAB API/NZB-key rotation might still be outstanding is stale; the credentials were rotated."
+rollup_policy:
+  specialist_writes_root: false
+  generated_from:
+    - ".project/workstreams/infrastructure.yaml"
+    - ".project/workstreams/media-automation.yaml"
 
 portfolio:
   milestone: true
   signal: >
-    The media stack is effectively at migration acceptance: Plex, Kometa,
-    Tautulli, TRaSH/Recyclarr policy, Usenet fallback behavior and monitoring
-    are all verified on the desktop, with one live torrent hardlink test
-    remaining before formal closure. The project also captured a real
-    storage-I/O bottleneck with Netdata and deliberately separated that
-    optimization from the migration-close gate.
+    Homelab migration and media-stack stabilization together provide a strong
+    portfolio story around safe infrastructure migration, rollback discipline,
+    storage/filesystem design, Docker service recovery, monitoring and
+    application-level validation.
 
 verification:
   last_verified: "2026-09-08"
   sources:
-    - "docs/current-state.md"
-    - "docs/roadmap.md"
-    - "docs/migration-milestone-2026-09-01.md"
-    - "Verified project-chat evidence through 2026-09-08."
+    - ".project/workstreams/infrastructure.yaml"
+    - ".project/workstreams/media-automation.yaml"
 
 sync:
   status: "synced"
