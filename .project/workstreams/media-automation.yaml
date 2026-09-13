@@ -19,41 +19,44 @@ current_gate: >
 current_state: >
   The desktop media stack is functioning end to end, but the final torrent
   hardlink acceptance test failed. The Fall of the House of Usher S01E01 had
-  different inode numbers and links=1 on the torrent and library paths. Fresh
-  Docker inspection now confirms Sonarr sees /data/torrents as a separate
-  /downloads bind mount and /data/media/tv as a separate /tv bind mount. This
-  split mount topology is incompatible with the desired single-filesystem ARR
-  hardlink workflow and explains why imports are being copied rather than
-  hardlinked even though both host paths live on the same ext4 /data disk. The
-  Sonarr hardlink setting still needs a fresh UI check before the Compose layout
-  is changed. SAB-vs-Plex disk-I/O contention remains a post-closure
-  optimization, likely to be solved later with dedicated SSD scratch storage.
+  different inode numbers and links=1 on the torrent and library paths. Docker
+  inspection confirms Sonarr sees /data/torrents as a separate /downloads bind
+  mount and /data/media/tv as a separate /tv bind mount. Sonarr's "Use
+  Hardlinks instead of Copy" setting is confirmed enabled. The remaining cause
+  is therefore the split Docker mount topology: although both host paths live
+  on the same ext4 /data filesystem, they are presented to the container as
+  separate mount points, preventing the intended hardlink workflow. qBittorrent
+  continuing to seed the source torrent is expected and is not the cause of
+  the failed hardlink creation. The Sonarr warning about file locks concerns
+  rename operations on files being seeded, not this inode/link-count failure.
+  SAB-vs-Plex disk-I/O contention remains a post-closure optimization, likely
+  to be solved later with dedicated SSD scratch storage.
 
 exact_next_action: >
-  In Sonarr, verify Settings > Media Management > Use Hardlinks instead of Copy
-  is enabled. If enabled, hand the mount-layout correction to infrastructure:
-  expose a single shared /data bind mount to Sonarr and align download/root
-  paths accordingly instead of separate /downloads and /tv mounts. Then repeat
-  a real torrent import and verify matching inode numbers with link count >=2.
+  Hand the mount-layout correction to infrastructure: expose a single shared
+  /data bind mount to Sonarr and align torrent and TV paths under that mount
+  instead of separate /downloads and /tv mounts. Apply the equivalent pattern
+  to Radarr as appropriate. Then repeat a real torrent import and verify the
+  torrent-side and media-side files have matching inode numbers and link count
+  >=2 while qBittorrent continues seeding.
 
 blockers:
   - >
     Sonarr currently sees torrent downloads and the TV library through separate
-    Docker bind mounts (/downloads and /tv), so the final hardlink acceptance
-    check fails and imported torrent payloads are duplicated.
+    Docker bind mounts (/downloads and /tv), so imported torrent payloads are
+    copied rather than hardlinked despite the hardlink option being enabled.
 
 dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Infrastructure, Migration & GitHub"
     dependency: >
-      Own the Compose/mount-layout correction if the Sonarr hardlink setting is
-      confirmed enabled, because this is an infrastructure-level container
-      path change.
+      Own the Compose/mount-layout correction because this is an
+      infrastructure-level container path change.
 
 important_open_loops:
-  - "Freshly verify Sonarr Settings > Media Management > Use Hardlinks instead of Copy is enabled."
   - "Replace separate /downloads and /tv binds with a shared /data mount for ARR hardlink compatibility, subject to infrastructure ownership."
-  - "Repeat a real torrent import after correction and verify matching inode/link count on torrent and media paths."
+  - "Apply equivalent shared-path design to Radarr if its current mount topology has the same split-bind pattern."
+  - "Repeat a real torrent import after correction and verify matching inode/link count on torrent and media paths while qBittorrent is still seeding."
   - "Existing imported torrent/media pairs may occupy duplicate disk space; clean them only after confirming the library copy and seeding requirement."
   - "After acceptance, decide with infrastructure whether to unmount, archive, repurpose, or wipe the old rollback disk."
   - "Replace the temporary migration-version override with the permanent image pin/update policy."
@@ -64,7 +67,6 @@ important_open_loops:
   - "Later media backlog remains Bazarr, Trakt/PlexTraktSync, Seerr, controlled remote access, and media agents."
 
 stale_or_unknown:
-  - "Whether Sonarr's Use Hardlinks instead of Copy toggle is currently enabled is not freshly verified."
   - "Exact future SAB scratch device, size and filesystem are undecided; SSD is currently the likely direction."
   - "The old rollback disk is confirmed still attached read-only, but its final disposition is intentionally undecided until migration closure."
 
@@ -73,15 +75,16 @@ portfolio:
   signal: >
     The final migration acceptance test caught a subtle container-path design
     defect: service health and imports worked, but split Docker bind mounts
-    defeated ext4 hardlinking and silently doubled storage use. The failure is
-    now tied to a concrete mount-topology correction rather than vague ARR
-    behavior.
+    defeated ext4 hardlinking and silently doubled storage use. The ARR
+    hardlink setting is now confirmed correct, isolating the problem to Docker
+    mount topology.
 
 verification:
   last_verified: "2026-09-13"
   sources:
     - "Verified project-chat inode check for The Fall of the House of Usher S01E01 on 2026-09-13."
     - "Verified docker inspect output on 2026-09-13 showing /data/torrents -> /downloads and /data/media/tv -> /tv."
+    - "Verified Sonarr UI on 2026-09-13 showing Use Hardlinks instead of Copy enabled."
     - "docs/current-state.md"
     - "docs/roadmap.md"
 
