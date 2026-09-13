@@ -9,9 +9,9 @@ status: "active"
 phase: "post-migration-operations-and-movie-intelligence"
 
 current_gate: >
-  Move from data-ingestion foundation into a controlled Homelab/Media Agent
-  interface, starting with narrow observable/query capabilities and then
-  explicit write actions rather than unrestricted shell or SQL access.
+  Expand the verified Movie Intelligence read layer into a combined media-status
+  interface by adding read-only Radarr visibility before introducing any write
+  actions.
 
 current_state: >
   The notebook-to-desktop homelab migration is formally closed. Movie
@@ -19,18 +19,18 @@ current_state: >
   682 unique movies, 556 watched/rated, 126 watchlist, and 0 rows in both
   states. The one-time private ČSFD watchlist bootstrap is complete, and the
   public ČSFD ratings sync is verified as idempotent at the data-identity level.
-  A systemd oneshot service for scripts/sync_csfd.mjs is verified end-to-end:
-  the 2026-09-13 manual systemd run completed successfully with 556 seen,
-  0 added and 556 existing rows processed. A persistent systemd timer is now
-  enabled and active, scheduled for the 1st and 15th day of each month at
-  04:15 in the host's systemd timezone. systemctl confirmed the timer is
-  active (waiting) and the next trigger was 2026-09-15 04:15:00 UTC.
+  A systemd oneshot service for scripts/sync_csfd.mjs is verified end-to-end,
+  and a persistent systemd timer is enabled for the 1st and 15th day of each
+  month at 04:15 in the host systemd timezone. The first narrow agent-facing
+  read tool, scripts/lookup_movie.mjs, is now verified against media.db and
+  returns structured JSON. A live test for "Heretik" resolved one exact movie
+  with watched=true, watchlist=false, rating=4, year=2024 and the expected ČSFD
+  external identifier. The next integration boundary is Radarr, still read-only.
 
 exact_next_action: >
-  Define and implement the first narrow agent-facing Movie Intelligence tool
-  contract, beginning with read/query operations such as resolving a movie,
-  checking watched/watchlist/library state and exposing structured results;
-  keep future Radarr write actions explicit, validated, logged and allowlisted.
+  Verify local read-only access to the Radarr API without exposing the API key,
+  then implement a narrow get_radarr_movie_status-style query and combine it
+  with media.db state before any add/search/download write action is allowed.
 
 blockers: []
 
@@ -42,12 +42,16 @@ dependencies:
       Kometa and ARR hardlink validation as non-blocking post-migration work.
   - component: "Movie Intelligence"
     dependency: >
-      SQLite media.db, node-csfd-api, better-sqlite3 and the scheduled ČSFD
-      systemd sync are verified and available as the data foundation for future
-      agent tools.
+      SQLite media.db, node-csfd-api, better-sqlite3, scheduled ČSFD sync and
+      the verified lookup_movie.mjs read tool are available as the data layer.
+  - component: "Radarr"
+    dependency: >
+      Read-only API access must be verified locally and wrapped without exposing
+      credentials before Radarr state is added to the agent-facing interface.
 
 important_open_loops:
   - "Verify the first unattended timer-triggered ČSFD sync after a scheduled run and confirm journal logging."
+  - "Add a read-only Radarr status tool and then an aggregate movie-status view spanning media.db and Radarr."
   - "Use SQLite-aware backup semantics for future online backups; avoid naive copy while WAL writes may be active."
   - "Keep the one-time ČSFD private watchlist export out of GitHub; it contains private/session-adjacent page data."
   - "Future TV/series ingestion should use a separate SerialZone importer; 10 series/season items were intentionally excluded from the film bootstrap."
@@ -63,9 +67,10 @@ portfolio:
     Formally closed the staged notebook-to-desktop Ubuntu Server migration and
     moved the project into post-migration operations. The platform now hosts a
     source-agnostic local movie-intelligence data layer with verified ČSFD
-    ingestion and a persistent twice-monthly systemd sync. This creates a
-    practical, auditable foundation for future AI tools and narrow media-control
-    actions such as querying state and safely requesting Radarr downloads.
+    ingestion, scheduled synchronization, and its first structured read-only
+    agent tool. This creates a practical, auditable foundation for future AI
+    media-control actions while keeping Radarr writes behind a separate safety
+    boundary.
 
 verification:
   last_verified: "2026-09-13"
@@ -74,6 +79,7 @@ verification:
     - "Specialist-chat command output 2026-09-06: media.db sanity check = 682 total / 556 watched / 126 watchlist / 0 both."
     - "Specialist-chat command output 2026-09-13: systemd service run completed successfully = 556 seen / 0 added / 556 existing rows processed."
     - "Specialist-chat command output 2026-09-13: movie-intelligence-csfd-sync.timer enabled and active (waiting), next trigger shown as 2026-09-15 04:15:00 UTC."
+    - "Specialist-chat command output 2026-09-13: lookup_movie.mjs query for Heretik returned one structured JSON result with watched=true, watchlist=false, rating=4 and ČSFD ID 1419147."
     - "GitHub verification 2026-09-08: PR #3 'Document desktop migration milestone' is merged (merged 2026-09-01)."
 
 sync:
