@@ -9,9 +9,8 @@ status: "active"
 phase: "post-migration-operations-and-movie-intelligence"
 
 current_gate: >
-  Expand the verified Movie Intelligence read layer into a combined media-status
-  interface by wrapping Radarr in a narrow read-only query, then combine Radarr
-  state with media.db before introducing any write actions.
+  Combine the now-verified Movie Intelligence and Radarr read layers into one
+  unified movie-status interface before introducing any mutation capability.
 
 current_state: >
   The notebook-to-desktop homelab migration is formally closed. Movie
@@ -21,17 +20,21 @@ current_state: >
   public ČSFD ratings sync is verified as idempotent at the data-identity level.
   A systemd oneshot service for scripts/sync_csfd.mjs is verified end-to-end,
   and a persistent systemd timer is enabled for the 1st and 15th day of each
-  month at 04:15 in the host systemd timezone. The first narrow agent-facing
-  read tool, scripts/lookup_movie.mjs, is verified against media.db and returns
-  structured JSON. Local read-only Radarr API access is now also verified:
-  a credential-safe GET to /api/v3/system/status succeeded against Radarr
-  6.1.1.10360 running in Docker, with the API key read locally from the Radarr
-  config and not exposed in chat output.
+  month at 04:15 in the host systemd timezone. scripts/lookup_movie.mjs is
+  verified against media.db and returns structured JSON. A narrow read-only
+  Radarr wrapper, scripts/get_radarr_movie_status.mjs, is also now verified in
+  both negative and positive cases: querying Heretik returned zero Radarr
+  matches after that movie had been removed from the Radarr library, while
+  querying Scarface returned one matching Radarr item (1983, TMDb 111,
+  IMDb tt0086250) with monitored=true, has_file=true and quality profile
+  "UHD Bluray + WEB". The wrapper therefore exposes Radarr library presence and
+  state without exposing the API key or granting write access.
 
 exact_next_action: >
-  Implement and test scripts/get_radarr_movie_status.mjs as a narrow read-only
-  Radarr library query that returns structured JSON for a movie title; after
-  that, combine it with media.db state in a unified get_movie_status interface.
+  Implement and test scripts/get_movie_status.mjs as a read-only aggregator
+  that returns media.db and Radarr state together in one structured JSON result;
+  keep source results distinguishable and do not infer an entity match when
+  title/year identity is ambiguous.
 
 blockers: []
 
@@ -47,13 +50,14 @@ dependencies:
       the verified lookup_movie.mjs read tool are available as the data layer.
   - component: "Radarr"
     dependency: >
-      Local authenticated read-only API access is verified. The next boundary
-      is to wrap library state in a narrow JSON-returning tool without exposing
-      credentials or adding mutation capabilities.
+      Local authenticated read-only API access and the narrow
+      get_radarr_movie_status.mjs wrapper are verified. No Radarr mutation
+      capability is enabled yet.
 
 important_open_loops:
   - "Verify the first unattended timer-triggered ČSFD sync after a scheduled run and confirm journal logging."
-  - "Implement a read-only Radarr movie-status tool and then an aggregate movie-status view spanning media.db and Radarr."
+  - "Implement the aggregate get_movie_status view spanning media.db and Radarr."
+  - "Before Radarr write actions, add stronger identity resolution using stable external IDs such as TMDb where available rather than title-only matching."
   - "Use SQLite-aware backup semantics for future online backups; avoid naive copy while WAL writes may be active."
   - "Keep the one-time ČSFD private watchlist export out of GitHub; it contains private/session-adjacent page data."
   - "Future TV/series ingestion should use a separate SerialZone importer; 10 series/season items were intentionally excluded from the film bootstrap."
@@ -70,9 +74,9 @@ portfolio:
     moved the project into post-migration operations. The platform now hosts a
     source-agnostic local movie-intelligence data layer with verified ČSFD
     ingestion, scheduled synchronization, a structured media.db lookup tool,
-    and verified credential-safe read-only access to Radarr. This is the first
-    practical bridge from local movie intelligence toward controlled AI-driven
-    media actions while preserving an explicit read/write safety boundary.
+    and a verified credential-safe read-only Radarr movie-status wrapper. This
+    establishes the two-source observation layer required before controlled
+    AI-driven media write actions are introduced.
 
 verification:
   last_verified: "2026-09-13"
@@ -82,7 +86,8 @@ verification:
     - "Specialist-chat command output 2026-09-13: systemd service run completed successfully = 556 seen / 0 added / 556 existing rows processed."
     - "Specialist-chat command output 2026-09-13: movie-intelligence-csfd-sync.timer enabled and active (waiting), next trigger shown as 2026-09-15 04:15:00 UTC."
     - "Specialist-chat command output 2026-09-13: lookup_movie.mjs query for Heretik returned one structured JSON result with watched=true, watchlist=false, rating=4 and ČSFD ID 1419147."
-    - "Specialist-chat command output 2026-09-13: local authenticated GET /api/v3/system/status succeeded against Radarr 6.1.1.10360 in Docker without exposing the API key."
+    - "Specialist-chat command output 2026-09-13: get_radarr_movie_status.mjs query for Heretik returned count=0 after the item had been removed from Radarr."
+    - "Specialist-chat command output 2026-09-13: get_radarr_movie_status.mjs query for Scarface returned count=1 with monitored=true, has_file=true and quality profile UHD Bluray + WEB."
     - "GitHub verification 2026-09-08: PR #3 'Document desktop migration milestone' is merged (merged 2026-09-01)."
 
 sync:
