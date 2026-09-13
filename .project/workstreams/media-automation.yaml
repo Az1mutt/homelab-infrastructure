@@ -11,53 +11,55 @@ status: "active"
 phase: "migration-acceptance-closure"
 
 current_gate: >
-  Fix post-migration torrent import behavior so Sonarr/Radarr create real
-  hardlinks instead of duplicate copies on ext4, then repeat the live torrent
-  acceptance check before handing the media workstream back to infrastructure
-  for formal migration closure.
+  Complete one fresh real Sonarr/Radarr torrent import through the corrected
+  shared /data path and verify matching inode numbers with link count >=2.
+  If that passes, the media workstream can hand migration acceptance back to
+  infrastructure for formal closure.
 
 current_state: >
-  The desktop media stack is functioning end to end, but the final torrent
-  hardlink acceptance test failed. The Fall of the House of Usher S01E01 had
-  different inode numbers and links=1 on the torrent and library paths. Docker
-  inspection confirms Sonarr sees /data/torrents as a separate /downloads bind
-  mount and /data/media/tv as a separate /tv bind mount. Sonarr's "Use
-  Hardlinks instead of Copy" setting is confirmed enabled. The remaining cause
-  is therefore the split Docker mount topology: although both host paths live
-  on the same ext4 /data filesystem, they are presented to the container as
-  separate mount points, preventing the intended hardlink workflow. qBittorrent
-  continuing to seed the source torrent is expected and is not the cause of
-  the failed hardlink creation. The Sonarr warning about file locks concerns
-  rename operations on files being seeded, not this inode/link-count failure.
-  SAB-vs-Plex disk-I/O contention remains a post-closure optimization, likely
-  to be solved later with dedicated SSD scratch storage.
+  The desktop media stack is functioning end to end. The final torrent
+  acceptance test initially exposed duplicate-copy behavior: The Fall of the
+  House of Usher S01E01 had different inode numbers and links=1 between the
+  torrent and TV-library files. Sonarr's hardlink option was confirmed enabled,
+  while Docker inspection showed split /downloads and /tv bind mounts. The
+  Compose layout has now been corrected in this workstream by adding a shared
+  /data:/data bind mount to both Sonarr and Radarr, recreating both containers
+  successfully under the migration override, and adding Remote Path Mappings
+  for qBittorrent from /downloads to /data/torrents. A direct hardlink test
+  inside the Sonarr container succeeded between /data/torrents and
+  /data/media/tv: both test paths reported inode 256114799 and links=2. This
+  verifies that the corrected container/filesystem topology is hardlink-capable.
+  It does not yet prove that ARR uses the corrected path during a real import,
+  so one fresh live torrent import remains before acceptance can close. The
+  pre-fix House of Usher files remain separate copies and are not evidence of
+  the corrected behavior. SAB-vs-Plex disk-I/O contention remains a later
+  performance optimization, likely using dedicated SSD scratch storage.
 
 exact_next_action: >
-  Hand the mount-layout correction to infrastructure: expose a single shared
-  /data bind mount to Sonarr and align torrent and TV paths under that mount
-  instead of separate /downloads and /tv mounts. Apply the equivalent pattern
-  to Radarr as appropriate. Then repeat a real torrent import and verify the
-  torrent-side and media-side files have matching inode numbers and link count
-  >=2 while qBittorrent continues seeding.
+  Grab one fresh, preferably small torrent through Sonarr or Radarr and let ARR
+  import it normally while qBittorrent keeps seeding. Then compare one source
+  file under /data/torrents with its imported library file using stat. Migration
+  acceptance passes only if both paths have the same inode and link count >=2.
 
 blockers:
   - >
-    Sonarr currently sees torrent downloads and the TV library through separate
-    Docker bind mounts (/downloads and /tv), so imported torrent payloads are
-    copied rather than hardlinked despite the hardlink option being enabled.
+    Filesystem/container hardlink capability is fixed and verified, but the
+    corrected ARR workflow still needs one fresh end-to-end torrent import test.
 
 dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Infrastructure, Migration & GitHub"
     dependency: >
-      Own the Compose/mount-layout correction because this is an
-      infrastructure-level container path change.
+      No action is currently required for the ARR hardlink fix. After the fresh
+      real import test passes, infrastructure should refresh its state and
+      perform formal migration closure, rollback-disk disposition, permanent
+      image pin/update policy and backup hardening.
 
 important_open_loops:
-  - "Replace separate /downloads and /tv binds with a shared /data mount for ARR hardlink compatibility, subject to infrastructure ownership."
-  - "Apply equivalent shared-path design to Radarr if its current mount topology has the same split-bind pattern."
-  - "Repeat a real torrent import after correction and verify matching inode/link count on torrent and media paths while qBittorrent is still seeding."
-  - "Existing imported torrent/media pairs may occupy duplicate disk space; clean them only after confirming the library copy and seeding requirement."
+  - "Run one fresh real torrent import through Sonarr or Radarr after the shared /data and Remote Path Mapping correction."
+  - "Verify matching inode/link count on the fresh torrent-side and library-side files while qBittorrent is still seeding."
+  - "The pre-fix House of Usher torrent/library files are separate copies; clean duplicate torrent payloads only after deciding whether seeding is still needed."
+  - "After acceptance, tell infrastructure the ARR hardlink mount/path defect is resolved and hand back formal migration closure."
   - "After acceptance, decide with infrastructure whether to unmount, archive, repurpose, or wipe the old rollback disk."
   - "Replace the temporary migration-version override with the permanent image pin/update policy."
   - "Harden backup/restore procedures, retention, and restore drills."
@@ -67,26 +69,29 @@ important_open_loops:
   - "Later media backlog remains Bazarr, Trakt/PlexTraktSync, Seerr, controlled remote access, and media agents."
 
 stale_or_unknown:
+  - "A fresh end-to-end ARR import has not yet verified that Remote Path Mapping is applied exactly as intended during real torrent import."
   - "Exact future SAB scratch device, size and filesystem are undecided; SSD is currently the likely direction."
   - "The old rollback disk is confirmed still attached read-only, but its final disposition is intentionally undecided until migration closure."
 
 portfolio:
   milestone: true
   signal: >
-    The final migration acceptance test caught a subtle container-path design
-    defect: service health and imports worked, but split Docker bind mounts
-    defeated ext4 hardlinking and silently doubled storage use. The ARR
-    hardlink setting is now confirmed correct, isolating the problem to Docker
-    mount topology.
+    A subtle migration defect was diagnosed and corrected with evidence: split
+    Docker bind mounts caused functional ARR imports to duplicate payloads
+    rather than hardlink them. Sonarr/Radarr now share /data, qBittorrent paths
+    are remapped consistently, and an in-container inode test proves the fixed
+    topology can create real cross-directory ext4 hardlinks. One live ARR
+    import remains for full end-to-end acceptance.
 
 verification:
   last_verified: "2026-09-13"
   sources:
-    - "Verified project-chat inode check for The Fall of the House of Usher S01E01 on 2026-09-13."
-    - "Verified docker inspect output on 2026-09-13 showing /data/torrents -> /downloads and /data/media/tv -> /tv."
+    - "Verified project-chat inode check for The Fall of the House of Usher S01E01 on 2026-09-13 showing pre-fix duplicate copies."
+    - "Verified Docker inspection on 2026-09-13 showing the original split /downloads and /tv mounts."
     - "Verified Sonarr UI on 2026-09-13 showing Use Hardlinks instead of Copy enabled."
-    - "docs/current-state.md"
-    - "docs/roadmap.md"
+    - "Verified Compose validation and successful Sonarr/Radarr recreation after adding shared /data:/data on 2026-09-13."
+    - "Verified Sonarr and Radarr Remote Path Mapping for qBittorrent: /downloads -> /data/torrents on 2026-09-13."
+    - "Verified in-container hardlink test on 2026-09-13: inode 256114799, links=2 for both test paths."
 
 sync:
   status: "synced"
