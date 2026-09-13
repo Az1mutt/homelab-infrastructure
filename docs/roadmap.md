@@ -3,8 +3,8 @@
 ## Now
 
 - Operate the desktop homelab as the post-migration production platform.
-- Choose the low-frequency ČSFD ratings-sync cadence.
-- Create and verify a systemd service/timer for `scripts/sync_csfd.mjs`.
+- Verify the first unattended ČSFD ratings-sync timer run after 2026-09-15.
+- Define the first narrow agent-facing Movie Intelligence tool contract.
 - Keep Movie Intelligence writes controlled, idempotent and auditable.
 - Continue media-specific validation and cleanup without treating it as a migration blocker.
 
@@ -27,16 +27,22 @@ Verified project milestones:
 - ČSFD ratings ingestion verified.
 - One-time private ČSFD watchlist bootstrap completed.
 - Movie database verified at 682 unique movies: 556 watched, 126 watchlist, 0 overlap.
+- Systemd ČSFD sync service verified end-to-end on 2026-09-13.
+- Persistent twice-monthly timer enabled for the 1st and 15th day at 04:15 in the host's systemd timezone.
 
 ## Next
 
-- Deploy low-frequency scheduled ČSFD ratings sync with logging.
+- Check the first unattended timer-triggered ČSFD sync and journal output.
+- Implement a narrow read/query interface for Movie Intelligence:
+  - resolve a movie;
+  - check watched status;
+  - check watchlist status;
+  - expose structured results for an AI tool layer.
+- Define later explicit write actions such as add-to-watchlist and Radarr add/search without exposing unrestricted SQL or shell execution.
 - Retire/unmount the old rollback source disk when convenient.
 - Replace the temporary migration-version override with the permanent image pin/update policy if still present.
-- Remove the obsolete Compose `version` field if still present.
 - Extract appropriate secrets into local-only configuration and keep only safe public examples.
 - Harden backup/restore procedures and retention.
-- Refresh public documentation when live runtime details materially change.
 
 ## Post-migration media work
 
@@ -46,18 +52,31 @@ Verified project milestones:
 - Refine CZ/SK handling only if real usage justifies more automation.
 - Diagnose qBittorrent performance only if fallback performance remains a real issue.
 
-## Movie Intelligence / agents
+## Movie Intelligence / agent control plane
 
-- Add a safe scheduled ČSFD ratings sync.
-- Keep ČSFD private watchlist as a one-time bootstrap source; the local DB becomes the durable watchlist source of truth.
-- Add SerialZone as a separate future TV/series importer.
-- Add controlled operations for:
-  - add to watchlist;
-  - mark watched;
-  - add to Radarr;
-  - reconcile watched/watchlist state.
-- Enrich later with TMDb, IMDb, Plex and Radarr identifiers/metadata.
-- Prefer narrow scripts/API tools over unrestricted agent DB writes.
+The intended progression is:
+
+```text
+Observe -> Act -> Automate -> Delegate -> Autonomy
+```
+
+Near-term:
+
+- expose safe read/query capabilities over Movie Intelligence;
+- keep the local DB as the durable watchlist source of truth;
+- add SerialZone as a separate future TV/series importer;
+- design explicit tool contracts rather than unrestricted agent DB access.
+
+Later write actions:
+
+- add to watchlist;
+- mark watched;
+- add a movie to Radarr;
+- start a Radarr search;
+- reconcile downloaded/library/watchlist state;
+- expose download status.
+
+The Homelab Observer concept should evolve into an actionable control plane only through narrow allowlisted operations with validation and logging.
 
 ## Later infrastructure work
 
@@ -84,7 +103,7 @@ Verified project milestones:
 
 ## Open decisions
 
-- ČSFD sync cadence
+- first Movie Intelligence agent-tool interface shape
 - permanent container version/update policy
 - backup tooling, retention and frequency
 - monitoring stack
