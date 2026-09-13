@@ -11,84 +11,81 @@ status: "active"
 phase: "migration-acceptance-closure"
 
 current_gate: >
-  Finish the one remaining real torrent acceptance check, then hand the media
-  workstream back to infrastructure for formal migration closure and an
-  explicit decision on the old rollback disk. The known SAB-vs-Plex disk-I/O
-  contention is now treated as a post-closure optimization, not a migration
-  blocker.
+  Fix post-migration torrent import behavior so Sonarr/Radarr create real
+  hardlinks instead of duplicate copies on ext4, then repeat the live torrent
+  acceptance check before handing the media workstream back to infrastructure
+  for formal migration closure.
 
 current_state: >
   The dedicated Ubuntu Server desktop is operational and the media stack is
-  functioning end to end. Plex has been reclaimed and works again on the TV
-  clients. Kometa 2.4.8 is revalidated, its Newly Released Home/Recommended
-  configuration is visibly working, and Tautulli is re-authorized and healthy.
-  Radarr and Sonarr use TRaSH/Recyclarr-managed quality policies; Sonarr real
-  Usenet failures have demonstrated the intended blocklist/retry/fallback
-  behavior. Netdata is deployed and confirmed that heavy SAB activity can
-  saturate the 18 TB media disk and drive very high iowait, but remediation
-  is deferred to a future scratch-storage redesign, likely using SSD rather
-  than consuming the current 1 TB system disk. The old external rollback disk
-  is still attached read-only and will be deliberately dispositioned during
-  migration closure. SAB API/NZB credentials were rotated after the accidental
-  screenshot disclosure. nzb360 is configured locally but paid unlocks remain
-  deferred. A real torrent has now been grabbed; its download is still in
-  progress, so the final post-download import/hardlink acceptance check is
-  pending.
+  functioning end to end. Plex, Kometa, Tautulli, TRaSH/Recyclarr, Usenet
+  fallback behavior and monitoring are verified. A real torrent for The Fall
+  of the House of Usher completed and was imported into /data/media/tv, but a
+  direct inode check on S01E01 proved the torrent file and library file are not
+  hardlinks: the torrent-side file had inode 256212997 with links=1 while the
+  media-side file had inode 248578695 with links=1. This means the import is a
+  duplicate copy and the final torrent-hardlink migration acceptance check has
+  failed. Both paths are under /data on the ext4 data disk, so the next step is
+  to inspect the current Sonarr container mount layout and the Sonarr hardlink
+  import setting before changing or deleting anything. The known SAB-vs-Plex
+  disk-I/O contention remains a post-closure optimization, likely to be solved
+  later with dedicated SSD scratch storage.
 
 exact_next_action: >
-  Wait for the currently grabbed torrent to finish. Then verify that the
-  torrent remains available to qBittorrent for seeding, that Radarr/Sonarr
-  imports the media successfully, and that the torrent-side and media-side
-  files share the same inode/link count on ext4. If that passes, issue the
-  media-workstream completion handoff to infrastructure for formal migration
-  closure.
+  Inspect the current Sonarr Docker volume mappings and confirm whether the
+  torrent download path and TV library are exposed through separate bind mounts
+  or a shared /data mount. Then verify that Sonarr's "Use Hardlinks instead of
+  Copy" setting is enabled. Do not declare migration acceptance complete until
+  a new real torrent import is verified with matching inode numbers and link
+  count >=2.
 
 blockers:
   - >
-    The current torrent download has not finished yet, so the final
-    post-migration torrent import/hardlink acceptance check cannot be verified.
+    The final torrent hardlink acceptance check failed: torrent-side and
+    media-side S01E01 files have different inode numbers and links=1, proving
+    that Sonarr created a duplicate copy rather than a hardlink.
 
 dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Infrastructure, Migration & GitHub"
     dependency: >
-      After media acceptance passes, close the migration formally, decide what
-      to do with the old read-only rollback disk, remove/replace temporary
-      migration pinning, and continue backup/version-policy/public-safe
-      infrastructure cleanup.
+      Formal migration closure remains pending until the media workstream fixes
+      and re-verifies torrent hardlink imports. If the cause is Docker mount
+      topology, infrastructure may need to own the Compose-layout correction.
 
 important_open_loops:
-  - "Complete the in-progress torrent download and verify automatic import plus ext4 hardlink behavior."
+  - "Inspect Sonarr Docker volume mappings for separate /downloads and /tv bind mounts versus a shared /data mount."
+  - "Verify Sonarr Settings > Media Management > Use Hardlinks instead of Copy is enabled."
+  - "After correction, repeat a real torrent import and verify matching inode/link count on torrent and media paths."
+  - "Existing imported torrent/media pairs may currently occupy duplicate disk space; clean them only after verifying the library copy and deciding whether seeding is still needed."
   - "After acceptance, decide with infrastructure whether to unmount, archive, repurpose, or wipe the old rollback disk."
   - "Replace the temporary migration-version override with the permanent image pin/update policy."
   - "Harden backup/restore procedures, retention, and restore drills."
   - "Treat SAB scratch separation as a future performance optimization, likely on SSD; exact device/layout is not yet decided."
-  - "Repeat Netdata/Tautulli load testing after any future SAB scratch-storage redesign."
-  - "Iterate Kometa v2 based on how the Home/Recommended experience looks in practice rather than committing now to a fixed row sequence."
-  - "Keep nzb360 premium unlock/subscription deferred for now, but revisit if the mobile cockpit proves useful."
+  - "Iterate Kometa v2 based on the actual TV experience."
+  - "Keep nzb360 premium unlock/subscription deferred for now."
   - "Later media backlog remains Bazarr, Trakt/PlexTraktSync, Seerr, controlled remote access, and media agents."
 
 stale_or_unknown:
+  - "The exact reason hardlink creation failed is not yet verified; likely candidates are Docker mount topology or the Sonarr hardlink setting."
   - "Exact future SAB scratch device, size and filesystem are undecided; SSD is currently the likely direction."
   - "The old rollback disk is confirmed still attached read-only, but its final disposition is intentionally undecided until migration closure."
 
 portfolio:
   milestone: true
   signal: >
-    The media stack is effectively at migration acceptance: Plex, Kometa,
-    Tautulli, TRaSH/Recyclarr policy, Usenet fallback behavior and monitoring
-    are all verified on the desktop, with one live torrent hardlink test
-    remaining before formal closure. The project also captured a real
-    storage-I/O bottleneck with Netdata and deliberately separated that
-    optimization from the migration-close gate.
+    The final migration acceptance test caught a real storage-efficiency defect
+    that container health checks would have missed: torrent imports work
+    functionally but are currently duplicating payloads rather than creating
+    ext4 hardlinks. The workstream now has a concrete, evidence-backed gate for
+    correcting Docker/ARR import behavior before closure.
 
 verification:
-  last_verified: "2026-09-08"
+  last_verified: "2026-09-13"
   sources:
+    - "Verified project-chat inode check for The Fall of the House of Usher S01E01 on 2026-09-13."
     - "docs/current-state.md"
     - "docs/roadmap.md"
-    - "docs/migration-milestone-2026-09-01.md"
-    - "Verified project-chat evidence through 2026-09-08."
 
 sync:
   status: "synced"
