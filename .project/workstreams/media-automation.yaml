@@ -17,47 +17,44 @@ current_gate: >
   for formal migration closure.
 
 current_state: >
-  The dedicated Ubuntu Server desktop is operational and the media stack is
-  functioning end to end. Plex, Kometa, Tautulli, TRaSH/Recyclarr, Usenet
-  fallback behavior and monitoring are verified. A real torrent for The Fall
-  of the House of Usher completed and was imported into /data/media/tv, but a
-  direct inode check on S01E01 proved the torrent file and library file are not
-  hardlinks: the torrent-side file had inode 256212997 with links=1 while the
-  media-side file had inode 248578695 with links=1. This means the import is a
-  duplicate copy and the final torrent-hardlink migration acceptance check has
-  failed. Both paths are under /data on the ext4 data disk, so the next step is
-  to inspect the current Sonarr container mount layout and the Sonarr hardlink
-  import setting before changing or deleting anything. The known SAB-vs-Plex
-  disk-I/O contention remains a post-closure optimization, likely to be solved
-  later with dedicated SSD scratch storage.
+  The desktop media stack is functioning end to end, but the final torrent
+  hardlink acceptance test failed. The Fall of the House of Usher S01E01 had
+  different inode numbers and links=1 on the torrent and library paths. Fresh
+  Docker inspection now confirms Sonarr sees /data/torrents as a separate
+  /downloads bind mount and /data/media/tv as a separate /tv bind mount. This
+  split mount topology is incompatible with the desired single-filesystem ARR
+  hardlink workflow and explains why imports are being copied rather than
+  hardlinked even though both host paths live on the same ext4 /data disk. The
+  Sonarr hardlink setting still needs a fresh UI check before the Compose layout
+  is changed. SAB-vs-Plex disk-I/O contention remains a post-closure
+  optimization, likely to be solved later with dedicated SSD scratch storage.
 
 exact_next_action: >
-  Inspect the current Sonarr Docker volume mappings and confirm whether the
-  torrent download path and TV library are exposed through separate bind mounts
-  or a shared /data mount. Then verify that Sonarr's "Use Hardlinks instead of
-  Copy" setting is enabled. Do not declare migration acceptance complete until
-  a new real torrent import is verified with matching inode numbers and link
-  count >=2.
+  In Sonarr, verify Settings > Media Management > Use Hardlinks instead of Copy
+  is enabled. If enabled, hand the mount-layout correction to infrastructure:
+  expose a single shared /data bind mount to Sonarr and align download/root
+  paths accordingly instead of separate /downloads and /tv mounts. Then repeat
+  a real torrent import and verify matching inode numbers with link count >=2.
 
 blockers:
   - >
-    The final torrent hardlink acceptance check failed: torrent-side and
-    media-side S01E01 files have different inode numbers and links=1, proving
-    that Sonarr created a duplicate copy rather than a hardlink.
+    Sonarr currently sees torrent downloads and the TV library through separate
+    Docker bind mounts (/downloads and /tv), so the final hardlink acceptance
+    check fails and imported torrent payloads are duplicated.
 
 dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Infrastructure, Migration & GitHub"
     dependency: >
-      Formal migration closure remains pending until the media workstream fixes
-      and re-verifies torrent hardlink imports. If the cause is Docker mount
-      topology, infrastructure may need to own the Compose-layout correction.
+      Own the Compose/mount-layout correction if the Sonarr hardlink setting is
+      confirmed enabled, because this is an infrastructure-level container
+      path change.
 
 important_open_loops:
-  - "Inspect Sonarr Docker volume mappings for separate /downloads and /tv bind mounts versus a shared /data mount."
-  - "Verify Sonarr Settings > Media Management > Use Hardlinks instead of Copy is enabled."
-  - "After correction, repeat a real torrent import and verify matching inode/link count on torrent and media paths."
-  - "Existing imported torrent/media pairs may currently occupy duplicate disk space; clean them only after verifying the library copy and deciding whether seeding is still needed."
+  - "Freshly verify Sonarr Settings > Media Management > Use Hardlinks instead of Copy is enabled."
+  - "Replace separate /downloads and /tv binds with a shared /data mount for ARR hardlink compatibility, subject to infrastructure ownership."
+  - "Repeat a real torrent import after correction and verify matching inode/link count on torrent and media paths."
+  - "Existing imported torrent/media pairs may occupy duplicate disk space; clean them only after confirming the library copy and seeding requirement."
   - "After acceptance, decide with infrastructure whether to unmount, archive, repurpose, or wipe the old rollback disk."
   - "Replace the temporary migration-version override with the permanent image pin/update policy."
   - "Harden backup/restore procedures, retention, and restore drills."
@@ -67,23 +64,24 @@ important_open_loops:
   - "Later media backlog remains Bazarr, Trakt/PlexTraktSync, Seerr, controlled remote access, and media agents."
 
 stale_or_unknown:
-  - "The exact reason hardlink creation failed is not yet verified; likely candidates are Docker mount topology or the Sonarr hardlink setting."
+  - "Whether Sonarr's Use Hardlinks instead of Copy toggle is currently enabled is not freshly verified."
   - "Exact future SAB scratch device, size and filesystem are undecided; SSD is currently the likely direction."
   - "The old rollback disk is confirmed still attached read-only, but its final disposition is intentionally undecided until migration closure."
 
 portfolio:
   milestone: true
   signal: >
-    The final migration acceptance test caught a real storage-efficiency defect
-    that container health checks would have missed: torrent imports work
-    functionally but are currently duplicating payloads rather than creating
-    ext4 hardlinks. The workstream now has a concrete, evidence-backed gate for
-    correcting Docker/ARR import behavior before closure.
+    The final migration acceptance test caught a subtle container-path design
+    defect: service health and imports worked, but split Docker bind mounts
+    defeated ext4 hardlinking and silently doubled storage use. The failure is
+    now tied to a concrete mount-topology correction rather than vague ARR
+    behavior.
 
 verification:
   last_verified: "2026-09-13"
   sources:
     - "Verified project-chat inode check for The Fall of the House of Usher S01E01 on 2026-09-13."
+    - "Verified docker inspect output on 2026-09-13 showing /data/torrents -> /downloads and /data/media/tv -> /tv."
     - "docs/current-state.md"
     - "docs/roadmap.md"
 
