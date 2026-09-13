@@ -1,7 +1,7 @@
 # Current State
 
-**Snapshot date:** 2026-09-09  
-**Project phase:** migration closed; post-migration operations and Movie Intelligence foundation active
+**Snapshot date:** 2026-09-13  
+**Project phase:** migration closed; post-migration operations and Movie Intelligence active
 
 This document is the concise source of truth for what exists, what has been verified, and what remains planned.
 
@@ -18,54 +18,13 @@ This document is the concise source of truth for what exists, what has been veri
 
 ## Migration status
 
-The notebook-to-desktop migration is **formally closed as of 2026-09-09** by owner acceptance in the infrastructure workstream.
+The notebook-to-desktop migration is formally closed as of 2026-09-09 by owner acceptance in the infrastructure workstream.
 
-This changes the project boundary:
-
-- migration acceptance is no longer an active gate;
-- the desktop remains the production homelab target;
-- remaining media checks and infrastructure hardening are post-migration follow-ups, not closure blockers;
-- the old rollback source disk can now be retired/unmounted when convenient after any final user-desired spot checks.
-
-## Desktop platform
-
-The last detailed host/runtime snapshot was captured on 2026-09-01. The following remain the latest known verified values, but time-sensitive runtime details should be refreshed before making claims that require current live state.
-
-| Item | Status | Current knowledge |
-|---|---|---|
-| Host | Verified | Dedicated Ubuntu Server desktop |
-| Operating system | Verified | Clean Ubuntu Server installation |
-| SSH | Verified | Remote administration works |
-| Network | Verified historically | Wi-Fi stable; Ethernet remains preferred long-term |
-| System disk | Verified | Existing ~1 TB WDC disk hosts the OS |
-| Data disk | Verified | Toshiba MG09 18 TB disk |
-| Data filesystem | Verified | ext4 |
-| Persistent mount | Verified | `/data` |
-| Docker Engine | Verified historically | 29.7.2 |
-| Docker Compose | Verified historically | v5.5.0 |
-| Media stack | Verified historically | Plex, Radarr, Sonarr, Prowlarr, qBittorrent, SABnzbd |
-| Kometa | Post-migration follow-up | Revalidation remains useful but is not a migration-closure blocker |
-| Recyclarr | Verified historically | Separate Compose project managing Radarr TRaSH configuration |
-
-## Storage and migration outcome
-
-Verified migration results include:
-
-- source disk mounted read-only before copying;
-- private pre-migration Docker-stack archive readable;
-- source and target recovery archive SHA-256 matched;
-- media and torrent copy verification completed successfully;
-- Compose parsed successfully before first boot;
-- persistent media services started successfully;
-- local HTTP smoke tests responded as expected;
-- a real Radarr post-migration download/import completed successfully;
-- 26 NTFS-era duplicate media/torrent sets were converted to ext4 hardlinks;
-- approximately 711.6 GiB was reclaimed;
-- a representative hardlink pair shared the same inode with link count 2.
+Remaining media checks and infrastructure hardening are post-migration follow-ups rather than migration-closure blockers.
 
 ## Movie Intelligence
 
-A new local Movie Intelligence foundation is verified on the desktop.
+A local Movie Intelligence foundation is operational on the desktop.
 
 Current SQLite state:
 
@@ -91,6 +50,34 @@ Implementation details:
 
 The private ČSFD HTML export is not repository material.
 
+## Scheduled ČSFD ratings sync
+
+The ratings sync is now automated with systemd.
+
+Verified on 2026-09-13:
+
+- `movie-intelligence-csfd-sync.service` runs `scripts/sync_csfd.mjs` as a oneshot service;
+- a manual systemd invocation completed successfully;
+- result: 556 seen, 0 added, 556 existing rows processed;
+- `movie-intelligence-csfd-sync.timer` is enabled and active (waiting);
+- schedule: 1st and 15th day of each month at 04:15 in the host's systemd timezone;
+- `Persistent=true` is enabled so missed runs can be caught after the host returns;
+- systemd showed the next trigger as 2026-09-15 04:15:00 UTC.
+
+The first unattended timer-triggered run should still be checked in the journal after it occurs.
+
+## Agent / control-plane direction
+
+The next architectural step is to expose Movie Intelligence and selected Homelab capabilities through narrow, structured tools rather than unrestricted shell, SSH or raw SQL access.
+
+Near-term read/query capabilities should include resolving a movie and checking watched/watchlist/library state. Later write actions may include explicit, validated operations such as adding a movie to Radarr or starting a search.
+
+The intended progression is:
+
+```text
+Observe -> Act -> Automate -> Delegate -> Autonomy
+```
+
 ## Acquisition policy
 
 Current intended behavior:
@@ -101,20 +88,16 @@ Current intended behavior:
 
 ## Post-migration follow-ups
 
-These remain useful, but they no longer block migration closure:
-
-- choose a low-frequency ČSFD ratings sync cadence and deploy a systemd timer;
+- verify the first unattended ČSFD timer run and journal output;
 - revalidate Kometa and ARR torrent hardlink behavior when convenient;
 - finish Sonarr TRaSH/Recyclarr configuration in the media workstream;
 - retire/unmount the old rollback source disk;
 - choose a permanent container image pin/update policy;
-- remove or replace the temporary migration override if still present;
-- remove the obsolete Compose `version` attribute if still present;
 - extract appropriate secrets into local-only configuration;
 - mature backup/restore retention and restore drills;
 - add monitoring/dashboarding;
-- later design controlled agent operations for watchlist, watched state and Radarr actions.
+- implement controlled agent tools for Movie Intelligence and later Radarr actions.
 
 ## Evidence boundary
 
-Migration closure is verified by explicit owner acceptance on 2026-09-09. Some lower-level runtime details have not been freshly rechecked since the 2026-09-01 migration snapshot; refresh them before treating those time-sensitive values as current.
+Migration closure is verified by explicit owner acceptance on 2026-09-09. The scheduled ČSFD sync service and timer were directly verified on 2026-09-13. Some lower-level host/runtime details from the 2026-09-01 migration snapshot have not been freshly rechecked and should be refreshed before treating them as current.
