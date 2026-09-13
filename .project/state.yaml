@@ -9,20 +9,15 @@ status: "active"
 phase: "migration-closed-post-migration-operations-and-movie-intelligence"
 
 current_gate: >
-  Transition from migration work into routine post-migration operations:
-  operationalize the verified Movie Intelligence foundation with a
-  low-frequency ČSFD ratings sync, then continue non-blocking infrastructure
-  hardening and cleanup.
+  Operationalize the verified Movie Intelligence foundation with a
+  low-frequency scheduled ČSFD ratings sync, then continue non-blocking
+  infrastructure hardening and cleanup.
 
 current_state: >
   The notebook-to-desktop homelab migration is formally closed as of
   2026-09-09 based on owner acceptance in this specialist workstream. The
-  dedicated Ubuntu Server desktop remains the production target and the
-  migration milestone no longer depends on additional media-workstream
-  acceptance to be considered complete. Previously outstanding checks such as
-  ARR torrent hardlink behavior, Kometa revalidation, rollback-source
-  retirement, permanent image pinning, secrets hardening, backup maturity and
-  monitoring are now post-migration operational follow-ups rather than closure
+  dedicated Ubuntu Server desktop remains the production target and remaining
+  media/infrastructure checks are post-migration follow-ups rather than closure
   blockers. A local Movie Intelligence foundation is verified on the desktop:
   SQLite media.db is in WAL mode with 682 unique movies, 556 watched/rated,
   126 watchlist, and 0 rows in both states. The one-time private ČSFD
@@ -31,12 +26,15 @@ current_state: >
   excluded for a future SerialZone path. Six watchlist items already existed
   as watched, so watched status correctly took precedence. The public ČSFD
   ratings sync works and a repeat run processed 556 existing rows with
-  0 additions, confirming no duplicate creation.
+  0 additions, confirming no duplicate creation. A systemd oneshot service
+  (movie-intelligence-csfd-sync.service) has now been created and manually
+  verified end-to-end: on 2026-09-13 it completed successfully with 556 seen,
+  0 added and 556 updated, exiting cleanly under systemd.
 
 exact_next_action: >
-  Confirm the concrete low-frequency ČSFD ratings-sync cadence, then create and
-  verify a systemd service/timer for scripts/sync_csfd.mjs; daily scheduling is
-  explicitly unnecessary.
+  Create the systemd timer for movie-intelligence-csfd-sync.service on a
+  twice-monthly cadence (1st and 15th at 04:15), then enable it and verify the
+  next scheduled run with systemctl list-timers.
 
 blockers: []
 
@@ -48,11 +46,11 @@ dependencies:
       Kometa and ARR hardlink validation as non-blocking post-migration work.
   - component: "Movie Intelligence"
     dependency: >
-      node-csfd-api and better-sqlite3 are installed and verified; systemd
-      scheduling remains planned with cadence intentionally much lower than daily.
+      node-csfd-api, better-sqlite3 and the systemd oneshot sync service are
+      installed and verified; only timer scheduling remains for this gate.
 
 important_open_loops:
-  - "Choose and deploy the low-frequency ČSFD ratings sync cadence; verify a scheduled run and logging."
+  - "Deploy the twice-monthly ČSFD ratings timer and verify its schedule/logging."
   - "Use SQLite-aware backup semantics for future online backups; avoid naive copy while WAL writes may be active."
   - "Keep the one-time ČSFD private watchlist export out of GitHub; it contains private/session-adjacent page data."
   - "Future TV/series ingestion should use a separate SerialZone importer; 10 series/season items were intentionally excluded from the film bootstrap."
@@ -67,18 +65,18 @@ portfolio:
     Formally closed the staged notebook-to-desktop Ubuntu Server migration and
     moved the project into post-migration operations. The platform now also
     hosts a source-agnostic local movie-intelligence data layer on SQLite with
-    verified ČSFD ratings ingestion, private watchlist bootstrap,
-    external-ID deduplication and watched-over-watchlist precedence, creating
-    a practical foundation for future media agents and Radarr integration.
+    verified ČSFD ingestion, private watchlist bootstrap and a tested systemd
+    execution path, creating a practical foundation for future media agents
+    and Radarr integration.
 
 verification:
-  last_verified: "2026-09-09"
+  last_verified: "2026-09-13"
   sources:
+    - "Specialist-chat systemd log 2026-09-13: movie-intelligence-csfd-sync.service completed successfully; 556 seen / 0 added / 556 updated."
     - "Owner acceptance in specialist chat 2026-09-09: migration can be formally closed."
     - "Specialist-chat command output 2026-09-06: media.db sanity check = 682 total / 556 watched / 126 watchlist / 0 both."
     - "Specialist-chat command output 2026-09-06: repeat ČSFD ratings sync = 556 seen / 0 added / 556 existing rows processed."
     - "Specialist-chat import verification 2026-09-06: SQLite-aware pre-import backup created and one-time watchlist bootstrap completed."
-    - "Specialist-chat parsed private watchlist snapshot 2026-09-06: 142 source items / 132 movie-like / 10 series-or-season excluded."
     - "GitHub verification 2026-09-08: PR #3 'Document desktop migration milestone' is merged (merged 2026-09-01)."
 
 sync:
