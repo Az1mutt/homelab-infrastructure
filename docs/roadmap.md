@@ -46,11 +46,12 @@ Subtitle policy:
 
 - English subtitles remain the primary/default preference.
 - In many releases English subtitles will already be embedded or present; Bazarr should avoid creating unnecessary duplicates.
-- Bazarr should additionally search for high-quality Czech subtitles when available.
-- Czech subtitles should match the exact release/version as closely as possible so timing and cuts line up without manual repair.
-- Czech subtitles are an optional alternate track, not a replacement for English; the user can switch to Czech manually in Plex when wanted.
-- Reduce the current need to manually find and pair Czech subtitles, while retaining manual override for difficult releases.
-- Define sensible movie/TV language and scoring rules, with provider priorities tuned for Czech subtitle quality and release matching.
+- Bazarr should additionally search for high-quality Czech and Slovak subtitles when available.
+- Czech should be preferred over Slovak when both are viable, mainly because a good release/version match is expected to be available more often.
+- CZ/SK subtitles should match the exact release/version as closely as possible so timing and cuts line up without manual repair.
+- CZ/SK subtitles are optional alternate tracks, not replacements for English; the user can switch to Czech or Slovak manually in Plex when wanted.
+- Reduce the current need to manually find and pair CZ/SK subtitles, while retaining manual override for difficult releases.
+- Define sensible movie/TV language and scoring rules, with provider priorities tuned for CZ/SK subtitle quality and release matching.
 
 ### 2. Persistent watched-library / personal cinema shelf
 
