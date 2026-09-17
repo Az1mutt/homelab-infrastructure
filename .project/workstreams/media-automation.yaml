@@ -31,12 +31,16 @@ current_state: >
   verifies that the corrected container/filesystem topology is hardlink-capable.
   It does not yet prove that ARR uses the corrected path during a real import,
   so one fresh live torrent import remains before acceptance can close. The
-  next media-app priority after closure is Bazarr/subtitle automation, followed
-  by a Plex-visible persistent watched-library concept so watched titles remain
-  visually browsable even when their local files are deleted. Trakt/
+  next media-app priority after closure is Bazarr/subtitle automation. English
+  subtitles remain the primary/default preference; Bazarr should avoid
+  duplicating good embedded/present English subtitles while additionally
+  finding high-quality Czech subtitles matched closely to the exact release so
+  they are available as an optional alternate track in Plex. The goal is to
+  reduce manual Czech subtitle searching/pairing, not to replace English.
+  After that come the Plex-visible persistent watched-library concept, Trakt/
   PlexTraktSync, Seerr, Kometa v2 refinement, controlled remote access and
-  media agents follow after that. SAB-vs-Plex disk-I/O contention remains a
-  later performance optimization, likely using dedicated SSD scratch storage.
+  media agents. SAB-vs-Plex disk-I/O contention remains a later performance
+  optimization, likely using dedicated SSD scratch storage.
 
 exact_next_action: >
   When server access is available again, grab one fresh, preferably small
@@ -64,7 +68,8 @@ important_open_loops:
   - "Verify matching inode/link count on the fresh torrent-side and library-side files while qBittorrent is still seeding."
   - "The pre-fix House of Usher torrent/library files are separate copies; clean duplicate torrent payloads only after deciding whether seeding is still needed."
   - "After acceptance, tell infrastructure the ARR hardlink mount/path defect is resolved and hand back formal migration closure."
-  - "Deploy Bazarr next and design CZ/EN subtitle profiles that avoid duplicate subtitle clutter while reducing manual Czech subtitle matching."
+  - "Deploy Bazarr next with English as the primary/default subtitle preference, avoid unnecessary duplicate English subtitles, and additionally fetch high-quality Czech subtitles matched closely to the exact release as an optional alternate track."
+  - "Tune subtitle provider/language/scoring rules separately for movies and TV so Czech subtitles are reliable without replacing English or creating clutter."
   - "Design a persistent Plex-visible watched-library/personal-cinema shelf so watched titles remain visually browsable after local media deletion."
   - "Test native Plex/List-style implementation first; evaluate a dedicated archive/placeholder library only if the TV-client experience is inadequate."
   - "Connect persistent watched history later to Trakt/PlexTraktSync and the planned media/ČSFD database so local availability is separate from viewing history."
@@ -93,8 +98,9 @@ portfolio:
     are remapped consistently, and an in-container inode test proves the fixed
     topology can create real cross-directory ext4 hardlinks. The post-closure
     roadmap now extends from basic media automation toward a personal media
-    knowledge layer: subtitle automation, durable watched-history presentation,
-    Trakt/ČSFD enrichment and later curated agents.
+    knowledge layer: subtitle automation with English-first plus reliable Czech
+    alternates, durable watched-history presentation, Trakt/ČSFD enrichment and
+    later curated agents.
 
 verification:
   last_verified: "2026-09-17"
@@ -105,7 +111,7 @@ verification:
     - "Verified Compose validation and successful Sonarr/Radarr recreation after adding shared /data:/data on 2026-09-13."
     - "Verified Sonarr and Radarr Remote Path Mapping for qBittorrent: /downloads -> /data/torrents on 2026-09-13."
     - "Verified in-container hardlink test on 2026-09-13: inode 256114799, links=2 for both test paths."
-    - "Roadmap priorities clarified in project chat on 2026-09-17: Bazarr next, persistent Plex watched shelf, then Trakt/PlexTraktSync, Seerr, Kometa refinement, remote access and media agents."
+    - "Roadmap priorities clarified in project chat on 2026-09-17: Bazarr next with English primary and Czech high-quality release-matched alternates; persistent Plex watched shelf, then Trakt/PlexTraktSync, Seerr, Kometa refinement, remote access and media agents."
 
 sync:
   status: "synced"
