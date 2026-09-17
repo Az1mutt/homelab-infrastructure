@@ -75,7 +75,13 @@ These are short closure items and should not hold up the rest of the roadmap.
 Media workstream:
 
 - deploy and configure Bazarr;
-- automate CZ/EN subtitle acquisition while avoiding unnecessary duplicate subtitle files;
+- keep English subtitles as the primary/default preference;
+- avoid downloading redundant English subtitles when a good embedded/present English track already exists;
+- additionally fetch high-quality Czech and Slovak subtitles matched as closely as possible to the exact release/version;
+- prefer Czech over Slovak when both are viable because reliable release matching is expected more often, while keeping Slovak enabled as a useful alternate;
+- keep CZ/SK as optional alternate tracks in Plex rather than replacements for English;
+- tune language/provider/scoring rules separately for movies and TV;
+- retain manual override for difficult or poorly matched releases;
 - verify the workflow on real library items.
 
 ### Phase 3 — Request gateway
@@ -165,7 +171,7 @@ No public router port-forwarding is required for the current plan.
 Keep only a small number of active fronts:
 
 1. Infrastructure/Agent chat: verify unattended ČSFD timer run and finish unified `get_movie_status` read layer.
-2. Plex/Media chat: complete hardlink sanity check, then move directly to Bazarr.
+2. Plex/Media chat: complete hardlink sanity check, then move directly to Bazarr with English-first plus release-matched CZ/SK alternates.
 3. After Bazarr: bring Seerr forward because it can serve both human requests and the future safe agent write boundary.
 
 Do not start Trakt, My Cinema, Kometa v2 and write-capable agents all at once.
