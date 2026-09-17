@@ -42,14 +42,15 @@ Finish the real torrent import/hardlink check, then close the media acceptance p
 
 This is the next application priority after migration closure.
 
-Goals:
+Subtitle policy:
 
-- automate Czech subtitles where available;
-- keep English or embedded subtitles when useful;
-- avoid duplicate subtitle clutter;
-- reduce manual subtitle matching for CZ releases;
-- define sensible language/profile rules for movies versus TV;
-- keep manual override available for difficult matches.
+- English subtitles remain the primary/default preference.
+- In many releases English subtitles will already be embedded or present; Bazarr should avoid creating unnecessary duplicates.
+- Bazarr should additionally search for high-quality Czech subtitles when available.
+- Czech subtitles should match the exact release/version as closely as possible so timing and cuts line up without manual repair.
+- Czech subtitles are an optional alternate track, not a replacement for English; the user can switch to Czech manually in Plex when wanted.
+- Reduce the current need to manually find and pair Czech subtitles, while retaining manual override for difficult releases.
+- Define sensible movie/TV language and scoring rules, with provider priorities tuned for Czech subtitle quality and release matching.
 
 ### 2. Persistent watched-library / personal cinema shelf
 
