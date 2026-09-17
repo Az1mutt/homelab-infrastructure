@@ -8,113 +8,101 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "migration-acceptance-closure"
+phase: "post-migration-media-evolution"
 
 current_gate: >
-  Complete one fresh real Sonarr/Radarr torrent import through the corrected
-  shared /data path and verify matching inode numbers with link count >=2.
-  If that passes, the media workstream can hand migration acceptance back to
-  infrastructure for formal closure.
+  Complete one fresh live ARR torrent hardlink sanity check when practical,
+  then move directly into Bazarr deployment and subtitle-policy validation.
+  The hardlink check is useful post-migration validation but is no longer a
+  migration blocker; the desktop migration is already formally closed.
 
 current_state: >
-  The desktop media stack is functioning end to end. The final torrent
-  acceptance test initially exposed duplicate-copy behavior: The Fall of the
-  House of Usher S01E01 had different inode numbers and links=1 between the
-  torrent and TV-library files. Sonarr's hardlink option was confirmed enabled,
-  while Docker inspection showed split /downloads and /tv bind mounts. The
-  Compose layout has now been corrected in this workstream by adding a shared
-  /data:/data bind mount to both Sonarr and Radarr, recreating both containers
-  successfully under the migration override, and adding Remote Path Mappings
-  for qBittorrent from /downloads to /data/torrents. A direct hardlink test
-  inside the Sonarr container succeeded between /data/torrents and
-  /data/media/tv: both test paths reported inode 256114799 and links=2. This
-  verifies that the corrected container/filesystem topology is hardlink-capable.
-  It does not yet prove that ARR uses the corrected path during a real import,
-  so one fresh live torrent import remains before acceptance can close. The
-  next media-app priority after closure is Bazarr/subtitle automation. English
-  subtitles remain the primary/default preference; Bazarr should avoid
-  duplicating good embedded/present English subtitles while additionally
-  finding high-quality Czech and Slovak subtitles matched closely to the exact
-  release so they are available as optional alternate tracks in Plex. Czech is
-  preferred over Slovak when both are viable because a good release match is
-  expected more often. The goal is to reduce manual CZ/SK subtitle searching
-  and pairing, not to replace English. After that come the Plex-visible
-  persistent watched-library concept, Trakt/PlexTraktSync, Seerr, Kometa v2
-  refinement, controlled remote access and media agents. SAB-vs-Plex disk-I/O
-  contention remains a later performance optimization, likely using dedicated
-  SSD scratch storage.
+  The desktop media stack is operational and the notebook-to-desktop migration
+  is formally closed. A pre-fix torrent import proved that split Docker mounts
+  caused duplicate copies instead of hardlinks. The media workstream corrected
+  Sonarr and Radarr to share /data, added qBittorrent Remote Path Mapping from
+  /downloads to /data/torrents, and verified in-container hardlink capability
+  with matching inode 256114799 and links=2. One fresh real ARR import remains
+  as a non-blocking sanity check. The next media application priority is Bazarr.
+  English subtitles remain primary/default; Bazarr should avoid unnecessary
+  duplicate English subtitles while additionally finding high-quality Czech and
+  Slovak alternates matched closely to the exact release. Czech is preferred
+  over Slovak when both are viable because matching availability is expected to
+  be better, while Slovak remains enabled as a useful alternate. After Bazarr,
+  Seerr moves forward earlier as the human request/discovery layer and as a
+  potential safe request gateway for the separate Agent Control Plane. The
+  watched/history layer follows through Trakt/PlexTraktSync plus a Plex-visible
+  My Cinema shelf. The local Movie Intelligence media.db remains the durable
+  internal personal-state layer owned by the Infrastructure / Agent Control
+  Plane workstream; this media workstream owns Plex presentation and sync/media
+  behavior around it. Kometa v2 and Curator-facing curation come after the
+  watched/history contracts are stable.
 
 exact_next_action: >
-  When server access is available again, grab one fresh, preferably small
-  torrent through Sonarr or Radarr and let ARR import it normally while
-  qBittorrent keeps seeding. Then compare one source file under /data/torrents
-  with its imported library file using stat. Migration acceptance passes only
-  if both paths have the same inode and link count >=2.
+  When server access is available, grab one fresh preferably small torrent via
+  Sonarr or Radarr, let ARR import it while qBittorrent keeps seeding, and verify
+  matching inode numbers with link count >=2. Treat the result as a sanity
+  check, not a migration gate. Then deploy/configure Bazarr and validate the
+  English-first plus CZ/SK alternate subtitle workflow on real movies and TV.
 
-blockers:
-  - >
-    Filesystem/container hardlink capability is fixed and verified, but the
-    corrected ARR workflow still needs one fresh end-to-end torrent import test.
+blockers: []
 
 dependencies:
   - project: "Homelab & Media Stack"
-    workstream: "Infrastructure, Migration & GitHub"
+    workstream: "Infrastructure & Agent Control Plane"
     dependency: >
-      No action is currently required for the ARR hardlink fix. After the fresh
-      real import test passes, infrastructure should refresh its state and
-      perform formal migration closure, rollback-disk disposition, permanent
-      image pin/update policy and backup hardening.
+      Own Movie Intelligence media.db, ČSFD/SerialZone ingestion, agent tools,
+      API/MCP/control-plane plumbing, stable entity identity, security/audit
+      boundaries and future agent-facing wrappers. This workstream should not
+      duplicate those responsibilities.
+  - component: "Seerr"
+    dependency: >
+      This workstream owns Seerr deployment, request UX and media-policy
+      configuration. The Agent Control Plane may later wrap the Seerr API as a
+      controlled write gateway instead of exposing unrestricted direct ARR
+      mutations.
+  - component: "Watched/history"
+    dependency: >
+      Design Trakt/PlexTraktSync and My Cinema so they complement rather than
+      compete with Movie Intelligence as the durable internal personal-state
+      layer.
 
 important_open_loops:
-  - "Run one fresh real torrent import through Sonarr or Radarr after the shared /data and Remote Path Mapping correction."
-  - "Verify matching inode/link count on the fresh torrent-side and library-side files while qBittorrent is still seeding."
-  - "The pre-fix House of Usher torrent/library files are separate copies; clean duplicate torrent payloads only after deciding whether seeding is still needed."
-  - "After acceptance, tell infrastructure the ARR hardlink mount/path defect is resolved and hand back formal migration closure."
-  - "Deploy Bazarr next with English as the primary/default subtitle preference, avoid unnecessary duplicate English subtitles, and additionally fetch high-quality CZ/SK subtitles matched closely to the exact release as optional alternate tracks."
-  - "Prefer Czech over Slovak when both are viable because reliable release matching is expected more often, while still keeping Slovak enabled as a useful alternate."
-  - "Tune subtitle provider/language/scoring rules separately for movies and TV so CZ/SK subtitles are reliable without replacing English or creating clutter."
-  - "Design a persistent Plex-visible watched-library/personal-cinema shelf so watched titles remain visually browsable after local media deletion."
-  - "Test native Plex/List-style implementation first; evaluate a dedicated archive/placeholder library only if the TV-client experience is inadequate."
-  - "Connect persistent watched history later to Trakt/PlexTraktSync and the planned media/ČSFD database so local availability is separate from viewing history."
-  - "Add Seerr after subtitle/history foundations are stable."
-  - "Iterate Kometa v2 based on the actual TV experience rather than a fixed row plan."
-  - "Keep nzb360 premium unlock/subscription deferred for now."
-  - "Add controlled remote access before enabling remote media-agent operations."
-  - "Later media agents remain Observer, Curator and Media Operator, with destructive actions confirmation-gated."
-  - "After acceptance, decide with infrastructure whether to unmount, archive, repurpose, or wipe the old rollback disk."
-  - "Replace the temporary migration-version override with the permanent image pin/update policy."
-  - "Harden backup/restore procedures, retention, and restore drills."
-  - "Treat SAB scratch separation as a future performance optimization, likely on SSD; exact device/layout is not yet decided."
+  - "Run one fresh real Sonarr/Radarr torrent import after the shared /data + Remote Path Mapping fix and verify matching inode/link count while qBittorrent is still seeding."
+  - "Deploy Bazarr next with English as primary/default, avoid redundant English downloads, fetch high-quality release-matched CZ/SK alternates, prefer Czech over Slovak when both are viable, and retain manual override for difficult releases."
+  - "Tune Bazarr language/provider/scoring rules separately for movies and TV and verify them against real library items."
+  - "Deploy/configure Seerr after Bazarr as the human request/discovery layer; define media policy here while the sibling control-plane workstream evaluates the Seerr API as a safe agent write gateway."
+  - "Design Trakt/PlexTraktSync behavior without creating a competing source of truth against Movie Intelligence media.db."
+  - "Prototype My Cinema / persistent watched shelf in Plex so watched titles remain visually browsable after local files are deleted."
+  - "Prefer a clean Plex-native watched/history presentation first; evaluate archive/placeholder techniques only if TV-client behavior is inadequate."
+  - "Iterate Kometa v2 after watched/history behavior is stable; integrate Curator outputs only after data contracts are clear."
+  - "Keep nzb360 premium deferred unless the mobile cockpit proves valuable."
+  - "Coordinate with the Agent Control Plane instead of re-owning Observer/Media Operator implementation in this workstream."
 
 stale_or_unknown:
-  - "A fresh end-to-end ARR import has not yet verified that Remote Path Mapping is applied exactly as intended during real torrent import."
-  - "The exact Plex implementation for the persistent watched-library shelf is undecided and should be validated on the actual TV client before committing to an architecture."
-  - "Exact future SAB scratch device, size and filesystem are undecided; SSD is currently the likely direction."
-  - "The old rollback disk is confirmed still attached read-only, but its final disposition is intentionally undecided until migration closure."
+  - "A fresh end-to-end ARR torrent import has not yet verified the corrected Remote Path Mapping in a real post-fix workflow, although direct in-container hardlink creation is verified."
+  - "The exact Plex implementation for My Cinema / watched-but-no-longer-local titles is still open and must be validated on the actual TV client."
+  - "Exact Trakt/PlexTraktSync synchronization responsibilities relative to Movie Intelligence media.db remain to be designed."
+  - "Project-level closure/ownership changes are currently represented on draft PR #5; this workstream file is synced on main while the project rollup remains pending that PR merge."
 
 portfolio:
-  milestone: true
+  milestone: false
   signal: >
-    A subtle migration defect was diagnosed and corrected with evidence: split
-    Docker bind mounts caused functional ARR imports to duplicate payloads
-    rather than hardlink them. Sonarr/Radarr now share /data, qBittorrent paths
-    are remapped consistently, and an in-container inode test proves the fixed
-    topology can create real cross-directory ext4 hardlinks. The post-closure
-    roadmap now extends from basic media automation toward a personal media
-    knowledge layer: subtitle automation with English-first plus reliable CZ/SK
-    alternates, durable watched-history presentation, Trakt/ČSFD enrichment and
-    later curated agents.
+    Ownership is now cleanly split into two coordinated tracks: this workstream
+    owns Plex/media UX and policy, while the sibling Infrastructure & Agent
+    Control Plane owns Movie Intelligence and agent plumbing. Near-term media
+    delivery is now focused on Bazarr, then Seerr, then durable watched/history
+    presentation, while agent capability can progress in parallel without
+    blocking the Plex roadmap.
 
 verification:
   last_verified: "2026-09-17"
   sources:
-    - "Verified project-chat inode check for The Fall of the House of Usher S01E01 on 2026-09-13 showing pre-fix duplicate copies."
-    - "Verified Docker inspection on 2026-09-13 showing the original split /downloads and /tv mounts."
-    - "Verified Sonarr UI on 2026-09-13 showing Use Hardlinks instead of Copy enabled."
-    - "Verified Compose validation and successful Sonarr/Radarr recreation after adding shared /data:/data on 2026-09-13."
-    - "Verified Sonarr and Radarr Remote Path Mapping for qBittorrent: /downloads -> /data/torrents on 2026-09-13."
-    - "Verified in-container hardlink test on 2026-09-13: inode 256114799, links=2 for both test paths."
-    - "Roadmap priorities clarified in project chat on 2026-09-17: Bazarr next with English primary and CZ/SK release-matched alternates, Czech preferred when both are viable; persistent Plex watched shelf, then Trakt/PlexTraktSync, Seerr, Kometa refinement, remote access and media agents."
+    - "Verified pre-fix House of Usher inode check on 2026-09-13 showing duplicate copies."
+    - "Verified Sonarr/Radarr shared /data Compose change and qBittorrent Remote Path Mapping on 2026-09-13."
+    - "Verified in-container hardlink test on 2026-09-13: inode 256114799, links=2 for both paths."
+    - "Cross-workstream ownership and execution order reconciled with the Infrastructure / Agent Control Plane roadmap on 2026-09-17."
+    - "Bazarr policy clarified on 2026-09-17: English primary/default, CZ/SK release-matched alternates with Czech preferred when both are viable."
 
 sync:
   status: "synced"
