@@ -31,15 +31,19 @@ current_state: >
   verifies that the corrected container/filesystem topology is hardlink-capable.
   It does not yet prove that ARR uses the corrected path during a real import,
   so one fresh live torrent import remains before acceptance can close. The
-  pre-fix House of Usher files remain separate copies and are not evidence of
-  the corrected behavior. SAB-vs-Plex disk-I/O contention remains a later
-  performance optimization, likely using dedicated SSD scratch storage.
+  next media-app priority after closure is Bazarr/subtitle automation, followed
+  by a Plex-visible persistent watched-library concept so watched titles remain
+  visually browsable even when their local files are deleted. Trakt/
+  PlexTraktSync, Seerr, Kometa v2 refinement, controlled remote access and
+  media agents follow after that. SAB-vs-Plex disk-I/O contention remains a
+  later performance optimization, likely using dedicated SSD scratch storage.
 
 exact_next_action: >
-  Grab one fresh, preferably small torrent through Sonarr or Radarr and let ARR
-  import it normally while qBittorrent keeps seeding. Then compare one source
-  file under /data/torrents with its imported library file using stat. Migration
-  acceptance passes only if both paths have the same inode and link count >=2.
+  When server access is available again, grab one fresh, preferably small
+  torrent through Sonarr or Radarr and let ARR import it normally while
+  qBittorrent keeps seeding. Then compare one source file under /data/torrents
+  with its imported library file using stat. Migration acceptance passes only
+  if both paths have the same inode and link count >=2.
 
 blockers:
   - >
@@ -60,16 +64,23 @@ important_open_loops:
   - "Verify matching inode/link count on the fresh torrent-side and library-side files while qBittorrent is still seeding."
   - "The pre-fix House of Usher torrent/library files are separate copies; clean duplicate torrent payloads only after deciding whether seeding is still needed."
   - "After acceptance, tell infrastructure the ARR hardlink mount/path defect is resolved and hand back formal migration closure."
+  - "Deploy Bazarr next and design CZ/EN subtitle profiles that avoid duplicate subtitle clutter while reducing manual Czech subtitle matching."
+  - "Design a persistent Plex-visible watched-library/personal-cinema shelf so watched titles remain visually browsable after local media deletion."
+  - "Test native Plex/List-style implementation first; evaluate a dedicated archive/placeholder library only if the TV-client experience is inadequate."
+  - "Connect persistent watched history later to Trakt/PlexTraktSync and the planned media/ČSFD database so local availability is separate from viewing history."
+  - "Add Seerr after subtitle/history foundations are stable."
+  - "Iterate Kometa v2 based on the actual TV experience rather than a fixed row plan."
+  - "Keep nzb360 premium unlock/subscription deferred for now."
+  - "Add controlled remote access before enabling remote media-agent operations."
+  - "Later media agents remain Observer, Curator and Media Operator, with destructive actions confirmation-gated."
   - "After acceptance, decide with infrastructure whether to unmount, archive, repurpose, or wipe the old rollback disk."
   - "Replace the temporary migration-version override with the permanent image pin/update policy."
   - "Harden backup/restore procedures, retention, and restore drills."
   - "Treat SAB scratch separation as a future performance optimization, likely on SSD; exact device/layout is not yet decided."
-  - "Iterate Kometa v2 based on the actual TV experience."
-  - "Keep nzb360 premium unlock/subscription deferred for now."
-  - "Later media backlog remains Bazarr, Trakt/PlexTraktSync, Seerr, controlled remote access, and media agents."
 
 stale_or_unknown:
   - "A fresh end-to-end ARR import has not yet verified that Remote Path Mapping is applied exactly as intended during real torrent import."
+  - "The exact Plex implementation for the persistent watched-library shelf is undecided and should be validated on the actual TV client before committing to an architecture."
   - "Exact future SAB scratch device, size and filesystem are undecided; SSD is currently the likely direction."
   - "The old rollback disk is confirmed still attached read-only, but its final disposition is intentionally undecided until migration closure."
 
@@ -80,11 +91,13 @@ portfolio:
     Docker bind mounts caused functional ARR imports to duplicate payloads
     rather than hardlink them. Sonarr/Radarr now share /data, qBittorrent paths
     are remapped consistently, and an in-container inode test proves the fixed
-    topology can create real cross-directory ext4 hardlinks. One live ARR
-    import remains for full end-to-end acceptance.
+    topology can create real cross-directory ext4 hardlinks. The post-closure
+    roadmap now extends from basic media automation toward a personal media
+    knowledge layer: subtitle automation, durable watched-history presentation,
+    Trakt/ČSFD enrichment and later curated agents.
 
 verification:
-  last_verified: "2026-09-13"
+  last_verified: "2026-09-17"
   sources:
     - "Verified project-chat inode check for The Fall of the House of Usher S01E01 on 2026-09-13 showing pre-fix duplicate copies."
     - "Verified Docker inspection on 2026-09-13 showing the original split /downloads and /tv mounts."
@@ -92,6 +105,7 @@ verification:
     - "Verified Compose validation and successful Sonarr/Radarr recreation after adding shared /data:/data on 2026-09-13."
     - "Verified Sonarr and Radarr Remote Path Mapping for qBittorrent: /downloads -> /data/torrents on 2026-09-13."
     - "Verified in-container hardlink test on 2026-09-13: inode 256114799, links=2 for both test paths."
+    - "Roadmap priorities clarified in project chat on 2026-09-17: Bazarr next, persistent Plex watched shelf, then Trakt/PlexTraktSync, Seerr, Kometa refinement, remote access and media agents."
 
 sync:
   status: "synced"
