@@ -4,7 +4,20 @@
 
 This checkpoint supersedes older media migration-gate and Bazarr status below. It does not re-verify unrelated infrastructure. Migration remains formally closed; a fresh torrent hardlink check is non-blocking.
 
-### Bazarr pilot evidence
+### Seerr acceptance — 2026-09-25
+
+- **Verified:** Seerr 3.4.1 is healthy in its own Compose project, attached to the existing `docker_default` media network. Port 5055 binds only the host LAN address; no public proxy or router rule was added. Plex owner authentication initialized successfully.
+- **Verified:** Plex Movies and TV Shows libraries are enabled and scanned. Seerr distinguishes The Sinner season 2 as available and season 1 as missing. Radarr and Sonarr connection tests returned the intended existing profiles and roots.
+- **Verified:** Request #1 for The Sinner (2017), season 1 only (TMDb 39852 / TVDB 326866), was approved in Seerr and reached existing Sonarr series #25. Profile 7 `WEB-2160p (Alternative)`, root `/tv`, path `/tv/The Sinner`. Season 1 became monitored; season 2 stayed monitored and seasons 3–4 stayed unmonitored.
+- **Verified:** The pilot initially disabled immediate search. The user then explicitly requested searching; Sonarr SeasonSearch #92180 completed with 8 reports sent to SABnzbd through NZBgeek. This verifies request handoff and acquisition start, not completed download/import or playback.
+- **Verified:** Radarr profile 9 `UHD Bluray + WEB` and root `/movies` configured; no unnecessary movie request created. Before/after API comparisons show identical ARR quality profiles, indexers, download clients and remote path mappings. Usenet automatic/RSS and torrent interactive-only policy remain unchanged.
+- **Configuration:** Future approved requests use automatic search through ARR; no separate duplicate 4K services or conflicting quality rules. New Plex account auto-enrollment is disabled; the existing owner can sign in. Default request permissions remain approval-based.
+- **Open:** Browser/client owner login has not been user-tested; movie request creation is component-tested only. The Sinner download/import is still pending. Router reachability from outside the LAN was not independently probed.
+- **Stop point:** Seerr request-layer acceptance is complete. Next action: open Seerr locally with the existing Plex owner and check the request; later verify The Sinner import. Do not start Trakt/My Cinema in this task. Bazarr English-default/match-reliability and fresh torrent hardlink checks remain non-blocking follow-up.
+
+Deployment, backups and rollback: [Seerr](seerr.md).
+
+### Bazarr pilot evidence (prior verified checkpoint; unchanged during Seerr setup)
 
 - **Verified:** Bazarr 1.6.1 is running and healthy. OpenSubtitles.com is configured and reports Good; login/search/download succeeded after the user confirmed the account email. No credentials are stored in Git.
 - **Verified:** Only one movie at a time received the EN/CZ/SK pilot profile. Embedded English counted as present. Dune (2021) returned CZ/SK candidates at 73% without source/release-group matches; none was downloaded.
@@ -20,8 +33,10 @@ This checkpoint supersedes older media migration-gate and Bazarr status below. I
 
 Sonarr still reports root `/tv` and mapping `/download/` → `/data/torrents/`; Radarr reports root `/movies` and mapping `/downloads/` → `/data/torrents/`. These were inspected without changes. No old video/torrent was moved, reimported or modified to force a hardlink test. Previously inspected Tokyo Vice S02E10 source/library files had different inodes and links=1; a fresh post-fix workflow remains unverified.
 
-**Acceptance:** Subtitle acquisition, Plex visibility and corrected Czech timing are verified on one film. Overall Bazarr pilot acceptance remains incomplete pending the English default client check; broad automation is not authorized. Confirm that behavior, record the result, and stop. Do not begin Seerr until the Bazarr gate is explicitly complete.
+**Acceptance:** Remaining Bazarr English-default and unattended-match checks are explicitly non-blocking by user decision. Broad automation stays paused. Seerr acceptance is recorded above.
 
+
+## Historical migration snapshot (superseded by checkpoint above)
 
 **Snapshot date:** 2026-09-08  
 **Project phase:** migration acceptance / closure preparation
