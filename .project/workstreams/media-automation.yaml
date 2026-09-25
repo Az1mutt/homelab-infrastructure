@@ -8,42 +8,47 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "bazarr-pilot-safe-checkpoint"
+phase: "bazarr-pilot-download-verified-client-check-pending"
 
 current_gate: >
-  Complete the small-sample OpenSubtitles.com and Plex subtitle acceptance.
-  Bazarr is deployed, but all pilot assignments are removed at the user's
-  requested safe pause. No bulk downloading is enabled. Seerr follows acceptance.
+  Confirm automatic English subtitle selection on the real Plex client on an
+  item without a remembered manual override. One Czech download, Plex visibility
+  and corrected timing are verified. Broad subtitle automation and Seerr remain
+  gated; exact-match reliability is not established by a manually corrected sample.
 
 current_state: >
-  Bazarr 1.6.1 (LinuxServer v1.6.1-ls365) is deployed in its own Compose project,
-  with image pinned by digest, UID/GID 1000, Europe/Bratislava and a healthy
-  container. Form-authenticated UI is bound to the host LAN address only.
-  Sonarr/Radarr connections and synchronization of 44 series and 34 movie files
-  are verified. EN/CZ/SK pilot profile accepts embedded subtitles and uses 90%
-  minimum scores for movies and TV. Dune (2021) detected embedded English
-  normal/HI tracks and wanted only CZ/SK; four The Boys episodes detected
-  embedded EN/CZ and wanted only SK. This is component-tested detection, not
-  subtitle download or playback acceptance. At safe pause, no profiles are
-  assigned, auto-assignment and subtitle upgrades are disabled, and both
-  download histories contain zero records. OpenSubtitles account creation
-  was confirmed by the user; provider setup was absent at final inspection.
-  Titulky.com is deferred. Seerr remains planned. Migration remains closed.
-  Live ARR configuration differs from the prior handoff: Sonarr root is /tv
-  and its remote mapping uses /download/ rather than /downloads/. Radarr
-  root remains /movies. The latest Sonarr torrent import on 2026-09-13
-  retains separate source/library inodes with links=1; timing relative to
-  the prior fix is unknown. Fresh post-fix import acceptance remains pending.
-  Movie Intelligence media.db and agent/control-plane work remain owned by
-  the sibling workstream.
+  Bazarr 1.6.1 remains healthy with verified Sonarr/Radarr integration,
+  44 series and 34 movie files. OpenSubtitles.com login/search/download works
+  after the user confirmed the account email. Dune candidates at 73% were
+  rejected for missing source/release-group matches. Exactly one Czech subtitle
+  was downloaded for The Game (1997), provider ID 374530, score 90.56%.
+  The BX Blu-ray subtitle matched title/year/source/resolution but not the
+  CtrlHD video release group, hash or codecs. The initial timing failed the
+  user playback check. Independent comparison against embedded English found
+  stable offsets of +14.68/+14.72/+14.72 seconds with scale 1.000. Applied
+  +14.72 seconds only to the new Czech subtitle, preserving all 1196 cues/text
+  and a private original backup; the user confirmed corrected timing.
+  Plex sees the external Czech SRT and the original English track.
+  Account settings now enable automatic track selection, English subtitles
+  and Always enabled. Actual automatic English selection on an item without
+  a manual override remains to be confirmed. The Game remembers the user's
+  manual Czech selection. No Slovak download or equal-quality CZ/SK tie-break
+  was tested. Profiles are unassigned again, defaults and upgrades disabled,
+  and history contains one movie subtitle download and zero episode downloads.
+  No redeployment or unrelated setting changes were made. ARR path drift
+  remains: Sonarr /tv with /download/ mapping, Radarr /movies with /downloads/
+  mapping, both targeting /data/torrents/. No old media was changed to force
+  hardlink validation. Migration stays closed; fresh hardlink sanity check
+  remains non-blocking. Seerr is not started.
 
 exact_next_action: >
-  Finish OpenSubtitles.com setup privately in Bazarr, reassign only the
-  bounded pilot sample, inspect exact release/cut/FPS matching, test suitable
-  CZ/SK downloads and verify Plex visibility plus English default playback.
-  Remove pilot assignments again if acceptance is incomplete. Do not enable
-  library-wide profiles or bulk downloads. Investigate ARR path drift before
-  the next fresh torrent sanity check without reimporting old media.
+  Obtain user confirmation that a Plex item without a remembered manual override
+  automatically uses English subtitles. Record that evidence before declaring
+  the small-sample Bazarr gate complete. Keep profiles, library-wide assignment
+  and upgrades disabled; do not claim unattended exact-match reliability.
+  Stop after reporting acceptance status. Seerr must not start before the gate
+  is clearly complete. Investigate ARR path drift before a future fresh torrent
+  import without reimporting old media.
 
 blockers: []
 
@@ -69,7 +74,7 @@ dependencies:
 
 important_open_loops:
   - "Run one fresh real Sonarr/Radarr torrent import after the shared /data + Remote Path Mapping fix and verify matching inode/link count while qBittorrent is still seeding."
-  - "Finish deployed Bazarr OpenSubtitles.com and Plex small-sample acceptance; no bulk activation before verification."
+  - "Finish the Plex English-default client check; OpenSubtitles download and corrected Czech timing passed, but unattended matching remains unproven."
   - "Tune Bazarr language/provider/scoring rules separately for movies and TV and verify them against real library items."
   - "Deploy/configure Seerr after Bazarr as the human request/discovery layer; define media policy here while the sibling control-plane workstream evaluates the Seerr API as a safe agent write gateway."
   - "Design Trakt/PlexTraktSync behavior without creating a competing source of truth against Movie Intelligence media.db."
@@ -80,7 +85,8 @@ important_open_loops:
   - "Coordinate with the Agent Control Plane instead of re-owning Observer/Media Operator implementation in this workstream."
 
 stale_or_unknown:
-  - "A fresh end-to-end ARR torrent import has not yet verified the corrected Remote Path Mapping in a real post-fix workflow, although direct in-container hardlink creation is verified."
+  - "Live ARR roots/mapping drift remains unresolved; historical direct hardlink capability does not verify a fresh actual ARR import."
+  - "English default client behavior without a remembered override remains pending. High subtitle score did not prevent the pilot timing mismatch; no SK download/equal-quality CZ-SK tie-break tested."
   - "The exact Plex implementation for My Cinema / watched-but-no-longer-local titles is still open and must be validated on the actual TV client."
   - "Exact Trakt/PlexTraktSync synchronization responsibilities relative to Movie Intelligence media.db remain to be designed."
   - "Project-level closure/ownership changes are currently represented on draft PR #5; this workstream file is synced on main while the project rollup remains pending that PR merge."
@@ -98,6 +104,10 @@ portfolio:
 verification:
   last_verified: "2026-09-25"
   sources:
+    - "2026-09-25 OpenSubtitles Good status, 1 Czech movie download (ID 374530, 90.56%), Plex external Czech visibility verified."
+    - "2026-09-25 user confirmed corrected Czech playback after +14.72s shift; 3-section diagnostic +14.68/+14.72/+14.72s, scale 1.000, 1196 cues/text retained."
+    - "2026-09-25 Plex API: autoSelectAudio=true, defaultSubtitleLanguage=en, autoSelectSubtitle=2; client automatic English playback confirmation pending."
+    - "2026-09-25 final safety check: zero assigned profiles, defaults/upgrades disabled; history 1 movie / 0 episode downloads."
     - "2026-09-25 live Bazarr health, ARR API connectivity, library sync and small-sample embedded subtitle detection verified; provider download/Plex playback acceptance pending."
     - "2026-09-25 safe checkpoint: 0 assigned profiles, 0 subtitle history records, defaults/upgrades disabled; backups saved privately."
     - "2026-09-25 live ARR root/mapping drift and Tokyo Vice source/library links=1 observed; no old-media mutation."
