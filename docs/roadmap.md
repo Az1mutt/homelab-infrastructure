@@ -20,7 +20,7 @@ This checkpoint supersedes older media migration-gate and Bazarr status below. I
 
 Sonarr still reports root `/tv` and mapping `/download/` → `/data/torrents/`; Radarr reports root `/movies` and mapping `/downloads/` → `/data/torrents/`. These were inspected without changes. No old video/torrent was moved, reimported or modified to force a hardlink test. Previously inspected Tokyo Vice S02E10 source/library files had different inodes and links=1; a fresh post-fix workflow remains unverified.
 
-**Acceptance:** Subtitle acquisition, Plex visibility and corrected Czech timing are verified on one film. Overall Bazarr pilot acceptance remains incomplete pending the English default client check; broad automation is not authorized. Confirm that behavior, record the result, and stop. Do not begin Seerr until the Bazarr gate is explicitly complete.
+**Acceptance / sequencing update (2026-09-25):** Subtitle acquisition, Plex visibility and corrected Czech timing are verified on one film. Broader Bazarr automation remains intentionally paused because unattended exact-match reliability and the clean English-default client check are still open. The user explicitly chose to keep those as non-blocking follow-up and proceed to Seerr now. Do not enable library-wide Bazarr profiles, bulk subtitle downloads or upgrades while this remains open.
 
 
 ## Now
@@ -76,7 +76,14 @@ Subtitle policy:
 - Reduce the current need to manually find and pair CZ/SK subtitles, while retaining manual override for difficult releases.
 - Define sensible movie/TV language and scoring rules, with provider priorities tuned for CZ/SK subtitle quality and release matching.
 
-### 2. Persistent watched-library / personal cinema shelf
+### 2. Seerr
+
+- deploy and configure Seerr as the next active media task;
+- use it as the human-friendly discovery/request layer over Radarr/Sonarr;
+- preserve existing Radarr/Sonarr quality profiles and Usenet-first/manual-torrent acquisition policy rather than duplicating them in Seerr;
+- keep the deployment/policy media-owned while the sibling Agent Control Plane may later consume the Seerr API as a controlled write gateway.
+
+### 3. Persistent watched-library / personal cinema shelf
 
 Design a Plex-visible permanent collection of titles already watched, even when the media file is no longer stored locally.
 
@@ -91,16 +98,11 @@ Design principles:
 - if the TV-client experience is insufficient, evaluate a dedicated archive/placeholder-library approach;
 - later connect this layer to the planned media database / ČSFD enrichment and recommendation agents.
 
-### 3. Trakt / PlexTraktSync
+### 4. Trakt / PlexTraktSync
 
 - synchronize watched state and ratings outside Plex;
 - provide a durable history source independent of individual media files;
 - evaluate whether Trakt should become one of the canonical inputs for the future Media Brain.
-
-### 4. Seerr
-
-- add a clean request/discovery interface for movies and TV;
-- integrate requests with Radarr/Sonarr while preserving current quality and acquisition policy.
 
 ### 5. Kometa v2 iteration
 
