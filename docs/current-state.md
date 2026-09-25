@@ -2,17 +2,25 @@
 
 ## Media checkpoint — 2026-09-25
 
-This checkpoint supersedes older media migration-gate and Bazarr status below; it does not re-verify unrelated infrastructure. Migration is formally closed according to the owned workstream. A fresh torrent hardlink check remains non-blocking.
+This checkpoint supersedes older media migration-gate and Bazarr status below. It does not re-verify unrelated infrastructure. Migration remains formally closed; a fresh torrent hardlink check is non-blocking.
 
-- **Verified:** Bazarr 1.6.1 (LinuxServer v1.6.1-ls365) deployed as a separate Compose project, UID/GID 1000, Europe/Bratislava, image pinned by digest. Container health passed; authenticated UI bound only to the host LAN address, port 6767.
-- **Verified:** Sonarr 4.0.17.2952 and Radarr 6.1.1.10360 connections; 44 series and 34 movie files synchronized at checkpoint.
-- **Component-tested:** EN + CZ + SK pilot profile, embedded subtitles accepted, 90% minimum scores for TV and movies, original release names and hashing enabled. Dune (2021) recognized two embedded English tracks and requested only CZ/SK. Four available The Boys episodes recognized embedded EN/CZ and requested only SK.
-- **Safe pause:** Zero assigned movie/series profiles, default auto-assignment disabled, subtitle upgrades disabled, zero download-history records. Provider was not yet configured at the final read. User created an OpenSubtitles.com account; credentials must be entered privately in Bazarr. Titulky.com is deferred.
-- **Unknown:** Provider login/search/download success, release/timing quality, Czech preference behavior, Plex track visibility and English default playback. No full subtitle acceptance claimed. Seerr not started.
-- **Live drift:** Sonarr still reports root `/tv` and mapping `/download/` → `/data/torrents/`; Radarr reports `/movies` and `/downloads/` → `/data/torrents/`. Shared mounts alone do not prove actual imports hardlink. Latest Sonarr torrent import (2026-09-13, Tokyo Vice S02E10) has different source/library inodes, each links=1; relation to the prior fix timing is unverified. No old files were reimported or altered.
-- **Next:** Finish OpenSubtitles configuration, temporarily assign only the pilot sample, inspect release/FPS/cut matches, test one suitable CZ/SK subtitle, verify in Plex, then remove pilot assignments if acceptance remains incomplete. Do not enable bulk downloads. Seerr follows Bazarr acceptance.
+### Bazarr pilot evidence
 
-Live files: `/data/docker/bazarr/docker-compose.yml`, `/data/docker/bazarr/config/`; existing media Compose files were not edited. Pre-deployment backups and a consistent checkpoint database/config backup are under `/data/docker/arr_backup/`. Credentials remain outside Git.
+- **Verified:** Bazarr 1.6.1 is running and healthy. OpenSubtitles.com is configured and reports Good; login/search/download succeeded after the user confirmed the account email. No credentials are stored in Git.
+- **Verified:** Only one movie at a time received the EN/CZ/SK pilot profile. Embedded English counted as present. Dune (2021) returned CZ/SK candidates at 73% without source/release-group matches; none was downloaded.
+- **Verified:** Exactly one Czech subtitle was downloaded for The Game (1997): `The Game (1997) Bluray-1080p.cs.srt`, provider subtitle ID `374530`. Bazarr history records 90.56% (163/180; search UI rounded to 90%). Local video: `The.Game.1997.1080p.BluRay.DTS.x264.1-CtrlHD-Obfuscated`, 24000/1001 FPS, 7728.320 seconds. Subtitle release: `The Game 1997 1080p BluRay VC-1 DTS-HD MA 5.1-BX`.
+- **Match limitation:** Title/year, nominal edition, source and resolution matched; release group, hash and audio/video codecs did not. The initial subtitle did not synchronize correctly, confirmed by the user. A high score did not prove an exact cut/runtime match.
+- **Verified correction:** Against the embedded English SRT, three separated sections yielded offsets +14.68, +14.72 and +14.72 seconds, all at scale 1.000. Applied a uniform +14.72-second shift only to the newly downloaded Czech file, retaining all 1,196 cues and identical subtitle text. Original subtitle retained privately under `/data/docker/bazarr/config/pilot-validation/`. User confirmed the corrected external Czech track now synchronizes. The user also reported that another subtitle found directly through Plex had synchronized without correction.
+- **Verified Plex visibility:** Refreshed only The Game. Plex lists the external Czech SRT alongside the unchanged embedded English SRT. The user confirmed external-track playback.
+- **Verified account configuration:** Automatic track selection is enabled, preferred subtitle language is English, and subtitle mode is Always enabled. **Still pending:** explicit client confirmation of automatic English selection on an item without a remembered manual override. The Game currently retains the manually selected Czech track; that does not establish a default-selection defect.
+- **Policy boundary:** Czech was selected ahead of the lower-scoring Slovak candidates. No equally good CZ/SK tie-break was tested, and no Slovak subtitle was downloaded. Unattended exact-match/timing reliability is not accepted based on this manually corrected sample.
+- **Safe final state:** 34 movie files and 44 series synchronized; zero assigned language profiles; library default assignment and subtitle upgrades remain disabled. Exactly one movie subtitle-download record and zero episode-download records. Minimum scores remain 90% for movies and TV. Bazarr was not redeployed.
+
+### ARR / next gate
+
+Sonarr still reports root `/tv` and mapping `/download/` → `/data/torrents/`; Radarr reports root `/movies` and mapping `/downloads/` → `/data/torrents/`. These were inspected without changes. No old video/torrent was moved, reimported or modified to force a hardlink test. Previously inspected Tokyo Vice S02E10 source/library files had different inodes and links=1; a fresh post-fix workflow remains unverified.
+
+**Acceptance:** Subtitle acquisition, Plex visibility and corrected Czech timing are verified on one film. Overall Bazarr pilot acceptance remains incomplete pending the English default client check; broad automation is not authorized. Confirm that behavior, record the result, and stop. Do not begin Seerr until the Bazarr gate is explicitly complete.
 
 
 **Snapshot date:** 2026-09-08  
