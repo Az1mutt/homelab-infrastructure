@@ -12,8 +12,9 @@ This checkpoint supersedes older media migration-gate and Bazarr status below. I
 - **Verified:** The pilot initially disabled immediate search. The user then explicitly requested searching; Sonarr SeasonSearch #92180 completed with 8 reports sent to SABnzbd through NZBgeek. This verifies request handoff and acquisition start, not completed download/import or playback.
 - **Verified:** Radarr profile 9 `UHD Bluray + WEB` and root `/movies` configured; no unnecessary movie request created. Before/after API comparisons show identical ARR quality profiles, indexers, download clients and remote path mappings. Usenet automatic/RSS and torrent interactive-only policy remain unchanged.
 - **Configuration:** Future approved requests use automatic search through ARR; no separate duplicate 4K services or conflicting quality rules. New Plex account auto-enrollment is disabled; the existing owner can sign in. Default request permissions remain approval-based.
-- **Open:** Browser/client owner login has not been user-tested; movie request creation is component-tested only. The Sinner download/import is still pending. Router reachability from outside the LAN was not independently probed.
-- **Stop point:** Seerr request-layer acceptance is complete. Next action: open Seerr locally with the existing Plex owner and check the request; later verify The Sinner import. Do not start Trakt/My Cinema in this task. Bazarr English-default/match-reliability and fresh torrent hardlink checks remain non-blocking follow-up.
+- **Verified follow-up:** The user confirmed the real Seerr flow completed successfully on the client through Plex, closing the previously open owner-login and The Sinner download/import follow-up.
+- **Still outside this acceptance:** Router reachability from outside the LAN was not independently probed; no public exposure was added or required. Movie request creation remains component-tested rather than exercised with a second real download.
+- **Stop point:** Seerr is accepted end-to-end for the intended human request flow. Bazarr English-default/match-reliability and fresh torrent hardlink checks remain non-blocking follow-up. The next media work is the watched/history architecture and persistent Plex-visible My Cinema shelf.
 
 Deployment, backups and rollback: [Seerr](seerr.md).
 
