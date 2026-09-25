@@ -8,12 +8,12 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "seerr-deployment-with-bazarr-open-loop"
+phase: "seerr-accepted-with-bazarr-open-loop"
 
 current_gate: >
-  Proceed with Seerr deployment/configuration as the next active media task.
-  Keep Bazarr broad automation paused and its remaining English-default and
-  unattended subtitle-match reliability checks open as non-blocking follow-up.
+  Seerr request-layer acceptance complete. Stop after documentation sync.
+  Keep Bazarr English-default and subtitle-match reliability checks open,
+  with profiles, bulk downloads and upgrades disabled. Do not start Trakt/My Cinema.
 
 current_state: >
   Bazarr 1.6.1 remains healthy with verified Sonarr/Radarr integration,
@@ -40,17 +40,22 @@ current_state: >
   hardlink validation. Migration stays closed; fresh hardlink sanity check
   remains non-blocking. On 2026-09-25 the user explicitly chose to leave the
   remaining Bazarr client/default and unattended-match acceptance open and move
-  on to Seerr. Seerr is now the next active media implementation task.
+  on to Seerr. Seerr 3.4.1 is now healthy, LAN-bound and integrated with Plex,
+  Radarr and Sonarr. Movies and TV Shows scans completed. Request 1 for The
+  Sinner season 1 reached existing Sonarr series 25 using profile 7
+  WEB-2160p (Alternative) and /tv. Season 2 remained monitored, 3 and 4
+  unmonitored. At the user's subsequent explicit request, SeasonSearch 92180
+  sent eight reports to SABnzbd through NZBgeek. Download/import is pending.
+  Radarr uses profile 9 UHD Bluray + WEB and /movies. Both services use
+  existing authoritative profiles, with automatic search enabled after the
+  pilot. ARR profile/indexer/client/mapping snapshots are unchanged.
+  Private configuration and database backups retained; no secrets committed.
 
 exact_next_action: >
-  Inspect the current live media Compose/application state, then deploy and
-  configure Seerr as the human-facing discovery/request layer over Radarr and
-  Sonarr without creating a conflicting quality or acquisition-policy layer.
-  Preserve existing ARR profiles and Usenet-first/manual-torrent behavior.
-  Keep Bazarr profiles, bulk assignment and upgrades disabled; finish its
-  English-default and broader match-reliability checks later as an open loop.
-  Investigate ARR path drift before a future fresh torrent import without
-  reimporting old media.
+  Open LAN Seerr with the existing Plex owner and inspect The Sinner season 1
+  request; verify download/import later. Seerr acceptance is complete at the
+  request handoff boundary. Stop here; do not start Trakt/My Cinema.
+  Keep Bazarr and fresh torrent hardlink checks as non-blocking follow-up.
 
 blockers: []
 
@@ -78,7 +83,7 @@ important_open_loops:
   - "Run one fresh real Sonarr/Radarr torrent import after the shared /data + Remote Path Mapping fix and verify matching inode/link count while qBittorrent is still seeding."
   - "Finish the Plex English-default client check opportunistically; OpenSubtitles download and corrected Czech timing passed, but unattended matching remains unproven and broad Bazarr automation stays paused."
   - "Tune Bazarr language/provider/scoring rules separately for movies and TV and verify them against real library items."
-  - "Deploy/configure Seerr now as the human request/discovery layer; define media policy here while the sibling control-plane workstream evaluates the Seerr API as a safe agent write gateway."
+  - "Seerr is accepted; user browser login and The Sinner download/import remain follow-up. Future API wrappers remain owned by the sibling control-plane workstream."
   - "Design Trakt/PlexTraktSync behavior without creating a competing source of truth against Movie Intelligence media.db."
   - "Prototype My Cinema / persistent watched shelf in Plex so watched titles remain visually browsable after local files are deleted."
   - "Prefer a clean Plex-native watched/history presentation first; evaluate archive/placeholder techniques only if TV-client behavior is inadequate."
@@ -94,7 +99,7 @@ stale_or_unknown:
   - "Project-level closure/ownership changes are currently represented on draft PR #5; this workstream file is synced on main while the project rollup remains pending that PR merge."
 
 portfolio:
-  milestone: false
+  milestone: true
   signal: >
     Ownership is now cleanly split into two coordinated tracks: this workstream
     owns Plex/media UX and policy, while the sibling Infrastructure & Agent
@@ -106,6 +111,9 @@ portfolio:
 verification:
   last_verified: "2026-09-25"
   sources:
+    - "2026-09-25 Seerr 3.4.1 healthy; Plex auth/library scan and both ARR connection tests passed."
+    - "2026-09-25 Seerr request 1 reached Sonarr series 25, season 1 only; user-authorized SeasonSearch 92180 sent 8 reports to SABnzbd via NZBgeek."
+    - "2026-09-25 ARR qualityprofile/downloadclient/indexer/remotepathmapping API snapshots identical before and after Seerr setup."
     - "2026-09-25 user decision: leave remaining Bazarr acceptance open as non-blocking and proceed to Seerr."
     - "2026-09-25 OpenSubtitles Good status, 1 Czech movie download (ID 374530, 90.56%), Plex external Czech visibility verified."
     - "2026-09-25 user confirmed corrected Czech playback after +14.72s shift; 3-section diagnostic +14.68/+14.72/+14.72s, scale 1.000, 1196 cues/text retained."
