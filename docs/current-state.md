@@ -1,5 +1,20 @@
 # Current State
 
+## Media checkpoint — 2026-09-25
+
+This checkpoint supersedes older media migration-gate and Bazarr status below; it does not re-verify unrelated infrastructure. Migration is formally closed according to the owned workstream. A fresh torrent hardlink check remains non-blocking.
+
+- **Verified:** Bazarr 1.6.1 (LinuxServer v1.6.1-ls365) deployed as a separate Compose project, UID/GID 1000, Europe/Bratislava, image pinned by digest. Container health passed; authenticated UI bound only to the host LAN address, port 6767.
+- **Verified:** Sonarr 4.0.17.2952 and Radarr 6.1.1.10360 connections; 44 series and 34 movie files synchronized at checkpoint.
+- **Component-tested:** EN + CZ + SK pilot profile, embedded subtitles accepted, 90% minimum scores for TV and movies, original release names and hashing enabled. Dune (2021) recognized two embedded English tracks and requested only CZ/SK. Four available The Boys episodes recognized embedded EN/CZ and requested only SK.
+- **Safe pause:** Zero assigned movie/series profiles, default auto-assignment disabled, subtitle upgrades disabled, zero download-history records. Provider was not yet configured at the final read. User created an OpenSubtitles.com account; credentials must be entered privately in Bazarr. Titulky.com is deferred.
+- **Unknown:** Provider login/search/download success, release/timing quality, Czech preference behavior, Plex track visibility and English default playback. No full subtitle acceptance claimed. Seerr not started.
+- **Live drift:** Sonarr still reports root `/tv` and mapping `/download/` → `/data/torrents/`; Radarr reports `/movies` and `/downloads/` → `/data/torrents/`. Shared mounts alone do not prove actual imports hardlink. Latest Sonarr torrent import (2026-09-13, Tokyo Vice S02E10) has different source/library inodes, each links=1; relation to the prior fix timing is unverified. No old files were reimported or altered.
+- **Next:** Finish OpenSubtitles configuration, temporarily assign only the pilot sample, inspect release/FPS/cut matches, test one suitable CZ/SK subtitle, verify in Plex, then remove pilot assignments if acceptance remains incomplete. Do not enable bulk downloads. Seerr follows Bazarr acceptance.
+
+Live files: `/data/docker/bazarr/docker-compose.yml`, `/data/docker/bazarr/config/`; existing media Compose files were not edited. Pre-deployment backups and a consistent checkpoint database/config backup are under `/data/docker/arr_backup/`. Credentials remain outside Git.
+
+
 **Snapshot date:** 2026-09-08  
 **Project phase:** migration acceptance / closure preparation
 

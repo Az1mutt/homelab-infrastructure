@@ -8,42 +8,42 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "post-migration-media-evolution"
+phase: "bazarr-pilot-safe-checkpoint"
 
 current_gate: >
-  Complete one fresh live ARR torrent hardlink sanity check when practical,
-  then move directly into Bazarr deployment and subtitle-policy validation.
-  The hardlink check is useful post-migration validation but is no longer a
-  migration blocker; the desktop migration is already formally closed.
+  Complete the small-sample OpenSubtitles.com and Plex subtitle acceptance.
+  Bazarr is deployed, but all pilot assignments are removed at the user's
+  requested safe pause. No bulk downloading is enabled. Seerr follows acceptance.
 
 current_state: >
-  The desktop media stack is operational and the notebook-to-desktop migration
-  is formally closed. A pre-fix torrent import proved that split Docker mounts
-  caused duplicate copies instead of hardlinks. The media workstream corrected
-  Sonarr and Radarr to share /data, added qBittorrent Remote Path Mapping from
-  /downloads to /data/torrents, and verified in-container hardlink capability
-  with matching inode 256114799 and links=2. One fresh real ARR import remains
-  as a non-blocking sanity check. The next media application priority is Bazarr.
-  English subtitles remain primary/default; Bazarr should avoid unnecessary
-  duplicate English subtitles while additionally finding high-quality Czech and
-  Slovak alternates matched closely to the exact release. Czech is preferred
-  over Slovak when both are viable because matching availability is expected to
-  be better, while Slovak remains enabled as a useful alternate. After Bazarr,
-  Seerr moves forward earlier as the human request/discovery layer and as a
-  potential safe request gateway for the separate Agent Control Plane. The
-  watched/history layer follows through Trakt/PlexTraktSync plus a Plex-visible
-  My Cinema shelf. The local Movie Intelligence media.db remains the durable
-  internal personal-state layer owned by the Infrastructure / Agent Control
-  Plane workstream; this media workstream owns Plex presentation and sync/media
-  behavior around it. Kometa v2 and Curator-facing curation come after the
-  watched/history contracts are stable.
+  Bazarr 1.6.1 (LinuxServer v1.6.1-ls365) is deployed in its own Compose project,
+  with image pinned by digest, UID/GID 1000, Europe/Bratislava and a healthy
+  container. Form-authenticated UI is bound to the host LAN address only.
+  Sonarr/Radarr connections and synchronization of 44 series and 34 movie files
+  are verified. EN/CZ/SK pilot profile accepts embedded subtitles and uses 90%
+  minimum scores for movies and TV. Dune (2021) detected embedded English
+  normal/HI tracks and wanted only CZ/SK; four The Boys episodes detected
+  embedded EN/CZ and wanted only SK. This is component-tested detection, not
+  subtitle download or playback acceptance. At safe pause, no profiles are
+  assigned, auto-assignment and subtitle upgrades are disabled, and both
+  download histories contain zero records. OpenSubtitles account creation
+  was confirmed by the user; provider setup was absent at final inspection.
+  Titulky.com is deferred. Seerr remains planned. Migration remains closed.
+  Live ARR configuration differs from the prior handoff: Sonarr root is /tv
+  and its remote mapping uses /download/ rather than /downloads/. Radarr
+  root remains /movies. The latest Sonarr torrent import on 2026-09-13
+  retains separate source/library inodes with links=1; timing relative to
+  the prior fix is unknown. Fresh post-fix import acceptance remains pending.
+  Movie Intelligence media.db and agent/control-plane work remain owned by
+  the sibling workstream.
 
 exact_next_action: >
-  When server access is available, grab one fresh preferably small torrent via
-  Sonarr or Radarr, let ARR import it while qBittorrent keeps seeding, and verify
-  matching inode numbers with link count >=2. Treat the result as a sanity
-  check, not a migration gate. Then deploy/configure Bazarr and validate the
-  English-first plus CZ/SK alternate subtitle workflow on real movies and TV.
+  Finish OpenSubtitles.com setup privately in Bazarr, reassign only the
+  bounded pilot sample, inspect exact release/cut/FPS matching, test suitable
+  CZ/SK downloads and verify Plex visibility plus English default playback.
+  Remove pilot assignments again if acceptance is incomplete. Do not enable
+  library-wide profiles or bulk downloads. Investigate ARR path drift before
+  the next fresh torrent sanity check without reimporting old media.
 
 blockers: []
 
@@ -69,7 +69,7 @@ dependencies:
 
 important_open_loops:
   - "Run one fresh real Sonarr/Radarr torrent import after the shared /data + Remote Path Mapping fix and verify matching inode/link count while qBittorrent is still seeding."
-  - "Deploy Bazarr next with English as primary/default, avoid redundant English downloads, fetch high-quality release-matched CZ/SK alternates, prefer Czech over Slovak when both are viable, and retain manual override for difficult releases."
+  - "Finish deployed Bazarr OpenSubtitles.com and Plex small-sample acceptance; no bulk activation before verification."
   - "Tune Bazarr language/provider/scoring rules separately for movies and TV and verify them against real library items."
   - "Deploy/configure Seerr after Bazarr as the human request/discovery layer; define media policy here while the sibling control-plane workstream evaluates the Seerr API as a safe agent write gateway."
   - "Design Trakt/PlexTraktSync behavior without creating a competing source of truth against Movie Intelligence media.db."
@@ -96,8 +96,11 @@ portfolio:
     blocking the Plex roadmap.
 
 verification:
-  last_verified: "2026-09-17"
+  last_verified: "2026-09-25"
   sources:
+    - "2026-09-25 live Bazarr health, ARR API connectivity, library sync and small-sample embedded subtitle detection verified; provider download/Plex playback acceptance pending."
+    - "2026-09-25 safe checkpoint: 0 assigned profiles, 0 subtitle history records, defaults/upgrades disabled; backups saved privately."
+    - "2026-09-25 live ARR root/mapping drift and Tokyo Vice source/library links=1 observed; no old-media mutation."
     - "Verified pre-fix House of Usher inode check on 2026-09-13 showing duplicate copies."
     - "Verified Sonarr/Radarr shared /data Compose change and qBittorrent Remote Path Mapping on 2026-09-13."
     - "Verified in-container hardlink test on 2026-09-13: inode 256114799, links=2 for both paths."
