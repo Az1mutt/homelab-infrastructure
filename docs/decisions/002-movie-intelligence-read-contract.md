@@ -12,7 +12,9 @@ Movie Intelligence owns personal state; Radarr owns local acquisition/library st
 
 Implement a small Node.js module/CLI with a read-only SQLite adapter, fixed GET-only Radarr adapter and versioned `get_movie_status` contract. Keep source candidates and source health separate. Prefer TMDb, then other shared stable IDs. Every conflicting supplied/source ID vetoes confirmation; matching titles and years are only candidate signals. Unknown data remains null, source failure remains unresolved, and multiple candidates remain ambiguous.
 
-Use built-in SQLite with a configurable identifier-only schema mapping. Do not infer the private live schema or add arbitrary SQL, migrations, shell interfaces or write methods. Do not contact the live homelab for implementation acceptance. Synthetic fixtures exercise the adapters and resolver locally.
+Use built-in SQLite with a configurable identifier-only single-table mapping and an explicit fixed normalized mode. Issue #11 supplies the normalized `movies` / `user_movies` / `external_ids` schema contract; implement it with one read statement and namespace-aware ID validation. Do not auto-guess the schema or add arbitrary SQL, migrations, shell interfaces or write methods. Do not contact the live homelab for implementation acceptance. Synthetic fixtures using the supplied exact DDL exercise the adapters and resolver locally.
+
+The normalized adapter maps `my_rating` to personal rating, preserves `watched_at`, and leaves `rated_at` null. Missing user state remains unknown. Canonical external-ID collisions fail closed instead of allowing an aggregation to silently pick a value. These additions do not change contract version 0.1 or identity resolution rules.
 
 ## Consequences
 

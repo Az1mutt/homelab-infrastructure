@@ -2,8 +2,10 @@
 
 ## Infrastructure control plane — 2026-09-26
 
+- **Issue #11 component-tested:** fixed normalized SQLite adapter and exact disposable-schema tests; original 26 tests preserved. Next live read acceptance must explicitly select normalized mode. Include the ČSFD timer-journal check where convenient; deployment/live access remains outside this implementation.
+
 - **Component-tested:** repository-backed [read-only Movie Intelligence v0.1](../tools/movie-intelligence/README.md), including SQLite/Radarr adapters, stable identity handling and offline fixtures.
-- **Next:** separately authorize deployment, verify the actual SQLite schema mapping and exercise Heretik/Scarface against live sources; record sanitized read-only acceptance evidence.
+- **Next:** separately authorize deployment, select normalized SQLite mode and exercise Heretik/Scarface against live sources; record sanitized read-only acceptance evidence.
 - **After live read acceptance:** a separate controlled Seerr request wrapper, with narrow policy and audit boundaries. No unrestricted ARR mutation, deployment or live changes are part of Issue #9 implementation.
 
 ## Media checkpoint — 2026-09-25

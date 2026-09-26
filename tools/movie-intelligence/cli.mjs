@@ -15,6 +15,7 @@ try {
   const adapters = values.fixtures ? fixtureAdapters() : {
     movieIntelligence: () => readMovieIntelligence({
       dbPath: process.env.MOVIE_DB_PATH,
+      schemaMode: process.env.MOVIE_DB_SCHEMA_MODE ?? 'single-table',
       mapping: process.env.MOVIE_DB_MAPPING_PATH ? JSON.parse(readFileSync(process.env.MOVIE_DB_MAPPING_PATH, 'utf8')) : undefined,
     }),
     radarr: () => readRadarr({ baseUrl: process.env.RADARR_BASE_URL, apiKey: process.env.RADARR_API_KEY }),
