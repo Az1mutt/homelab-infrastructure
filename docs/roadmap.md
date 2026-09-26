@@ -1,5 +1,11 @@
 # Roadmap
 
+## Infrastructure control plane — 2026-09-26
+
+- **Component-tested:** repository-backed [read-only Movie Intelligence v0.1](../tools/movie-intelligence/README.md), including SQLite/Radarr adapters, stable identity handling and offline fixtures.
+- **Next:** separately authorize deployment, verify the actual SQLite schema mapping and exercise Heretik/Scarface against live sources; record sanitized read-only acceptance evidence.
+- **After live read acceptance:** a separate controlled Seerr request wrapper, with narrow policy and audit boundaries. No unrestricted ARR mutation, deployment or live changes are part of Issue #9 implementation.
+
 ## Media checkpoint — 2026-09-25
 
 This checkpoint supersedes older media migration-gate and Bazarr status below. It does not re-verify unrelated infrastructure. Migration remains formally closed; a fresh torrent hardlink check is non-blocking.
