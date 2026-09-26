@@ -11,11 +11,24 @@ status: "active"
 phase: "post-migration-operations-and-agent-control-plane"
 
 current_gate: >
-  Repository-backed Movie Intelligence read-only v0.1 and the fixed normalized
-  SQLite adapter are component-tested. Separately authorize live read-only
-  acceptance using normalized mode; no implementation test establishes live acceptance.
+  Issue 13 live read-only acceptance passed for the normalized Movie Intelligence
+  and Radarr path. Next is a separately scoped controlled Seerr request wrapper;
+  no unrestricted ARR mutation or wrapper implementation is authorized here.
 
 current_state: >
+  Live acceptance on 2026-09-26 used clean checkout 0382d1c, explicit normalized
+  mode and transient official Node v24.21.0. Heretik (2024) returned one
+  Movie Intelligence candidate (CSFD 1419147, no TMDb/IMDb) and no Radarr candidate.
+  TMDb 111 returned no Movie Intelligence ID candidate and one Radarr Scarface
+  (1983), IMDb tt0086250, monitored=true, has_file=true, profile 9 UHD Bluray + WEB.
+  Both reads exited 0 and returned single_source_only without fabricated matching.
+  This does not prove absence of a differently identified personal-state record.
+  DB/WAL/SHM hashes and persistent container IDs were unchanged; host Node stayed
+  v22.22.1. No credentials were persisted, no service installed and no ARR/Seerr
+  write action performed. The September 15 unattended CSFD run is verified:
+  timer trigger 04:15:02 UTC, successful service exit at 04:15:31 UTC, exit 0,
+  journal completion confirmed. Timer active/waiting; next observed October 1
+  at 04:15 UTC. The following implementation history predates live acceptance.
   Issue 11 adds explicit normalized SQLite mode for movies, user_movies and
   external_ids, mapping my_rating and validating csfd/tmdb/imdb identifiers.
   All 26 original tests plus 11 normalized-schema tests pass locally. The
@@ -24,8 +37,8 @@ current_state: >
   tools/movie-intelligence now provides a source-separated get_movie_status
   contract, read-only SQLite and GET-only Radarr adapters, stable-ID identity
   rules and deterministic local tests; 26 tests passed in the implementation
-  environment. This repository implementation remains component-tested, not
-  deployed or live-accepted. No homelab access or changes were performed for
+  environment. At that implementation milestone it was component-tested, not
+  live-accepted; Issue 13 above now verifies the live read path. No homelab access or changes were performed for
   that milestone. The previously identified single-table compatibility gap is
   addressed by Issue 11's explicit fixed normalized adapter and exact-schema
   fixture tests. Live access remains outside this implementation scope.
@@ -45,15 +58,13 @@ current_state: >
   IMDb tt0086250) returned monitored=true, has_file=true and profile
   "UHD Bluray + WEB". Seerr 3.4.1 has since been accepted end-to-end by the
   media workstream as the human request gateway and is a candidate future
-  controlled write gateway for agents. The first unattended ČSFD timer-triggered
-  run after 2026-09-15 has not yet been rechecked in this workstream and is
-  therefore unknown, not assumed.
+  controlled write gateway for agents. The September 15 unattended CSFD run
+  has now been checked successfully under Issue 13.
 
 exact_next_action: >
-  Select normalized mode for separately authorized live read acceptance of
-  Heretik and Scarface; inspect the CSFD timer journal where convenient.
-  Capture sanitized evidence before considering a separate controlled Seerr
-  request wrapper. Do not infer deployment or live acceptance from local tests.
+  Design and implement a separately scoped narrow controlled Seerr request
+  wrapper with stable identity, policy checks and audit evidence. Keep direct
+  unrestricted ARR mutation out of scope. Stop Issue 13 after evidence sync.
 
 blockers: []
 
@@ -76,12 +87,10 @@ dependencies:
       pairing title-only matches.
   - component: "Normalized SQLite adapter"
     dependency: >
-      Issue 11 provides a fixed component-tested multi-table read path;
-      deployment must select normalized mode explicitly before live acceptance.
+      Issue 11 provides the fixed multi-table read path, live-accepted under
+      Issue 13 using explicit normalized mode and a transient supported runtime.
 
 important_open_loops:
-  - "After Issue 11, separately authorize live read-only Heretik/Scarface acceptance and record sanitized evidence."
-  - "Verify the first unattended timer-triggered ČSFD sync after 2026-09-15 and confirm journal logging."
   - "After read-contract acceptance, design a narrow Seerr request wrapper for 'request/download this movie' rather than unrestricted direct ARR mutation."
   - "Keep the local Movie Intelligence DB as the durable internal personal-state layer while the media workstream designs Plex/Trakt watched-history responsibilities."
   - "Use SQLite-aware backup semantics for online backups; avoid naive copy while WAL writes may be active."
@@ -92,7 +101,6 @@ important_open_loops:
   - "Continue backup/restore hardening and infrastructure monitoring as post-migration operations."
 
 stale_or_unknown:
-  - "First unattended ČSFD timer-triggered run after 2026-09-15 has not been checked in this workstream."
   - "Current attachment/disposition of the old rollback source disk has not been freshly verified."
   - "Current temporary migration-version override status has not been freshly verified."
 
@@ -109,6 +117,9 @@ portfolio:
 verification:
   last_verified: "2026-09-26"
   sources:
+    - "Issue 13, 2026-09-26: clean 0382d1c checkout, normalized mode, transient Node v24.21.0; Heretik MI 1 / Radarr 0 and TMDb 111 MI 0 / Radarr 1; both exit 0."
+    - "Issue 13: DB/WAL/SHM hashes and persistent container IDs unchanged; host Node v22.22.1; no write actions or credentials persisted."
+    - "Issue 13: timer last trigger September 15 04:15:02 UTC; service exit 04:15:31 UTC, success/0 and matching journal; timer active, next October 1 04:15 UTC."
     - "2026-09-26 Issue 11 implementation: all 37 local tests passed (26 original plus 11 exact normalized-schema tests); no homelab contact or writes."
     - "PR 10 merged at dd795e3: Movie Intelligence read-only control plane v0.1; 26 implementation tests reported passed; no live homelab access."
     - "2026-09-26 repository review: sqlite.mjs supports a single table + identifier mapping, while the previously verified live DB schema uses movies, external_ids and user_movies tables."
