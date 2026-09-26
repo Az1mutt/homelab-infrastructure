@@ -11,40 +11,51 @@ status: "active"
 phase: "post-migration-operations-and-agent-control-plane"
 
 current_gate: >
-  Repository-backed Movie Intelligence read-only v0.1 is component-tested.
-  Verify actual SQLite schema compatibility and separately authorize live
-  read acceptance before enabling any write/request action.
+  Repository-backed Movie Intelligence read-only v0.1 is merged and
+  component-tested. Its current SQLite adapter supports a single-table schema,
+  while the verified live Movie Intelligence database is normalized across
+  movies, external_ids and user_movies. Add a fixed normalized-schema adapter
+  before separately authorizing live read acceptance.
 
 current_state: >
-  Issue 9 implementation now provides tools/movie-intelligence with a
-  source-separated get_movie_status contract, read-only SQLite and GET-only
-  Radarr adapters, configurable schema mapping and deterministic local tests.
-  This repository implementation is component-tested, not deployed or
-  live-accepted. No homelab access or changes were performed for this milestone.
-  The notebook-to-desktop migration is formally closed by owner acceptance.
-  The desktop homelab is the production platform; remaining hardlink, rollback
-  disk, image-pinning, backup and monitoring items are post-migration follow-up,
-  not closure blockers. Movie Intelligence is operational on the homelab with
-  SQLite media.db in WAL mode and a verified state of 682 unique movies:
-  556 watched/rated, 126 watchlist and 0 overlap. The one-time private ČSFD
-  watchlist bootstrap is complete. Public ČSFD ratings sync is verified and a
-  systemd oneshot service plus persistent twice-monthly timer were enabled for
-  the 1st and 15th at 04:15 in the host systemd timezone. A local read-only
-  lookup_movie.mjs tool is verified against media.db. Credential-safe local
-  Radarr API access is verified, and get_radarr_movie_status.mjs was verified
-  in both negative and positive cases: Heretik was absent from Radarr after
-  removal, while Scarface (1983, TMDb 111, IMDb tt0086250) returned
-  monitored=true, has_file=true and profile "UHD Bluray + WEB". Seerr 3.4.1
-  has since been accepted end-to-end by the media workstream as the human
-  request gateway and is a candidate future controlled write gateway for agents.
-  The first unattended ČSFD timer-triggered run after 2026-09-15 has not yet
-  been rechecked in this workstream and is therefore unknown, not assumed.
+  Issue 9 is implemented and merged through PR 10 at merge commit dd795e3.
+  tools/movie-intelligence now provides a source-separated get_movie_status
+  contract, read-only SQLite and GET-only Radarr adapters, stable-ID identity
+  rules and deterministic local tests; 26 tests passed in the implementation
+  environment. This repository implementation remains component-tested, not
+  deployed or live-accepted. No homelab access or changes were performed for
+  that milestone. Review against the previously verified live DB schema found
+  a deliberate compatibility gap: sqlite.mjs currently supports one table plus
+  identifier mapping, but the real DB stores core movie fields in movies,
+  personal state in user_movies and IDs in external_ids. Identifier mapping
+  alone therefore cannot represent the live schema. GitHub Issue 11 now tracks
+  a fixed normalized read adapter and exact-schema tests; live access remains
+  out of scope until that code is merged. The notebook-to-desktop migration is
+  formally closed by owner acceptance. The desktop homelab is the production
+  platform; remaining hardlink, rollback disk, image-pinning, backup and
+  monitoring items are post-migration follow-up, not closure blockers. Movie
+  Intelligence is operational on the homelab with SQLite media.db in WAL mode
+  and a verified state of 682 unique movies: 556 watched/rated, 126 watchlist
+  and 0 overlap. The one-time private ČSFD watchlist bootstrap is complete.
+  Public ČSFD ratings sync is verified and a systemd oneshot service plus
+  persistent twice-monthly timer were enabled for the 1st and 15th at 04:15 in
+  the host systemd timezone. A local read-only lookup_movie.mjs tool is verified
+  against media.db. Credential-safe local Radarr API access is verified, and
+  get_radarr_movie_status.mjs was verified in both negative and positive cases:
+  Heretik was absent from Radarr after removal, while Scarface (1983, TMDb 111,
+  IMDb tt0086250) returned monitored=true, has_file=true and profile
+  "UHD Bluray + WEB". Seerr 3.4.1 has since been accepted end-to-end by the
+  media workstream as the human request gateway and is a candidate future
+  controlled write gateway for agents. The first unattended ČSFD timer-triggered
+  run after 2026-09-15 has not yet been rechecked in this workstream and is
+  therefore unknown, not assumed.
 
 exact_next_action: >
-  Review the actual SQLite schema against the documented identifier mapping.
-  Separately authorize deployment and live read-only Heretik/Scarface checks;
-  record sanitized evidence before designing a controlled Seerr request action.
-  No deployment, live access or mutation is part of the Issue 9 implementation.
+  Have Codex implement GitHub Issue 11: add a fixed read-only adapter for the
+  normalized movies + external_ids + user_movies schema, wire an explicit
+  schema mode, and test it against an exact disposable-schema fixture without
+  contacting the homelab. After merge, separately authorize live read-only
+  deployment/acceptance for Heretik and Scarface and capture sanitized evidence.
 
 blockers: []
 
@@ -65,10 +76,16 @@ dependencies:
       Before any agent write action, entity matching must prefer stable external
       IDs such as TMDb and must return ambiguous/unresolved instead of silently
       pairing title-only matches.
+  - component: "Normalized SQLite adapter"
+    dependency: >
+      PR 10's single-table adapter cannot model the verified normalized live
+      schema; Issue 11 must add a fixed reviewed multi-table read path before
+      live acceptance.
 
 important_open_loops:
+  - "Implement and merge Issue 11 normalized Movie Intelligence SQLite adapter."
+  - "After Issue 11, separately authorize live read-only Heretik/Scarface acceptance and record sanitized evidence."
   - "Verify the first unattended timer-triggered ČSFD sync after 2026-09-15 and confirm journal logging."
-  - "Repository get_movie_status is component-tested; actual schema compatibility and live read acceptance remain pending."
   - "After read-contract acceptance, design a narrow Seerr request wrapper for 'request/download this movie' rather than unrestricted direct ARR mutation."
   - "Keep the local Movie Intelligence DB as the durable internal personal-state layer while the media workstream designs Plex/Trakt watched-history responsibilities."
   - "Use SQLite-aware backup semantics for online backups; avoid naive copy while WAL writes may be active."
@@ -87,16 +104,18 @@ portfolio:
   milestone: true
   signal: >
     The project has moved beyond migration into an agent-control-plane phase:
-    a source-agnostic Movie Intelligence database, scheduled ČSFD ingestion and
-    credential-safe read-only Radarr visibility are verified. Seerr is also
-    accepted by the sibling media workstream as a human request gateway,
-    creating a practical path from Observe to safe, narrow Act capabilities
-    without exposing unrestricted shell, SQL or ARR mutation.
+    a repository-backed read contract, source-agnostic Movie Intelligence
+    database, scheduled ČSFD ingestion and credential-safe Radarr visibility are
+    in place. Schema review caught the live normalized-database mismatch before
+    deployment, preserving the read-only safety boundary and creating a clean
+    path to a fixed adapter, live acceptance and then controlled Seerr actions.
 
 verification:
   last_verified: "2026-09-26"
   sources:
-    - "2026-09-26 local Node.js fixture tests: SQLite read-only/WAL, Radarr GET/redirect/timeout/error handling, Heretik/Scarface and identity conflicts passed; no live homelab access."
+    - "PR 10 merged at dd795e3: Movie Intelligence read-only control plane v0.1; 26 implementation tests reported passed; no live homelab access."
+    - "2026-09-26 repository review: sqlite.mjs supports a single table + identifier mapping, while the previously verified live DB schema uses movies, external_ids and user_movies tables."
+    - "GitHub Issue 11 opened to add a fixed normalized-schema adapter and exact disposable-schema tests before live acceptance."
     - "Owner acceptance in specialist chat 2026-09-09: migration formally closed."
     - "Specialist-chat command output 2026-09-06: media.db = 682 total / 556 watched / 126 watchlist / 0 overlap."
     - "Specialist-chat command output 2026-09-13: ČSFD systemd service run = 556 seen / 0 added / 556 existing rows processed."
