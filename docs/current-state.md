@@ -1,12 +1,21 @@
 # Current State
 
-## Infrastructure implementation checkpoint — 2026-09-26
+## Live read acceptance — 2026-09-26 (Issue #13)
 
-**Issue #11 component-tested:** explicit normalized SQLite mode supports the supplied `movies`, `user_movies`, `external_ids` schema, `my_rating`, and ČSFD/TMDb/IMDb namespace pivoting. All 26 existing tests plus 11 normalized-schema tests pass locally. No homelab contact, schema migration or deployment occurred. Live Heretik/Scarface read acceptance and a convenient ČSFD timer-journal check remain separately authorized follow-up.
+**Verified / live-accepted:** the clean existing tool checkout matched main/PR #12 commit `0382d1c6fc52336cd621d823a577cb67c9a6d88b`. The reviewed three-table schema was confirmed and `MOVIE_DB_SCHEMA_MODE=normalized` was explicitly selected. Both CLI reads exited 0 using official `node:24-bookworm-slim`, runtime v24.21.0, in transient `docker run --rm` containers.
 
-**Component-tested:** [Movie Intelligence read-only control plane v0.1](../tools/movie-intelligence/README.md) implements repository-backed `get_movie_status`, a read-only SQLite adapter and a GET-only Radarr adapter. Local deterministic tests cover Heretik/Scarface, title/remake ambiguity, external-ID conflicts, partial failures, credential-safe errors and read-only behavior. The live schema is not assumed; identifier mapping is configurable.
+| Live query | Movie Intelligence | Radarr | Result |
+|---|---|---|---|
+| Heretik (2024) | 1 candidate; ČSFD 1419147, TMDb/IMDb null | 0 candidates | `single_source_only`, `title_candidate_in_one_source` |
+| TMDb 111 | 0 candidates for this ID | Scarface (1983), IMDb tt0086250; monitored=true, has_file=true; profile 9 UHD Bluray + WEB; released | `single_source_only`, `stable_id_in_one_source` |
 
-**Not live-verified:** This implementation was not deployed, did not contact the homelab and did not change Docker/Compose or service settings. Schema compatibility and real read acceptance remain the next gate. Existing specialist-reported prototype evidence remains distinct from this repository implementation. Seerr/ARR writes are out of scope; the next action after live read acceptance is a separate controlled Seerr wrapper task.
+**Identity boundary:** no live confirmed cross-source match was claimed. Zero Movie Intelligence candidates for TMDb 111 does not prove that a differently titled/identified record is absent. No IDs were invented or written; broader identity enrichment remains separate.
+
+**ČSFD timer verified:** active/waiting, last trigger 2026-09-15 04:15:02 UTC. The matching service ran until 04:15:31 UTC, Result=success and ExecMainStatus=0; journal lifecycle records confirm successful completion. Next trigger observed: 2026-10-01 04:15:00 UTC. This verifies scheduled execution success, not a fresh audit of every imported rating.
+
+**Safety evidence:** code and the DB directory were bind-mounted read-only; container root filesystem was read-only, extensions remained disabled, and the repository's GET-only Radarr adapter was used. DB, WAL and SHM hashes were identical before/after the CLI runs. Persistent container IDs were unchanged; host Node remained v22.22.1. No package upgrade, persistent service, schema migration, or Radarr/Seerr write/search/request action was performed. Credentials passed only through process memory/stdin; no credential files or raw personal output were committed.
+
+**Next exact action:** separately design/implement a narrow controlled Seerr request wrapper with identity, policy and audit boundaries. Do not start that implementation as part of Issue #13.
 
 ## Media checkpoint — 2026-09-25
 
