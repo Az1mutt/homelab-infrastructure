@@ -11,11 +11,16 @@ status: "active"
 phase: "post-migration-operations-and-agent-control-plane"
 
 current_gate: >
-  Turn the verified Movie Intelligence and Radarr read foundations into one
-  repository-backed, testable agent-facing read contract with stable movie
-  identity before enabling any write/request action.
+  Repository-backed Movie Intelligence read-only v0.1 is component-tested.
+  Verify actual SQLite schema compatibility and separately authorize live
+  read acceptance before enabling any write/request action.
 
 current_state: >
+  Issue 9 implementation now provides tools/movie-intelligence with a
+  source-separated get_movie_status contract, read-only SQLite and GET-only
+  Radarr adapters, configurable schema mapping and deterministic local tests.
+  This repository implementation is component-tested, not deployed or
+  live-accepted. No homelab access or changes were performed for this milestone.
   The notebook-to-desktop migration is formally closed by owner acceptance.
   The desktop homelab is the production platform; remaining hardlink, rollback
   disk, image-pinning, backup and monitoring items are post-migration follow-up,
@@ -36,13 +41,10 @@ current_state: >
   been rechecked in this workstream and is therefore unknown, not assumed.
 
 exact_next_action: >
-  Have Codex implement a public-safe, repository-backed Movie Intelligence
-  read-only control-plane v0.1: combine media.db and Radarr state into one
-  structured get_movie_status contract, add stable identity resolution that
-  prefers TMDb/external IDs over title matching, include fixture-based tests,
-  and keep all mutation capabilities out of scope. After review/merge, deploy
-  the tool to the homelab and verify it against real movies before designing a
-  controlled Seerr request action.
+  Review the actual SQLite schema against the documented identifier mapping.
+  Separately authorize deployment and live read-only Heretik/Scarface checks;
+  record sanitized evidence before designing a controlled Seerr request action.
+  No deployment, live access or mutation is part of the Issue 9 implementation.
 
 blockers: []
 
@@ -66,7 +68,7 @@ dependencies:
 
 important_open_loops:
   - "Verify the first unattended timer-triggered ČSFD sync after 2026-09-15 and confirm journal logging."
-  - "Implement repository-backed get_movie_status with source-separated results and stable identity resolution."
+  - "Repository get_movie_status is component-tested; actual schema compatibility and live read acceptance remain pending."
   - "After read-contract acceptance, design a narrow Seerr request wrapper for 'request/download this movie' rather than unrestricted direct ARR mutation."
   - "Keep the local Movie Intelligence DB as the durable internal personal-state layer while the media workstream designs Plex/Trakt watched-history responsibilities."
   - "Use SQLite-aware backup semantics for online backups; avoid naive copy while WAL writes may be active."
@@ -94,6 +96,7 @@ portfolio:
 verification:
   last_verified: "2026-09-26"
   sources:
+    - "2026-09-26 local Node.js fixture tests: SQLite read-only/WAL, Radarr GET/redirect/timeout/error handling, Heretik/Scarface and identity conflicts passed; no live homelab access."
     - "Owner acceptance in specialist chat 2026-09-09: migration formally closed."
     - "Specialist-chat command output 2026-09-06: media.db = 682 total / 556 watched / 126 watchlist / 0 overlap."
     - "Specialist-chat command output 2026-09-13: ČSFD systemd service run = 556 seen / 0 added / 556 existing rows processed."

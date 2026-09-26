@@ -1,0 +1,12 @@
+{
+  "movie_intelligence": [
+    { "id": 1, "title": "Heretik", "original_title": "Heretic", "year": 2024, "watched": 1, "watchlist": 0, "personal_rating": 4, "watched_at": "2025-01-01", "rated_at": "2025-01-02", "csfd_id": 900001 },
+    { "id": 2, "title": "Zjizvená tvář", "original_title": "Scarface", "year": 1983, "tmdb_id": 111, "imdb_id": "tt0086250", "watched": 0, "watchlist": 1 },
+    { "id": 3, "title": "Scarface", "year": 1932, "tmdb_id": 877, "imdb_id": "tt0023427", "watched": 0, "watchlist": 1 }
+  ],
+  "radarr": [
+    { "id": 10, "title": "Scarface", "originalTitle": "Scarface", "year": 1983, "tmdbId": 111, "imdbId": "tt0086250", "monitored": true, "hasFile": true, "qualityProfileId": 9, "status": "released" },
+    { "id": 11, "title": "Radarr Only Fixture", "year": 2000, "tmdbId": 900002, "monitored": false, "hasFile": false, "qualityProfileId": 9, "status": "released" }
+  ],
+  "profiles": [{ "id": 9, "name": "UHD Bluray + WEB" }]
+}
