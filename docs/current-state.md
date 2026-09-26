@@ -2,6 +2,8 @@
 
 ## Infrastructure implementation checkpoint — 2026-09-26
 
+**Issue #11 component-tested:** explicit normalized SQLite mode supports the supplied `movies`, `user_movies`, `external_ids` schema, `my_rating`, and ČSFD/TMDb/IMDb namespace pivoting. All 26 existing tests plus 11 normalized-schema tests pass locally. No homelab contact, schema migration or deployment occurred. Live Heretik/Scarface read acceptance and a convenient ČSFD timer-journal check remain separately authorized follow-up.
+
 **Component-tested:** [Movie Intelligence read-only control plane v0.1](../tools/movie-intelligence/README.md) implements repository-backed `get_movie_status`, a read-only SQLite adapter and a GET-only Radarr adapter. Local deterministic tests cover Heretik/Scarface, title/remake ambiguity, external-ID conflicts, partial failures, credential-safe errors and read-only behavior. The live schema is not assumed; identifier mapping is configurable.
 
 **Not live-verified:** This implementation was not deployed, did not contact the homelab and did not change Docker/Compose or service settings. Schema compatibility and real read acceptance remain the next gate. Existing specialist-reported prototype evidence remains distinct from this repository implementation. Seerr/ARR writes are out of scope; the next action after live read acceptance is a separate controlled Seerr wrapper task.

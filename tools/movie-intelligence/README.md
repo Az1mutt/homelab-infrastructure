@@ -20,6 +20,7 @@ Fixture mode ignores environment settings and never opens a database or makes ne
 | Environment variable | Purpose |
 |---|---|
 | `MOVIE_DB_PATH` | Existing SQLite file; no default host path and no file creation |
+| `MOVIE_DB_SCHEMA_MODE` | `single-table` (backward-compatible default) or `normalized` (Issue #11 schema); never auto-detected |
 | `MOVIE_DB_MAPPING_PATH` | Optional private JSON mapping described below |
 | `RADARR_BASE_URL` | Radarr origin plus optional URL base, without `/api/v3`, credentials, query or fragment |
 | `RADARR_API_KEY` | Secret supplied privately in the environment; never a CLI argument or committed file |
@@ -28,9 +29,30 @@ Once configured privately, `node cli.mjs --tmdb-id 111` reads both sources. Opti
 
 The module exports `get_movie_status(query, { movieIntelligence, radarr })`. Adapters are functions returning normalized record arrays (or promises), not URLs, SQL or shell commands. Production callers should use `readMovieIntelligence` and `readRadarr`. Built-in adapters validate fields and only expose allowlisted data. Exceptions are replaced by fixed source error codes, never upstream bodies, paths or stack traces.
 
-## SQLite schema boundary
+## Normalized SQLite schema (Issue #11)
 
-The live schema/prototypes were **not accessed or assumed**. Default supported table: `movies`. Required columns: positive integer `id`, nonempty text `title`. Optional columns: `original_title`, `year`, `tmdb_id`, `imdb_id`, `csfd_id`, `watched`, `watchlist`, `personal_rating`, `watched_at`, `rated_at`. Missing optional columns become `null`; unknown is never converted to false. Boolean values must be SQLite 0/1; ratings remain in the source scale; date strings are preserved, not guessed/reformatted. IDs are positive integers (IMDb uses `tt` plus digits). Invalid values fail the source rather than silently corrupt identity.
+**Component-tested only:** `MOVIE_DB_SCHEMA_MODE=normalized` selects a fixed read adapter for the previously verified schema supplied in Issue #11. No homelab access, deployment, migration or schema change was performed. It reads `movies LEFT JOIN user_movies LEFT JOIN external_ids` in one statement, giving one consistent SQLite snapshot. It does not read `sync_runs`.
+
+- `movies`: `id`, `title`, `original_title`, `year` supply movie identity.
+- `user_movies`: `watched`/`watchlist` must be 0/1, `my_rating` becomes `personal_rating`, and `watched_at` is preserved. No user row produces null personal-state fields; actual default 0/0 remains false/false.
+- `rated_at` stays null. Neither `watched_at`, `updated_at` nor `watchlist_added_at` is invented as a separate rating date. Bootstrap watchlist timestamps are not exposed as source-original dates.
+- `external_ids`: exact lowercase `source` values `csfd`, `tmdb`, `imdb` pivot into contract IDs. Missing namespaces remain null. TMDb/ČSFD TEXT values must convert to positive safe integers; IMDb must be a valid `tt` identifier. Empty/malformed supported IDs fail the entire source with a fixed error. Unknown namespaces are ignored; no ID is inferred from URLs.
+- Duplicate supported namespaces fail closed. Canonical IDs cannot belong to different movies, even if distinct TEXT values such as `111` and `0111` bypass the database's raw-text uniqueness. Cross-source conflicts still use the unchanged resolver.
+
+The exact three-table fixture DDL is [normalized-schema.sql](fixtures/normalized-schema.sql), with the supplied keys, uniqueness and foreign keys. It is test setup, **not a deployment migration**. Only synthetic rows are inserted in disposable tests. The adapter retains read-only/defensive opening, disabled extensions, WAL visibility and the 100,000-movie limit; it also rejects more than 400,000 joined rows without truncating results. Identifier mapping is incompatible with normalized mode and is rejected; an unknown mode also fails explicitly.
+
+Later authorized read command (POSIX shell, after privately setting `MOVIE_DB_PATH`, `RADARR_BASE_URL`, `RADARR_API_KEY` and unsetting `MOVIE_DB_MAPPING_PATH`):
+
+```sh
+MOVIE_DB_SCHEMA_MODE=normalized node cli.mjs --title Heretik --year 2024
+MOVIE_DB_SCHEMA_MODE=normalized node cli.mjs --tmdb-id 111
+```
+
+These commands have **not** been run against the homelab. Module callers pass `schemaMode: 'normalized'` to `readMovieIntelligence`, or use the fixed `readNormalizedMovieIntelligence` export. There is no caller SQL argument.
+
+## Single-table SQLite schema boundary
+
+The original portable adapter remains available with `MOVIE_DB_SCHEMA_MODE=single-table` (default). Default supported table: `movies`. Required columns: positive integer `id`, nonempty text `title`. Optional columns: `original_title`, `year`, `tmdb_id`, `imdb_id`, `csfd_id`, `watched`, `watchlist`, `personal_rating`, `watched_at`, `rated_at`. Missing optional columns become `null`; unknown is never converted to false. Boolean values must be SQLite 0/1; ratings remain in the source scale; date strings are preserved, not guessed/reformatted. IDs are positive integers (IMDb uses `tt` plus digits). Invalid values fail the source rather than silently corrupt identity. Do not use this mode for the normalized live schema: select normalized mode explicitly.
 
 For a different single-table schema, supply a JSON identifier mapping, for example:
 
@@ -54,7 +76,7 @@ For a different single-table schema, supply a JSON identifier mapping, for examp
 }
 ```
 
-With an explicit mapping, omit or set `null` for unavailable optional fields; named but absent columns are an error. Only simple identifiers are accepted. No SQL configuration, SQL endpoint or migrations exist. A normalized multi-table live schema would require a separately reviewed fixed read adapter; do not change production schema just to fit this tool.
+With an explicit mapping, omit or set `null` for unavailable optional fields; named but absent columns are an error. Only simple identifiers are accepted. No SQL configuration, SQL endpoint or migrations exist. The Issue #11 normalized schema uses the fixed adapter above, not identifier mapping; do not change production schema to fit this tool.
 
 SQLite opens with `readOnly: true`, defensive mode, extensions disabled and a 3-second busy timeout. No journal-mode changes or `immutable` shortcut; committed WAL data remains visible. WAL readers can use/create coordination sidecars depending on SQLite/filesystem state, so this is no database mutation, not a claim of zero filesystem side effects. For literal no-write filesystem acceptance, use an appropriate read-only snapshot/mount. Never naively copy a live WAL database: use the established SQLite-aware backup workflow. The runtime does not create backups or change permissions.
 
@@ -93,9 +115,9 @@ Only GET `/api/v3/movie` and `/api/v3/qualityprofile` are implemented. Authentic
 
 ## Later live acceptance (not performed by this change)
 
-1. Review this branch/PR and the schema mapping against a sanitized schema description; do not export personal rows or keys to Git.
+1. Review the Issue #11 schema contract and choose normalized mode; do not export personal rows or keys to Git.
 2. With separate deployment authorization, place the tool on the intended host/runtime and configure secrets privately. No service installation is required.
-3. Run Heretik by known identity/title and Scarface by TMDb 111; compare source-separated results with the existing prototypes. Confirm schema semantics, null handling, profile and file flags.
+3. Run Heretik by known identity/title and Scarface by TMDb 111; compare source-separated results with the existing prototypes. Confirm schema semantics, null handling, profile and file flags. Check the ČSFD timer journal where convenient under that separate live authorization.
 4. Confirm no writes, grabs, request actions or configuration changes occurred. Store only sanitized evidence and mark live acceptance separately.
 5. After live read acceptance, open a separate narrow **Seerr request wrapper** task. Direct unrestricted ARR mutation remains excluded.
 

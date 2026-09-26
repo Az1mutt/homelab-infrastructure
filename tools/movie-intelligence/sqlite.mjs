@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { resolve } from 'node:path';
 import { intelligenceRecord } from './model.mjs';
+import { readNormalizedMovieIntelligence } from './sqlite-normalized.mjs';
 
 export const defaultMapping = Object.freeze({
   table: 'movies',
@@ -16,9 +17,14 @@ function identifier(name) {
 }
 
 // Returns data only: callers never receive a database handle or SQL interface.
-export function readMovieIntelligence({ dbPath, mapping = defaultMapping } = {}) {
+export function readMovieIntelligence({ dbPath, mapping = defaultMapping, schemaMode = 'single-table' } = {}) {
   let db;
   try {
+    if (schemaMode === 'normalized') {
+      if (mapping !== defaultMapping) throw new Error('incompatible_mapping');
+      return readNormalizedMovieIntelligence({ dbPath });
+    }
+    if (schemaMode !== 'single-table') throw new Error('invalid_schema_mode');
     if (typeof dbPath !== 'string' || !dbPath || dbPath === ':memory:') throw new Error('invalid_path');
     const table = identifier(mapping.table);
     const columns = mapping.columns;

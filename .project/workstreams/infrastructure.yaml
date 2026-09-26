@@ -11,26 +11,25 @@ status: "active"
 phase: "post-migration-operations-and-agent-control-plane"
 
 current_gate: >
-  Repository-backed Movie Intelligence read-only v0.1 is merged and
-  component-tested. Its current SQLite adapter supports a single-table schema,
-  while the verified live Movie Intelligence database is normalized across
-  movies, external_ids and user_movies. Add a fixed normalized-schema adapter
-  before separately authorizing live read acceptance.
+  Repository-backed Movie Intelligence read-only v0.1 and the fixed normalized
+  SQLite adapter are component-tested. Separately authorize live read-only
+  acceptance using normalized mode; no implementation test establishes live acceptance.
 
 current_state: >
+  Issue 11 adds explicit normalized SQLite mode for movies, user_movies and
+  external_ids, mapping my_rating and validating csfd/tmdb/imdb identifiers.
+  All 26 original tests plus 11 normalized-schema tests pass locally. The
+  supplied schema contract was used without homelab contact or deployment.
   Issue 9 is implemented and merged through PR 10 at merge commit dd795e3.
   tools/movie-intelligence now provides a source-separated get_movie_status
   contract, read-only SQLite and GET-only Radarr adapters, stable-ID identity
   rules and deterministic local tests; 26 tests passed in the implementation
   environment. This repository implementation remains component-tested, not
   deployed or live-accepted. No homelab access or changes were performed for
-  that milestone. Review against the previously verified live DB schema found
-  a deliberate compatibility gap: sqlite.mjs currently supports one table plus
-  identifier mapping, but the real DB stores core movie fields in movies,
-  personal state in user_movies and IDs in external_ids. Identifier mapping
-  alone therefore cannot represent the live schema. GitHub Issue 11 now tracks
-  a fixed normalized read adapter and exact-schema tests; live access remains
-  out of scope until that code is merged. The notebook-to-desktop migration is
+  that milestone. The previously identified single-table compatibility gap is
+  addressed by Issue 11's explicit fixed normalized adapter and exact-schema
+  fixture tests. Live access remains outside this implementation scope.
+  The notebook-to-desktop migration is
   formally closed by owner acceptance. The desktop homelab is the production
   platform; remaining hardlink, rollback disk, image-pinning, backup and
   monitoring items are post-migration follow-up, not closure blockers. Movie
@@ -51,11 +50,10 @@ current_state: >
   therefore unknown, not assumed.
 
 exact_next_action: >
-  Have Codex implement GitHub Issue 11: add a fixed read-only adapter for the
-  normalized movies + external_ids + user_movies schema, wire an explicit
-  schema mode, and test it against an exact disposable-schema fixture without
-  contacting the homelab. After merge, separately authorize live read-only
-  deployment/acceptance for Heretik and Scarface and capture sanitized evidence.
+  Select normalized mode for separately authorized live read acceptance of
+  Heretik and Scarface; inspect the CSFD timer journal where convenient.
+  Capture sanitized evidence before considering a separate controlled Seerr
+  request wrapper. Do not infer deployment or live acceptance from local tests.
 
 blockers: []
 
@@ -78,12 +76,10 @@ dependencies:
       pairing title-only matches.
   - component: "Normalized SQLite adapter"
     dependency: >
-      PR 10's single-table adapter cannot model the verified normalized live
-      schema; Issue 11 must add a fixed reviewed multi-table read path before
-      live acceptance.
+      Issue 11 provides a fixed component-tested multi-table read path;
+      deployment must select normalized mode explicitly before live acceptance.
 
 important_open_loops:
-  - "Implement and merge Issue 11 normalized Movie Intelligence SQLite adapter."
   - "After Issue 11, separately authorize live read-only Heretik/Scarface acceptance and record sanitized evidence."
   - "Verify the first unattended timer-triggered ČSFD sync after 2026-09-15 and confirm journal logging."
   - "After read-contract acceptance, design a narrow Seerr request wrapper for 'request/download this movie' rather than unrestricted direct ARR mutation."
@@ -113,6 +109,7 @@ portfolio:
 verification:
   last_verified: "2026-09-26"
   sources:
+    - "2026-09-26 Issue 11 implementation: all 37 local tests passed (26 original plus 11 exact normalized-schema tests); no homelab contact or writes."
     - "PR 10 merged at dd795e3: Movie Intelligence read-only control plane v0.1; 26 implementation tests reported passed; no live homelab access."
     - "2026-09-26 repository review: sqlite.mjs supports a single table + identifier mapping, while the previously verified live DB schema uses movies, external_ids and user_movies tables."
     - "GitHub Issue 11 opened to add a fixed normalized-schema adapter and exact disposable-schema tests before live acceptance."
