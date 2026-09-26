@@ -4,67 +4,103 @@ state_scope: "workstream"
 
 project:
   name: "Homelab & Media Stack"
-  workstream: "Infrastructure, Migration & GitHub"
+  workstream: "Infrastructure & Agent Control Plane"
   owner: "Homelab Infrastructure specialist chat"
 
 status: "active"
-phase: "post-migration-stabilization"
+phase: "post-migration-operations-and-agent-control-plane"
 
 current_gate: >
-  Complete the remaining media-application acceptance checks on the desktop
-  so the migration can be formally closed and the old rollback source disk
-  can be retired safely.
+  Turn the verified Movie Intelligence and Radarr read foundations into one
+  repository-backed, testable agent-facing read contract with stable movie
+  identity before enabling any write/request action.
 
 current_state: >
-  The dedicated Ubuntu Server desktop is operational and now hosts the media
-  stack. The 18 TB Toshiba data disk is formatted as ext4 and persistently
-  mounted at /data. Plex, Radarr, Sonarr, Prowlarr, qBittorrent and SABnzbd
-  are running on the desktop. Migration data and the recovery archive were
-  validated, a real Radarr post-migration download/import completed
-  successfully, and 26 NTFS-era duplicate media/torrent sets were converted
-  to hardlinks, reclaiming approximately 711.6 GiB. The old external source
-  disk remains attached read-only as rollback media. A temporary Compose
-  override pins known-good application versions until migration closure.
+  The notebook-to-desktop migration is formally closed by owner acceptance.
+  The desktop homelab is the production platform; remaining hardlink, rollback
+  disk, image-pinning, backup and monitoring items are post-migration follow-up,
+  not closure blockers. Movie Intelligence is operational on the homelab with
+  SQLite media.db in WAL mode and a verified state of 682 unique movies:
+  556 watched/rated, 126 watchlist and 0 overlap. The one-time private ČSFD
+  watchlist bootstrap is complete. Public ČSFD ratings sync is verified and a
+  systemd oneshot service plus persistent twice-monthly timer were enabled for
+  the 1st and 15th at 04:15 in the host systemd timezone. A local read-only
+  lookup_movie.mjs tool is verified against media.db. Credential-safe local
+  Radarr API access is verified, and get_radarr_movie_status.mjs was verified
+  in both negative and positive cases: Heretik was absent from Radarr after
+  removal, while Scarface (1983, TMDb 111, IMDb tt0086250) returned
+  monitored=true, has_file=true and profile "UHD Bluray + WEB". Seerr 3.4.1
+  has since been accepted end-to-end by the media workstream as the human
+  request gateway and is a candidate future controlled write gateway for agents.
+  The first unattended ČSFD timer-triggered run after 2026-09-15 has not yet
+  been rechecked in this workstream and is therefore unknown, not assumed.
 
 exact_next_action: >
-  Receive the media-workstream completion handoff after application-level
-  validation, including confirmation of new ARR torrent hardlinks on ext4
-  and Kometa revalidation, then decide whether the old rollback source disk
-  can be retired.
+  Have Codex implement a public-safe, repository-backed Movie Intelligence
+  read-only control-plane v0.1: combine media.db and Radarr state into one
+  structured get_movie_status contract, add stable identity resolution that
+  prefers TMDb/external IDs over title matching, include fixture-based tests,
+  and keep all mutation capabilities out of scope. After review/merge, deploy
+  the tool to the homelab and verify it against real movies before designing a
+  controlled Seerr request action.
 
-blockers:
-  - "Formal infrastructure migration closure depends on completion of the remaining media-workstream acceptance checks."
+blockers: []
 
 dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Plex, Kometa & Media Automation"
     dependency: >
-      Complete application-level validation on the desktop, confirm new ARR
-      torrent imports create real hardlinks on ext4, and revalidate Kometa.
+      Media Automation owns Plex UX, Bazarr/subtitle policy, watched/history
+      design, My Cinema, Trakt/PlexTraktSync, Kometa behavior and Seerr
+      deployment/media policy. Seerr is accepted end-to-end and may later be
+      wrapped by this workstream as a controlled request gateway.
+  - component: "Movie Intelligence"
+    dependency: >
+      SQLite media.db, ČSFD ingestion, scheduled sync, lookup_movie.mjs and the
+      verified read-only Radarr wrapper provide the current live foundation.
+  - component: "Stable movie identity"
+    dependency: >
+      Before any agent write action, entity matching must prefer stable external
+      IDs such as TMDb and must return ambiguous/unresolved instead of silently
+      pairing title-only matches.
 
 important_open_loops:
-  - "Retire or unmount the old rollback source disk after final acceptance."
-  - "Choose a permanent container image pin/update policy."
-  - "Remove or replace the temporary migration-version override."
-  - "Remove the obsolete Compose version field after closure."
-  - "Extract appropriate secrets into local-only configuration and publish safe examples only."
-  - "Harden backup/restore procedures, retention, and restore drills."
-  - "Add monitoring/dashboarding only after migration closure."
+  - "Verify the first unattended timer-triggered ČSFD sync after 2026-09-15 and confirm journal logging."
+  - "Implement repository-backed get_movie_status with source-separated results and stable identity resolution."
+  - "After read-contract acceptance, design a narrow Seerr request wrapper for 'request/download this movie' rather than unrestricted direct ARR mutation."
+  - "Keep the local Movie Intelligence DB as the durable internal personal-state layer while the media workstream designs Plex/Trakt watched-history responsibilities."
+  - "Use SQLite-aware backup semantics for online backups; avoid naive copy while WAL writes may be active."
+  - "Keep private ČSFD exports, API keys and live credentials out of the public repository."
+  - "Future TV/series ingestion should use a separate SerialZone path and later Sonarr/Seerr integration."
+  - "Retire/unmount the old rollback source disk when convenient."
+  - "Replace/remove any temporary migration-version override and finalize permanent image pin/update policy."
+  - "Continue backup/restore hardening and infrastructure monitoring as post-migration operations."
+
+stale_or_unknown:
+  - "First unattended ČSFD timer-triggered run after 2026-09-15 has not been checked in this workstream."
+  - "Current attachment/disposition of the old rollback source disk has not been freshly verified."
+  - "Current temporary migration-version override status has not been freshly verified."
 
 portfolio:
   milestone: true
   signal: >
-    Completed a staged notebook-to-desktop Ubuntu Server migration with
-    rollback preservation, data validation, Docker service reproduction,
-    physical-layer performance troubleshooting, filesystem migration to ext4,
-    and verified hardlink recovery reclaiming approximately 711.6 GiB.
+    The project has moved beyond migration into an agent-control-plane phase:
+    a source-agnostic Movie Intelligence database, scheduled ČSFD ingestion and
+    credential-safe read-only Radarr visibility are verified. Seerr is also
+    accepted by the sibling media workstream as a human request gateway,
+    creating a practical path from Observe to safe, narrow Act capabilities
+    without exposing unrestricted shell, SQL or ARR mutation.
 
 verification:
-  last_verified: "2026-09-01"
+  last_verified: "2026-09-26"
   sources:
-    - "docs/current-state.md"
-    - "docs/roadmap.md"
-    - "docs/migration-milestone-2026-09-01.md"
+    - "Owner acceptance in specialist chat 2026-09-09: migration formally closed."
+    - "Specialist-chat command output 2026-09-06: media.db = 682 total / 556 watched / 126 watchlist / 0 overlap."
+    - "Specialist-chat command output 2026-09-13: ČSFD systemd service run = 556 seen / 0 added / 556 existing rows processed."
+    - "Specialist-chat command output 2026-09-13: systemd timer enabled and active (waiting), then scheduled for 2026-09-15 04:15 UTC."
+    - "Specialist-chat command output 2026-09-13: lookup_movie.mjs returned structured Movie Intelligence state for Heretik."
+    - "Specialist-chat command output 2026-09-13: Radarr wrapper returned count=0 for removed Heretik and count=1 for Scarface with monitored=true / has_file=true."
+    - "Media Automation workstream state on main verified 2026-09-25: Seerr accepted end-to-end through Plex and ARR/Usenet flow."
 
 sync:
   status: "synced"
