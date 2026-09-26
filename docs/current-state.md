@@ -1,5 +1,13 @@
 # Current State
 
+## Controlled Seerr wrapper — 2026-09-26 (Issue #14)
+
+**Component-tested, live write not yet accepted:** [movie-request wrapper](../tools/movie-intelligence/SEERR.md) provides dry-run plans, stable-ID preflight, existing-availability/request/managed no-ops, a single allowlisted movie POST behind explicit execution, identity read-back and sanitized audit events. All 37 existing tests plus 23 wrapper tests pass locally. No real Seerr request was sent.
+
+**Read-only discovery verified:** Seerr 3.4.1 search/movie/request-list and service-default GET semantics were inspected. The existing default standard Radarr service has a valid profile/root; Scarface reports available. No media policy, service/container or database changes occurred. Cross-process execution must be serialized and uncertain audit outcomes retained by the future orchestrator; the wrapper does not claim distributed exactly-once delivery.
+
+**Next:** a separate live acceptance issue must explicitly choose/approve one movie, review its dry-run and verify one request through Seerr → Radarr → acquisition/Plex as appropriate. Live write acceptance was not started here.
+
 ## Live read acceptance — 2026-09-26 (Issue #13)
 
 **Verified / live-accepted:** the clean existing tool checkout matched main/PR #12 commit `0382d1c6fc52336cd621d823a577cb67c9a6d88b`. The reviewed three-table schema was confirmed and `MOVIE_DB_SCHEMA_MODE=normalized` was explicitly selected. Both CLI reads exited 0 using official `node:24-bookworm-slim`, runtime v24.21.0, in transient `docker run --rm` containers.

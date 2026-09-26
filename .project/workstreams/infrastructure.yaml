@@ -11,11 +11,19 @@ status: "active"
 phase: "post-migration-operations-and-agent-control-plane"
 
 current_gate: >
-  Issue 13 live read-only acceptance passed for the normalized Movie Intelligence
-  and Radarr path. Next is a separately scoped controlled Seerr request wrapper;
-  no unrestricted ARR mutation or wrapper implementation is authorized here.
+  Issue 14 controlled Seerr movie-request wrapper is component-tested, with
+  live write not yet accepted. A separate issue must explicitly approve one
+  movie for end-to-end live request acceptance. No real request was sent here.
 
 current_state: >
+  Issue 14 adds dry-run planning, stable TMDb resolution, source-separated
+  preflight, duplicate/available/managed no-ops, one explicit-execution Seerr
+  movie POST and identity read-back with sanitized audit evidence. All 60 local
+  tests pass (37 existing plus 23 new). Read-only Seerr 3.4.1 discovery verified
+  the existing standard default Radarr service and profile/root validity.
+  No real request, media-policy change, service/container change or DB write
+  occurred. Cross-process replay requires orchestrator serialization and
+  retained uncertain-outcome receipts; no exactly-once guarantee is claimed.
   Live acceptance on 2026-09-26 used clean checkout 0382d1c, explicit normalized
   mode and transient official Node v24.21.0. Heretik (2024) returned one
   Movie Intelligence candidate (CSFD 1419147, no TMDb/IMDb) and no Radarr candidate.
@@ -62,9 +70,10 @@ current_state: >
   has now been checked successfully under Issue 13.
 
 exact_next_action: >
-  Design and implement a separately scoped narrow controlled Seerr request
-  wrapper with stable identity, policy checks and audit evidence. Keep direct
-  unrestricted ARR mutation out of scope. Stop Issue 13 after evidence sync.
+  Open a separate live acceptance issue where the owner explicitly chooses
+  one movie and approves one wrapper request after reviewing its dry-run.
+  Verify Seerr to Radarr to acquisition/Plex as appropriate and retain audit
+  evidence. Do not perform that live request in Issue 14.
 
 blockers: []
 
@@ -91,7 +100,7 @@ dependencies:
       Issue 13 using explicit normalized mode and a transient supported runtime.
 
 important_open_loops:
-  - "After read-contract acceptance, design a narrow Seerr request wrapper for 'request/download this movie' rather than unrestricted direct ARR mutation."
+  - "Controlled Seerr wrapper is component-tested; separately approve one movie for live write acceptance and preserve replay/uncertainty audit evidence."
   - "Keep the local Movie Intelligence DB as the durable internal personal-state layer while the media workstream designs Plex/Trakt watched-history responsibilities."
   - "Use SQLite-aware backup semantics for online backups; avoid naive copy while WAL writes may be active."
   - "Keep private ČSFD exports, API keys and live credentials out of the public repository."
@@ -117,6 +126,8 @@ portfolio:
 verification:
   last_verified: "2026-09-26"
   sources:
+    - "Issue 14, 2026-09-26: 60 local tests passed, original 37 unchanged; dry-run, single mock POST, readback, replay, conflicts, redirects, privacy and policy dependency covered."
+    - "Issue 14 read-only discovery: Seerr 3.4.1, admin visibility, working search/movie/request GETs and valid default standard Radarr policy; no live POST or configuration changes."
     - "Issue 13, 2026-09-26: clean 0382d1c checkout, normalized mode, transient Node v24.21.0; Heretik MI 1 / Radarr 0 and TMDb 111 MI 0 / Radarr 1; both exit 0."
     - "Issue 13: DB/WAL/SHM hashes and persistent container IDs unchanged; host Node v22.22.1; no write actions or credentials persisted."
     - "Issue 13: timer last trigger September 15 04:15:02 UTC; service exit 04:15:31 UTC, success/0 and matching journal; timer active, next October 1 04:15 UTC."

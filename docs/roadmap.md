@@ -4,7 +4,8 @@
 
 - **Verified / live-accepted (Issue #13):** normalized Movie Intelligence + Radarr reads on PR #12 commit `0382d1c`, transient Node v24.21.0; system Node v22.22.1 unchanged. Heretik is Movie-Intelligence-only; TMDb 111 returns Radarr-only Scarface with the expected file/profile state. No confirmed cross-source identity was fabricated.
 - **Verified:** unattended ČSFD run on 2026-09-15 completed successfully (exit 0, journal confirmed); timer remains active, next observed trigger 2026-10-01 04:15 UTC.
-- **Next:** a separate narrow controlled Seerr request wrapper with identity/policy/audit checks. No unrestricted direct ARR mutation. No wrapper implementation started in Issue #13.
+- **Component-tested (Issue #14):** [controlled Seerr movie-request wrapper](../tools/movie-intelligence/SEERR.md), dry-run default, stable identity, one allowlisted POST, duplicate/managed no-ops and uncertain-outcome handling; 60 tests pass. No live request was sent.
+- **Next:** a separate live acceptance issue where the owner explicitly approves one movie and one wrapper request; verify the resulting Seerr → Radarr → acquisition/Plex flow. Live write remains unaccepted. No unrestricted direct ARR mutation.
 - Detailed source counts, limitations and safety checks are recorded in [current state](current-state.md#live-read-acceptance--2026-09-26-issue-13).
 
 ## Media checkpoint — 2026-09-25
