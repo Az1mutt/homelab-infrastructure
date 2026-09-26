@@ -2,11 +2,10 @@
 
 ## Infrastructure control plane — 2026-09-26
 
-- **Issue #11 component-tested:** fixed normalized SQLite adapter and exact disposable-schema tests; original 26 tests preserved. Next live read acceptance must explicitly select normalized mode. Include the ČSFD timer-journal check where convenient; deployment/live access remains outside this implementation.
-
-- **Component-tested:** repository-backed [read-only Movie Intelligence v0.1](../tools/movie-intelligence/README.md), including SQLite/Radarr adapters, stable identity handling and offline fixtures.
-- **Next:** separately authorize deployment, select normalized SQLite mode and exercise Heretik/Scarface against live sources; record sanitized read-only acceptance evidence.
-- **After live read acceptance:** a separate controlled Seerr request wrapper, with narrow policy and audit boundaries. No unrestricted ARR mutation, deployment or live changes are part of Issue #9 implementation.
+- **Verified / live-accepted (Issue #13):** normalized Movie Intelligence + Radarr reads on PR #12 commit `0382d1c`, transient Node v24.21.0; system Node v22.22.1 unchanged. Heretik is Movie-Intelligence-only; TMDb 111 returns Radarr-only Scarface with the expected file/profile state. No confirmed cross-source identity was fabricated.
+- **Verified:** unattended ČSFD run on 2026-09-15 completed successfully (exit 0, journal confirmed); timer remains active, next observed trigger 2026-10-01 04:15 UTC.
+- **Next:** a separate narrow controlled Seerr request wrapper with identity/policy/audit checks. No unrestricted direct ARR mutation. No wrapper implementation started in Issue #13.
+- Detailed source counts, limitations and safety checks are recorded in [current state](current-state.md#live-read-acceptance--2026-09-26-issue-13).
 
 ## Media checkpoint — 2026-09-25
 
