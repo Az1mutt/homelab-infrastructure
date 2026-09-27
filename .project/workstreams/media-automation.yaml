@@ -8,131 +8,53 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-design-with-media-followups"
+phase: "watched-history-pilot-preflight"
 
 current_gate: >
-  Seerr end-to-end acceptance is complete through Plex. Keep Bazarr English-default,
-  subtitle-match reliability and fresh hardlink checks as non-blocking follow-up.
-  The next media design gate is the persistent watched/history layer and its
-  responsibility split with Trakt/PlexTraktSync and Movie Intelligence.
+  Complete account-level preflight before any watched-history writes: verify the
+  proposed pilot candidates against Plex cloud history, establish Trakt OAuth/app
+  status, and confirm a safe metadata-only Plex write/rollback path. Medium/full
+  backfill must additionally wait for stable TMDb/IMDb enrichment in media.db.
 
 current_state: >
-  Bazarr 1.6.1 remains healthy with verified Sonarr/Radarr integration,
-  44 series and 34 movie files. OpenSubtitles.com login/search/download works
-  after the user confirmed the account email. Dune candidates at 73% were
-  rejected for missing source/release-group matches. Exactly one Czech subtitle
-  was downloaded for The Game (1997), provider ID 374530, score 90.56%.
-  The BX Blu-ray subtitle matched title/year/source/resolution but not the
-  CtrlHD video release group, hash or codecs. The initial timing failed the
-  user playback check. Independent comparison against embedded English found
-  stable offsets of +14.68/+14.72/+14.72 seconds with scale 1.000. Applied
-  +14.72 seconds only to the new Czech subtitle, preserving all 1196 cues/text
-  and a private original backup; the user confirmed corrected timing.
-  Plex sees the external Czech SRT and the original English track.
-  Account settings now enable automatic track selection, English subtitles
-  and Always enabled. Actual automatic English selection on an item without
-  a manual override remains to be confirmed. The Game remembers the user's
-  manual Czech selection. No Slovak download or equal-quality CZ/SK tie-break
-  was tested. Profiles are unassigned again, defaults and upgrades disabled,
-  and history contains one movie subtitle download and zero episode downloads.
-  No redeployment or unrelated setting changes were made. ARR path drift
-  remains: Sonarr /tv with /download/ mapping, Radarr /movies with /downloads/
-  mapping, both targeting /data/torrents/. No old media was changed to force
-  hardlink validation. Migration stays closed; fresh hardlink sanity check
-  remains non-blocking. On 2026-09-25 the user explicitly chose to leave the
-  remaining Bazarr client/default and unattended-match acceptance open and move
-  on to Seerr. Seerr 3.4.1 is now healthy, LAN-bound and integrated with Plex,
-  Radarr and Sonarr. Movies and TV Shows scans completed. Request 1 for The
-  Sinner season 1 reached existing Sonarr series 25 using profile 7
-  WEB-2160p (Alternative) and /tv. Season 2 remained monitored, 3 and 4
-  unmonitored. At the user's subsequent explicit request, SeasonSearch 92180
-  sent eight reports to SABnzbd through NZBgeek. Download/import is pending.
-  Radarr uses profile 9 UHD Bluray + WEB and /movies. Both services use
-  existing authoritative profiles, with automatic search enabled after the
-  pilot. ARR profile/indexer/client/mapping snapshots are unchanged.
-  Private configuration and database backups retained; no secrets committed.
-  The user subsequently confirmed the Seerr flow completed successfully on the
-  real client through Plex, closing the previously open browser/login and
-  download/import follow-up for The Sinner season 1.
+  Seerr is accepted end-to-end through Plex. Bazarr broad automation and the fresh
+  torrent hardlink check remain non-blocking follow-up. The watched-history/My
+  Cinema design has now reached a read-only pilot preflight. Existing Plex behavior
+  is sufficient for the visual shelf: watched unavailable titles remain browsable
+  with posters on TV. The intended model is media.db as internal canonical state,
+  Plex Watch History as the private visual shelf, and Trakt as portable/shareable
+  cross-source watch history. Read-only discovery found that all 556 currently
+  watched Movie Intelligence rows carry only CSFD IDs; TMDb/IMDb mappings for the
+  pilot are temporary Seerr-verified proposals and are not yet persisted identities
+  in media.db. The current media.db watched_at values originate from CSFD rating
+  dates and must not be treated as proven viewing dates. Proposed legacy items with
+  unknown real watch dates therefore use an explicit synthetic placeholder policy,
+  currently the title release date, with provenance retained privately as
+  legacy_placeholder. Pilot candidates are Smile 2 (2024), The Fifth Element
+  (1997), and Heretic (2024), with Inglourious Basterds (2009) as an unchanged
+  Plex-watched control. Existing Plex server history for the control includes one
+  preserved event; Plex cloud history for all four remains unverified until private
+  account login. Plex officially supports watched marking, watched-date editing and
+  activity removal in the UI, but a safe programmable account-level historical-date
+  write path has not yet been confirmed. Trakt is not yet authenticated/configured
+  for this workflow; planned writes require OAuth and stable IDs. No watched-history
+  mutation, database change, Trakt write, Plex database edit, or GitHub personal-data
+  commit was performed during the preflight.
 
 exact_next_action: >
-  Define the watched/history architecture before implementation: decide the
-  responsibility split between Plex watched state, Trakt/PlexTraktSync and the
-  sibling Movie Intelligence media.db, then prototype the cleanest Plex-visible
-  persistent "My Cinema" shelf for watched titles that may no longer be stored
-  locally. Keep Bazarr and fresh torrent hardlink checks as non-blocking follow-up.
+  Privately sign in to Plex Watch History and Trakt, then perform account-level
+  read-only snapshots for the three proposed pilot candidates plus the unchanged
+  Inglourious Basterds control. Verify whether any candidate already has cloud
+  history and whether a usable Trakt API application already exists. Do not mutate
+  anything yet. After snapshot review, authorize at most one metadata-only pilot
+  write for Smile 2 with an explicitly synthetic legacy_placeholder date and a
+  rollback that removes only the newly created event. Before any medium or full
+  batch, hand stable TMDb/IMDb enrichment of the 556 watched CSFD-only rows to the
+  Infrastructure & Agent Control Plane workstream.
 
-blockers: []
+blockers:
+  - "Plex cloud watch-history state for the pilot candidates/control is not yet verified because private account login is required."
+  - "Trakt OAuth/application status is not yet established."
+  - "A safe programmable Plex account-level historical watched-date write method is not yet confirmed."
 
-dependencies:
-  - project: "Homelab & Media Stack"
-    workstream: "Infrastructure & Agent Control Plane"
-    dependency: >
-      Own Movie Intelligence media.db, ČSFD/SerialZone ingestion, agent tools,
-      API/MCP/control-plane plumbing, stable entity identity, security/audit
-      boundaries and future agent-facing wrappers. This workstream should not
-      duplicate those responsibilities.
-  - component: "Seerr"
-    dependency: >
-      This workstream owns Seerr deployment, request UX and media-policy
-      configuration. The Agent Control Plane may later wrap the Seerr API as a
-      controlled write gateway instead of exposing unrestricted direct ARR
-      mutations.
-  - component: "Watched/history"
-    dependency: >
-      Design Trakt/PlexTraktSync and My Cinema so they complement rather than
-      compete with Movie Intelligence as the durable internal personal-state
-      layer.
-
-important_open_loops:
-  - "Run one fresh real Sonarr/Radarr torrent import after the shared /data + Remote Path Mapping fix and verify matching inode/link count while qBittorrent is still seeding."
-  - "Finish the Plex English-default client check opportunistically; OpenSubtitles download and corrected Czech timing passed, but unattended matching remains unproven and broad Bazarr automation stays paused."
-  - "Tune Bazarr language/provider/scoring rules separately for movies and TV and verify them against real library items."
-  - "Seerr is accepted end-to-end through Plex; future API wrappers remain owned by the sibling control-plane workstream."
-  - "Design Trakt/PlexTraktSync behavior without creating a competing source of truth against Movie Intelligence media.db."
-  - "Prototype My Cinema / persistent watched shelf in Plex so watched titles remain visually browsable after local files are deleted."
-  - "Prefer a clean Plex-native watched/history presentation first; evaluate archive/placeholder techniques only if TV-client behavior is inadequate."
-  - "Iterate Kometa v2 after watched/history behavior is stable; integrate Curator outputs only after data contracts are clear."
-  - "Keep nzb360 premium deferred unless the mobile cockpit proves valuable."
-  - "Coordinate with the Agent Control Plane instead of re-owning Observer/Media Operator implementation in this workstream."
-
-stale_or_unknown:
-  - "Live ARR roots/mapping drift remains unresolved; historical direct hardlink capability does not verify a fresh actual ARR import."
-  - "English default client behavior without a remembered override remains pending and is explicitly non-blocking for Seerr. High subtitle score did not prevent the pilot timing mismatch; no SK download/equal-quality CZ-SK tie-break tested."
-  - "The exact Plex implementation for My Cinema / watched-but-no-longer-local titles is still open and must be validated on the actual TV client."
-  - "Exact Trakt/PlexTraktSync synchronization responsibilities relative to Movie Intelligence media.db remain to be designed."
-  - "Project-level closure/ownership changes are currently represented on draft PR #5; this workstream file is synced on main while the project rollup remains pending that PR merge."
-
-portfolio:
-  milestone: true
-  signal: >
-    Seerr is now verified end-to-end as the human request gateway from discovery
-    through ARR/Usenet acquisition into Plex, without changing authoritative ARR
-    profiles or acquisition policy. The media workstream can move on to durable
-    watched/history presentation while Bazarr and hardlink sanity checks remain
-    explicit non-blocking follow-up.
-
-verification:
-  last_verified: "2026-09-25"
-  sources:
-    - "2026-09-25 user confirmed the real Seerr request flow completed successfully through Plex, closing browser/login and The Sinner download/import follow-up."
-    - "2026-09-25 Seerr 3.4.1 healthy; Plex auth/library scan and both ARR connection tests passed."
-    - "2026-09-25 Seerr request 1 reached Sonarr series 25, season 1 only; user-authorized SeasonSearch 92180 sent 8 reports to SABnzbd via NZBgeek."
-    - "2026-09-25 ARR qualityprofile/downloadclient/indexer/remotepathmapping API snapshots identical before and after Seerr setup."
-    - "2026-09-25 user decision: leave remaining Bazarr acceptance open as non-blocking and proceed to Seerr."
-    - "2026-09-25 OpenSubtitles Good status, 1 Czech movie download (ID 374530, 90.56%), Plex external Czech visibility verified."
-    - "2026-09-25 user confirmed corrected Czech playback after +14.72s shift; 3-section diagnostic +14.68/+14.72/+14.72s, scale 1.000, 1196 cues/text retained."
-    - "2026-09-25 Plex API: autoSelectAudio=true, defaultSubtitleLanguage=en, autoSelectSubtitle=2; client automatic English playback confirmation pending."
-    - "2026-09-25 final safety check: zero assigned profiles, defaults/upgrades disabled; history 1 movie / 0 episode downloads."
-    - "2026-09-25 live Bazarr health, ARR API connectivity, library sync and small-sample embedded subtitle detection verified; provider download/Plex playback acceptance pending."
-    - "2026-09-25 safe checkpoint: 0 assigned profiles, 0 subtitle history records, defaults/upgrades disabled; backups saved privately."
-    - "2026-09-25 live ARR root/mapping drift and Tokyo Vice source/library links=1 observed; no old-media mutation."
-    - "Verified pre-fix House of Usher inode check on 2026-09-13 showing duplicate copies."
-    - "Verified Sonarr/Radarr shared /data Compose change and qBittorrent Remote Path Mapping on 2026-09-13."
-    - "Verified in-container hardlink test on 2026-09-13: inode 256114799, links=2 for both paths."
-    - "Cross-workstream ownership and execution order reconciled with the Infrastructure / Agent Control Plane roadmap on 2026-09-17."
-    - "Bazarr policy clarified on 2026-09-17: English primary/default, CZ/SK release-matched alternates with Czech preferred when both are viable."
-
-sync:
-  status: "synced"
-  storage: ".project/workstreams/media-automation.yaml"
+ dependencies: []
