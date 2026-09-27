@@ -19,25 +19,25 @@ current_gate: >
 current_state: >
   Seerr is accepted end-to-end through Plex. Bazarr broad automation and the fresh
   torrent hardlink check remain non-blocking follow-up. The watched-history/My
-  Cinema design has now reached a read-only pilot preflight. Existing Plex behavior
-  is sufficient for the visual shelf: watched unavailable titles remain browsable
+  Cinema design has reached a read-only pilot preflight. Existing Plex behavior is
+  sufficient for the visual shelf: watched unavailable titles remain browsable
   with posters on TV. The intended model is media.db as internal canonical state,
   Plex Watch History as the private visual shelf, and Trakt as portable/shareable
   cross-source watch history. Read-only discovery found that all 556 currently
   watched Movie Intelligence rows carry only CSFD IDs; TMDb/IMDb mappings for the
   pilot are temporary Seerr-verified proposals and are not yet persisted identities
-  in media.db. The current media.db watched_at values originate from CSFD rating
-  dates and must not be treated as proven viewing dates. Proposed legacy items with
+  in media.db. Current media.db watched_at values originate from CSFD rating dates
+  and must not be treated as proven viewing dates. Proposed legacy items with
   unknown real watch dates therefore use an explicit synthetic placeholder policy,
   currently the title release date, with provenance retained privately as
   legacy_placeholder. Pilot candidates are Smile 2 (2024), The Fifth Element
   (1997), and Heretic (2024), with Inglourious Basterds (2009) as an unchanged
   Plex-watched control. Existing Plex server history for the control includes one
   preserved event; Plex cloud history for all four remains unverified until private
-  account login. Plex officially supports watched marking, watched-date editing and
-  activity removal in the UI, but a safe programmable account-level historical-date
-  write path has not yet been confirmed. Trakt is not yet authenticated/configured
-  for this workflow; planned writes require OAuth and stable IDs. No watched-history
+  account login. Plex supports watched marking, watched-date editing and activity
+  removal in the UI, but a safe programmable account-level historical-date write
+  path has not yet been confirmed. Trakt is not yet authenticated/configured for
+  this workflow; planned writes require OAuth and stable IDs. No watched-history
   mutation, database change, Trakt write, Plex database edit, or GitHub personal-data
   commit was performed during the preflight.
 
@@ -57,4 +57,64 @@ blockers:
   - "Trakt OAuth/application status is not yet established."
   - "A safe programmable Plex account-level historical watched-date write method is not yet confirmed."
 
- dependencies: []
+dependencies:
+  - project: "Homelab & Media Stack"
+    workstream: "Infrastructure & Agent Control Plane"
+    dependency: >
+      Own Movie Intelligence media.db, stable identity enrichment, CSFD/SerialZone
+      ingestion, agent tools and control-plane write wrappers. Before medium/full
+      watched-history backfill, persist stable TMDb/IMDb identities for the 556
+      watched CSFD-only rows rather than relying on title-only or temporary mappings.
+  - component: "Trakt"
+    dependency: >
+      Establish private OAuth/application access and verify history write/read-back
+      semantics before any batch sync. Trakt is intended as portable/shareable
+      cross-source watch history, not merely a Plex mirror.
+  - component: "Plex watched/history"
+    dependency: >
+      Preserve genuine Plex watch events. Imported legacy items must be metadata-only,
+      skip existing history, and use event-specific rollback rather than broad
+      Mark as Unwatched operations.
+
+important_open_loops:
+  - "Verify Plex cloud history for Smile 2, The Fifth Element, Heretic and the unchanged Inglourious Basterds control after private login."
+  - "Establish Trakt OAuth/application status and snapshot candidate/control history before writes."
+  - "Confirm a safe programmable Plex account-level watched-date write/read-back/rollback path; do not write Plex SQLite directly."
+  - "Persist stable TMDb/IMDb enrichment for all 556 watched CSFD-only rows before medium/full backfill."
+  - "Run the watched-history rollout in stages: 1 item, then 3-5 pilot, then ~25-50 batch, then full ingest only after acceptance."
+  - "Keep synthetic dates explicitly labeled as legacy_placeholder in private audit/manifest data; never represent them as known viewing dates."
+  - "Run one fresh real Sonarr/Radarr torrent import and verify hardlink inode/link count while qBittorrent is still seeding."
+  - "Finish the Plex English-default subtitle client check opportunistically; broad Bazarr automation remains paused."
+  - "Tune Bazarr language/provider/scoring rules separately for movies and TV against real library items."
+  - "Iterate Kometa v2 only after watched/history behavior is stable."
+  - "Coordinate with the Agent Control Plane instead of re-owning Movie Intelligence or agent-wrapper implementation in this workstream."
+
+stale_or_unknown:
+  - "Plex cloud-account history for the pilot candidates/control is unknown until private login."
+  - "Trakt candidate history and usable API application status are unknown until private login."
+  - "Programmatic Plex historical watched-date editing is unverified; UI support alone is not sufficient for batch automation."
+  - "The exact medium/full-batch identity enrichment implementation remains owned by the sibling control-plane workstream."
+  - "Live ARR roots/mapping drift remains unresolved; historical direct hardlink capability does not verify a fresh actual ARR import."
+  - "English default subtitle client behavior without a remembered override remains pending and non-blocking."
+
+portfolio:
+  milestone: false
+  signal: >
+    My Cinema has moved from concept to a bounded migration design: Plex can serve
+    as the visual metadata-only shelf, Trakt as portable/shareable history, and
+    media.db as canonical internal state. The remaining work is now explicit:
+    account snapshots, stable identity enrichment, one-item write acceptance,
+    then staged scaling with rollback evidence.
+
+verification:
+  last_verified: "2026-09-27"
+  sources:
+    - "2026-09-27 read-only watched-history pilot preflight: 556 watched media.db rows carry CSFD IDs only; watched_at values derive from CSFD rating dates, not proven viewing dates."
+    - "2026-09-27 proposed pilot: Smile 2, The Fifth Element, Heretic; Inglourious Basterds preserved as unchanged Plex-watched control."
+    - "2026-09-27 Plex server control event verified; Plex cloud history and Trakt state remain private-login dependent and no writes were performed."
+    - "2026-09-27 user confirmed Plex Watch History UX is acceptable for the My Cinema visual shelf and wants historical metadata backfill plus Trakt portability."
+    - "2026-09-25 Seerr accepted end-to-end through Plex; Bazarr and hardlink checks remain non-blocking follow-up."
+
+sync:
+  status: "synced"
+  storage: ".project/workstreams/media-automation.yaml"
