@@ -1,6 +1,20 @@
 # Current State
 
-## Controlled Seerr wrapper — 2026-09-26 (Issue #14)
+## Live write acceptance — 2026-09-27 (Issue #16)
+
+**Verified / live-write-accepted:** the owner reviewed Phase A and explicitly approved Phase B for Whiplash (2014). Live title/year resolution returned one movie, TMDb `244786`. Phase A at 15:27:44 UTC returned `requestable`, both read sources healthy with zero matching candidates, Seerr status 1, and `mutation_attempted=false`.
+
+The exact merged `7902349` modules ran in a transient read-only Node v24.21.0 container with normalized SQLite and the DB directory mounted read-only. The older persistent checkout was not modified. After fresh wrapper preflight, one POST to `/api/v1/request` with `{"mediaType":"movie","mediaId":244786,"is4k":false}` returned `requested`; independent request read-back confirmed request **2**, TMDb **244786**, status **2 (approved)**.
+
+Sanitized audit: contract `0.1`, timestamp `2026-09-27T15:29:53.886Z`, action `request`, reason `request_identity_readback_confirmed`, preflight `requestable`, `mutation_attempted=true`, request ID `2`, request status `2`.
+
+Read-only Radarr verification found the same title/year/TMDb, monitored=true, has_file=false, and confirmed that profile and root match Seerr's existing defaults. The queue reports downloading with tracked status OK. **Pending:** completed acquisition, import and Plex visibility; no playback claim is made.
+
+No direct ARR mutation, policy/configuration changes, database writes, persistent service or host upgrade were performed. The sole authorized mutation was the wrapper-mediated Seerr request; downstream acquisition follows existing policy. No executable code changed or full test suite rerun (60 tests remain the Issue #14 evidence). Cross-process serialization/uncertain-receipt limitations still apply.
+
+**Next exact action:** read-only verification of Whiplash completion/import and Plex visibility; do not submit another request.
+
+## Historical implementation checkpoint — Controlled Seerr wrapper — 2026-09-26 (Issue #14)
 
 **Component-tested, live write not yet accepted:** [movie-request wrapper](../tools/movie-intelligence/SEERR.md) provides dry-run plans, stable-ID preflight, existing-availability/request/managed no-ops, a single allowlisted movie POST behind explicit execution, identity read-back and sanitized audit events. All 37 existing tests plus 23 wrapper tests pass locally. No real Seerr request was sent.
 

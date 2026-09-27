@@ -1,11 +1,12 @@
 # Roadmap
 
-## Infrastructure control plane — 2026-09-26
+## Infrastructure control plane — 2026-09-27
 
 - **Verified / live-accepted (Issue #13):** normalized Movie Intelligence + Radarr reads on PR #12 commit `0382d1c`, transient Node v24.21.0; system Node v22.22.1 unchanged. Heretik is Movie-Intelligence-only; TMDb 111 returns Radarr-only Scarface with the expected file/profile state. No confirmed cross-source identity was fabricated.
 - **Verified:** unattended ČSFD run on 2026-09-15 completed successfully (exit 0, journal confirmed); timer remains active, next observed trigger 2026-10-01 04:15 UTC.
 - **Component-tested (Issue #14):** [controlled Seerr movie-request wrapper](../tools/movie-intelligence/SEERR.md), dry-run default, stable identity, one allowlisted POST, duplicate/managed no-ops and uncertain-outcome handling; 60 tests pass. No live request was sent.
-- **Next:** a separate live acceptance issue where the owner explicitly approves one movie and one wrapper request; verify the resulting Seerr → Radarr → acquisition/Plex flow. Live write remains unaccepted. No unrestricted direct ARR mutation.
+- **Verified / live-write-accepted (Issue #16):** owner-approved Whiplash (2014), TMDb 244786; one wrapper POST, request 2 approved and identity read-back confirmed. Radarr handoff/default profile/root verified; downloading, no file yet.
+- **Next:** read-only completion/import/Plex verification for that movie. No duplicate request or direct ARR mutation.
 - Detailed source counts, limitations and safety checks are recorded in [current state](current-state.md#live-read-acceptance--2026-09-26-issue-13).
 
 ## Media checkpoint — 2026-09-25

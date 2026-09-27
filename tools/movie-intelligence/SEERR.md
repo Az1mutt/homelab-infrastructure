@@ -1,6 +1,6 @@
 # Controlled Seerr movie requests v0.1
 
-**Component-tested; live write not yet accepted.** Issue #14 adds a separate Act boundary to the live-accepted Observe module. No real Seerr request was sent during implementation. Node 24.14+ is required, with no new dependencies. Run the complete offline suite with `node --test test/*.test.mjs` from this directory.
+**Live-write-accepted for the owner-approved Whiplash pilot on 2026-09-27 (Issue #16); completed import/Plex visibility pending.** Issue #14 adds a separate Act boundary to the live-accepted Observe module. No real Seerr request was sent during implementation. Node 24.14+ is required, with no new dependencies. Run the complete offline suite with `node --test test/*.test.mjs` from this directory.
 
 ## Interface and configuration
 
@@ -81,7 +81,21 @@ One controller permits only one execute invocation at a time, remembers successf
 
 Every result has a versioned sanitized audit event: timestamp, action, resolved TMDb ID, decision/reason, preflight decision, mutation-attempted flag and request ID/status when verified. Planning does not prove approval; `requested` proves request persistence, not ARR import/acquisition/Plex completion.
 
-## Evidence and next acceptance
+## Live write acceptance — 2026-09-27 (Issue #16)
+
+**Verified / live-write-accepted:** the owner reviewed Phase A and explicitly approved Phase B for Whiplash (2014). Live title/year resolution returned one movie, TMDb `244786`. Phase A at 15:27:44 UTC returned `requestable`, both read sources healthy with zero matching candidates, Seerr status 1, and `mutation_attempted=false`.
+
+The exact merged `7902349` modules ran in a transient read-only Node v24.21.0 container with normalized SQLite and the DB directory mounted read-only. The older persistent checkout was not modified. After fresh wrapper preflight, one POST to `/api/v1/request` with `{"mediaType":"movie","mediaId":244786,"is4k":false}` returned `requested`; independent request read-back confirmed request **2**, TMDb **244786**, status **2 (approved)**.
+
+Sanitized audit: contract `0.1`, timestamp `2026-09-27T15:29:53.886Z`, action `request`, reason `request_identity_readback_confirmed`, preflight `requestable`, `mutation_attempted=true`, request ID `2`, request status `2`.
+
+Read-only Radarr verification found the same title/year/TMDb, monitored=true, has_file=false, and confirmed that profile and root match Seerr's existing defaults. The queue reports downloading with tracked status OK. **Pending:** completed acquisition, import and Plex visibility; no playback claim is made.
+
+No direct ARR mutation, policy/configuration changes, database writes, persistent service or host upgrade were performed. The sole authorized mutation was the wrapper-mediated Seerr request; downstream acquisition follows existing policy. No executable code changed or full test suite rerun (60 tests remain the Issue #14 evidence). Cross-process serialization/uncertain-receipt limitations still apply.
+
+**Next exact action:** read-only verification of Whiplash completion/import and Plex visibility; do not submit another request.
+
+## Historical implementation evidence and acceptance procedure
 
 Read-only discovery on 2026-09-26 confirmed Seerr 3.4.1, admin API visibility, working search/movie/request-list GETs, one default standard Radarr service and valid existing default profile/root. Scarface/TMDb 111 reports available. The installed source confirms the movie/request status enums, request media relation and configured-default behavior. Credentials were used only in memory; no settings/services/container changes or live POST were made. This is discovery evidence, not live wrapper/write acceptance.
 
