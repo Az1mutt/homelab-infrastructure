@@ -11,11 +11,16 @@ status: "active"
 phase: "post-migration-operations-and-agent-control-plane"
 
 current_gate: >
-  Issue 16 live wrapper write and Seerr-to-Radarr handoff are accepted for
-  Whiplash (2014), TMDb 244786, request 2. Acquisition is downloading;
-  completed import and Plex visibility remain pending.
+  Issue 17 read-only completion is verified: Whiplash acquisition, Radarr import
+  and Plex visibility passed. No remaining Whiplash acceptance gate.
 
 current_state: >
+  Issue 17 verified completion on 2026-09-27 at 19:04 UTC. Seerr request 2 is
+  completed (status 5); Radarr has_file=true and matching queue is empty.
+  Imported Bluray-2160p file 246, 23434594215 bytes, added 15:49:03 UTC,
+  exists at the managed path with matching size. Plex returns Whiplash (2014),
+  TMDb 244786, and the same media file. Visibility, not playback, is verified.
+  No live mutations occurred. The following Issue 16 checkpoint is historical.
   On 2026-09-27 the owner approved Phase A, which resolved Whiplash (2014)
   uniquely to TMDb 244786 with requestable preflight and no mutation.
   Phase B used merged 7902349 in transient Node v24.21.0, normalized read-only
@@ -79,8 +84,8 @@ current_state: >
   has now been checked successfully under Issue 13.
 
 exact_next_action: >
-  Verify Whiplash (2014), TMDb 244786, acquisition completion, Radarr import and
-  Plex visibility read-only. Do not submit another request.
+  No remaining Whiplash acceptance work. Select the next separately scoped
+  control-plane task; do not submit another request for this pilot.
 
 blockers: []
 
@@ -107,7 +112,7 @@ dependencies:
       Issue 13 using explicit normalized mode and a transient supported runtime.
 
 important_open_loops:
-  - "Controlled Seerr wrapper is live-write-accepted for Whiplash; completed import/Plex visibility remain pending. Preserve replay/uncertainty audit evidence."
+  - "Whiplash request/import/Plex visibility are accepted; preserve replay/uncertainty audit evidence for future actions."
   - "Keep the local Movie Intelligence DB as the durable internal personal-state layer while the media workstream designs Plex/Trakt watched-history responsibilities."
   - "Use SQLite-aware backup semantics for online backups; avoid naive copy while WAL writes may be active."
   - "Keep private ČSFD exports, API keys and live credentials out of the public repository."
@@ -133,6 +138,7 @@ portfolio:
 verification:
   last_verified: "2026-09-27"
   sources:
+    - "Issue 17, 2026-09-27 19:04 UTC: request 2 completed; Radarr has_file=true, file 246 Bluray-2160p and matching on-disk size; Plex TMDb 244786 and exact media file match. Read-only; playback not tested."
     - "Issue 16, 2026-09-27: owner-approved dry-run and one POST; request 2 approved/read-back confirmed TMDb 244786. Radarr handoff/default policy matches; downloading, import/Plex pending."
     - "Issue 14, 2026-09-26: 60 local tests passed, original 37 unchanged; dry-run, single mock POST, readback, replay, conflicts, redirects, privacy and policy dependency covered."
     - "Issue 14 read-only discovery: Seerr 3.4.1, admin visibility, working search/movie/request GETs and valid default standard Radarr policy; no live POST or configuration changes."

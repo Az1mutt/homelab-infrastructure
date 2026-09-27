@@ -1,6 +1,6 @@
 # Controlled Seerr movie requests v0.1
 
-**Live-write-accepted for the owner-approved Whiplash pilot on 2026-09-27 (Issue #16); completed import/Plex visibility pending.** Issue #14 adds a separate Act boundary to the live-accepted Observe module. No real Seerr request was sent during implementation. Node 24.14+ is required, with no new dependencies. Run the complete offline suite with `node --test test/*.test.mjs` from this directory.
+**Live-write-accepted for the owner-approved Whiplash pilot on 2026-09-27 (Issue #16); completed import/Plex visibility verified read-only under Issue #17.** Issue #14 adds a separate Act boundary to the live-accepted Observe module. No real Seerr request was sent during implementation. Node 24.14+ is required, with no new dependencies. Run the complete offline suite with `node --test test/*.test.mjs` from this directory.
 
 ## Interface and configuration
 
@@ -81,7 +81,15 @@ One controller permits only one execute invocation at a time, remembers successf
 
 Every result has a versioned sanitized audit event: timestamp, action, resolved TMDb ID, decision/reason, preflight decision, mutation-attempted flag and request ID/status when verified. Planning does not prove approval; `requested` proves request persistence, not ARR import/acquisition/Plex completion.
 
-## Live write acceptance — 2026-09-27 (Issue #16)
+## Whiplash completion — 2026-09-27 (Issue #17)
+
+**Verified read-only at 19:04 UTC:** Whiplash (2014), TMDb `244786`, completed acquisition and import. Seerr request `2` is completed (status `5`). Radarr reports `has_file=true`, monitored=true and an empty matching download queue; existing default profile/root still match. Imported file `246` is Bluray-2160p, 23,434,594,215 bytes, added at `2026-09-27T15:49:03Z`. The file exists at the expected managed movie path and its disk size matches Radarr metadata.
+
+Plex returned one matching Whiplash (2014) item with TMDb `244786` and a media part matching that exact imported file. **Plex visibility is verified; playback was not tested.** No request, ARR/download mutation, Plex scan/refresh, configuration, service or filesystem change was performed. This closes the pending import/Plex follow-up from Issue #16.
+
+**Next:** no further Whiplash acceptance action; future control-plane work requires separately scoped authorization.
+
+## Historical live write checkpoint — 2026-09-27 (Issue #16)
 
 **Verified / live-write-accepted:** the owner reviewed Phase A and explicitly approved Phase B for Whiplash (2014). Live title/year resolution returned one movie, TMDb `244786`. Phase A at 15:27:44 UTC returned `requestable`, both read sources healthy with zero matching candidates, Seerr status 1, and `mutation_attempted=false`.
 
