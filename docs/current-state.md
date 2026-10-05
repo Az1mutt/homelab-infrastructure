@@ -1,5 +1,12 @@
 # Current State
 
+## Stable identity enrichment gate — 2026-10-05
+
+Verified stable identity enrichment: 40 candidates inspected; 35 received both TMDb and IMDb IDs; five unresolved candidates were skipped. Existing external_ids was reused without a schema change. Independent CSFD-to-stable-ID linkage was cross-checked against movie metadata. SQLite-aware backups, a disposable-copy rehearsal and a reopened read-only verification passed. All pre-existing rows and personal/source state were logically unchanged; no identity collisions were introduced. Provenance and rollback evidence remain private. No Trakt, Plex or watch-date writes occurred in this gate.
+
+The 35-record cohort has passed the identity gate for a future 25–50-title batch. Fresh Plex/Trakt snapshots and date provenance are still required before that separate batch. CSFD rating timestamps are not proven viewing dates. No personal titles, IDs, snapshots, credentials or manifests are published here.
+
+
 ## Whiplash completion — 2026-09-27 (Issue #17)
 
 **Verified read-only at 19:04 UTC:** Whiplash (2014), TMDb `244786`, completed acquisition and import. Seerr request `2` is completed (status `5`). Radarr reports `has_file=true`, monitored=true and an empty matching download queue; existing default profile/root still match. Imported file `246` is Bluray-2160p, 23,434,594,215 bytes, added at `2026-09-27T15:49:03Z`. The file exists at the expected managed movie path and its disk size matches Radarr metadata.
