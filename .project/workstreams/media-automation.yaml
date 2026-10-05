@@ -8,47 +8,49 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-medium-batch-reconciliation"
+phase: "watched-history-medium-batch-accepted"
 
 current_gate: >
-  The first medium Trakt batch has 38 of 39 candidates fully verified with correct
-  identity/date, zero duplicates and rollback IDs captured privately. Podraz returned
-  HTTP 201 on its POST, the immediate read-back then failed with a network error, and
-  a later narrow read-only check reported no event. No POST has been repeated. Before
-  treating Podraz as absent, verify that the read-only lookup used Trakt's required
-  internal item identifier/semantics and inspect the already-saved POST response if
-  available. Plex and media.db remain unchanged.
+  The first medium Trakt history batch is accepted end-to-end. All 39 preflighted
+  safe candidates are now verified with correct identity/date, zero duplicates and
+  rollback/history IDs captured privately. Podraz was reconciled successfully after
+  confirming that the previous no-event lookup used invalid identifier semantics;
+  the original HTTP 201 had indicated an added event, and a correctly scoped Trakt-ID
+  read found exactly the intended event/date. Plex and media.db remained unchanged.
+  The next scaling decision is whether to prepare the remaining watched fleet for
+  Trakt import, reusing durable identity/provenance evidence rather than repeating
+  broad research. Plex historical-date automation remains a separate unverified gate.
 
 current_state: >
-  The medium cohort contains 40 movies with persisted TMDb+IMDb identities; preflight
-  produced 39 safe Trakt candidates and excluded Backrooms because Plex event/title
-  linkage remained ambiguous. Thirty-eight of the 39 candidates were written and
-  immediately verified: two used Plex-confirmed dates and 36 used explicit
-  release-date legacy_placeholder dates. Every verified event has a precise rollback
-  ID stored privately and zero duplicates were introduced. Podraz (TMDb 9277) was the
-  final attempted item. Its POST returned HTTP 201, immediate read-back failed due to
-  a network error, and the POST was correctly not repeated. A subsequent read-only
-  check reported no event, no matching identity/date and zero duplicates. This does
-  not yet authorize a retry because the Trakt API's item-specific history lookup is
-  keyed by Trakt's internal item ID rather than an external TMDb ID; the exact lookup
-  semantics used in the failed reconciliation must be verified first. The six earlier
-  accepted Trakt pilot events remain unchanged. Plex and media.db were not modified.
-  The temporary encrypted local transfer artifact/key remains an explicit cleanup
-  open loop with restricted permissions.
+  The watched-history/My Cinema pipeline has now passed single-item, five-title and
+  medium-batch Trakt acceptance. The medium cohort contains 40 movies with persisted
+  TMDb+IMDb identities; history preflight produced 39 safe Trakt candidates and
+  excluded Backrooms because Plex event/title linkage remained ambiguous. All 39 safe
+  candidates are now verified in Trakt. Thirty-eight were verified immediately after
+  write; the final title, Podraz (TMDb 9277), initially returned HTTP 201 followed by a
+  network error on read-back. The POST was correctly not repeated. A later no-event
+  result was traced to invalid lookup semantics: item-specific Trakt history reads
+  require the internal Trakt item ID rather than the TMDb ID. The saved POST evidence
+  indicated the item was added, and a correctly scoped read-only reconciliation found
+  exactly one intended event with the intended date and captured its rollback ID
+  privately. Final medium-batch result: 39/39 verified, zero duplicates, rollback IDs
+  for every event. Across the batch, two events used Plex-confirmed dates and 37 used
+  explicit release-date legacy_placeholder dates. The six earlier accepted pilot
+  events remain unchanged. Plex and media.db were not modified. The temporary
+  encrypted local transfer artifact/key remains an explicit cleanup open loop with
+  restricted permissions.
 
 exact_next_action: >
-  Perform a narrow READ-ONLY reconciliation for Podraz only. Do not repeat the POST.
-  First inspect the saved HTTP 201 response/request evidence, if retained, for returned
-  add/not-found details or a history ID. Then verify the exact endpoint/identifier used
-  by the later history check. Resolve TMDb 9277 to the corresponding Trakt internal
-  movie ID and query history using correct Trakt-ID semantics, or use an equivalently
-  exact read-only method that matches returned external IDs. If exactly one intended
-  event exists, capture its rollback/history ID privately and close the batch. If a
-  correctly scoped lookup definitively shows zero events and the saved POST response
-  yields no event ID, stop and report that evidence before any retry decision.
+  Decide the next watched-history scaling step using the accepted medium batch as the
+  durable reference. If continuing Trakt backfill, hand the remaining watched
+  population to Infrastructure & Agent Control Plane for stable TMDb/IMDb enrichment
+  in bounded cohorts or a reusable deterministic resolver, then perform narrow
+  history preflight and staged writes without re-researching already verified items.
+  Keep Backrooms excluded until its Plex event/title linkage can be resolved
+  independently. Separately, investigate a safe programmable Plex historical watched-
+  date write/read-back/rollback path before any automated Plex backfill.
 
 blockers:
-  - "Podraz remains unresolved after HTTP 201, immediate network read-back failure, and a later no-event read-only result whose identifier semantics must be verified before concluding the write was absent."
   - "A safe programmable Plex account-level historical watched-date write method remains unconfirmed; do not automate Plex historical backfill yet."
 
 dependencies:
@@ -57,23 +59,24 @@ dependencies:
     dependency: >
       Own Movie Intelligence media.db, stable identity enrichment, CSFD/SerialZone
       ingestion, agent tools and control-plane write wrappers. Future full-fleet
-      scaling should reuse verified identities and durable resolver/provenance evidence.
+      scaling should reuse verified resolver/provenance patterns and durable state
+      rather than repeat manual research.
   - component: "Trakt"
     dependency: >
       OAuth is established privately. Preserve existing history, use explicit stable
-      IDs, retain event-specific rollback evidence and never repeat an ambiguous POST.
-      Item-specific history reads must use correct Trakt identifier semantics.
+      IDs, retain event-specific rollback evidence and use correct Trakt internal-ID
+      semantics for item-specific history reads.
   - component: "Plex watched/history"
     dependency: >
       Preserve genuine Plex cloud watch events. Existing cloud dates remain preferred
       as real-date evidence. Plex historical backfill is still separate and unverified.
 
 important_open_loops:
-  - "Reconcile Podraz read-only using correct Trakt internal-ID semantics and saved POST evidence; do not repeat its POST yet."
-  - "After Podraz reconciliation, close the first medium Trakt batch and decide whether to scale to the remaining watched fleet using durable identity/provenance evidence."
+  - "Decide whether to scale Trakt import to the remaining watched fleet; reuse durable identity/provenance evidence and avoid repeating stable checks."
   - "Keep Backrooms excluded until Plex event/title linkage can be independently resolved."
   - "Preserve date provenance: Plex-confirmed, explicitly user-authorized earliest Plex date when multiple events exist, or release-date legacy_placeholder when no real date is known."
   - "Never infer viewing dates from CSFD rating dates."
+  - "Use correct Trakt internal item IDs for item-specific history reads; do not treat TMDb IDs as endpoint path IDs."
   - "Confirm a safe programmable Plex account-level watched-date write/read-back/rollback path before any automated Plex historical backfill; do not write Plex SQLite directly."
   - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step; do not expose its contents or secrets."
   - "Run one fresh real Sonarr/Radarr torrent import and verify hardlink inode/link count while qBittorrent is still seeding."
@@ -82,7 +85,6 @@ important_open_loops:
   - "Iterate Kometa v2 only after watched/history behavior is stable."
 
 stale_or_unknown:
-  - "Podraz final Trakt event state remains unknown until identifier-correct read-only reconciliation completes."
   - "Programmatic Plex historical watched-date editing is unverified; UI support alone is not sufficient for batch automation."
   - "Backrooms Plex event/title linkage remains unresolved because available cloud references conflict."
   - "Live ARR roots/mapping drift remains unresolved; historical direct hardlink capability does not verify a fresh actual ARR import."
@@ -91,19 +93,20 @@ stale_or_unknown:
 portfolio:
   milestone: true
   signal: >
-    The first medium Trakt batch has 38 fully verified writes with zero duplicates and
-    complete rollback evidence. Its single unresolved item is isolated behind a
-    read-only reconciliation gate, demonstrating safe stop/resume behavior without
-    risking a duplicate retry.
+    The first medium Trakt history batch is fully accepted: 39 of 39 candidates were
+    verified with zero duplicates and complete rollback evidence. The final-item
+    reconciliation also exposed and resolved a reusable API semantics issue: item-
+    specific Trakt history reads require Trakt internal IDs, not TMDb IDs. The pipeline
+    is now proven at medium scale and ready for a deliberate full-fleet scaling decision.
 
 verification:
   last_verified: "2026-10-05"
   sources:
-    - "2026-10-05 medium Trakt batch: 38 of 39 candidates fully written and verified; 0 duplicates; rollback IDs captured privately for all 38."
-    - "2026-10-05 Podraz POST returned HTTP 201; immediate read-back failed with a network error; POST was not repeated."
-    - "2026-10-05 later Podraz read-only check reported no event, no identity/date match, zero duplicates and no rollback ID."
-    - "2026-10-05 Plex and media.db remained unchanged."
-    - "Trakt API documentation: item-specific watched-history lookups use the Trakt item ID; sync history writes support historical watched_at and duplicates are the caller's responsibility."
+    - "2026-10-05 medium Trakt batch final status: 39/39 verified, zero duplicates, rollback IDs captured privately for every event."
+    - "2026-10-05 medium-batch provenance: 2 Plex-confirmed dates and 37 legacy_placeholder dates."
+    - "2026-10-05 Podraz reconciliation: previous lookup semantics invalid; original POST indicated added; correctly scoped Trakt-ID read found exactly one intended event with intended date; rollback ID captured."
+    - "2026-10-05 Plex and media.db remained unchanged during the medium Trakt batch."
+    - "2026-10-05 preflight: 40 identity-qualified candidates, 39 safe Trakt proposals, Backrooms excluded."
 
 sync:
   status: "synced"
