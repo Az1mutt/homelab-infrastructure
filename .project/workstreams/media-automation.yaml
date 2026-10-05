@@ -8,105 +8,93 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-medium-batch-accepted"
+phase: "watched-history-next-batch-checkpoint"
 
 current_gate: >
-  The first medium Trakt history batch is accepted end-to-end. All 39 preflighted
-  safe candidates are now verified with correct identity/date, zero duplicates and
-  rollback/history IDs captured privately. Podraz was reconciled successfully after
-  confirming that the previous no-event lookup used invalid identifier semantics;
-  the original HTTP 201 had indicated an added event, and a correctly scoped Trakt-ID
-  read found exactly the intended event/date. Plex and media.db remained unchanged.
-  The next scaling decision is whether to prepare the remaining watched fleet for
-  Trakt import, reusing durable identity/provenance evidence rather than repeating
-  broad research. Plex historical-date automation remains a separate unverified gate.
+  The first medium Trakt batch remains accepted at 39/39. A subsequent 25-title
+  production-style batch reused the proven resolver and Trakt pipeline. Of 25
+  candidates, 24 identities were resolved, one identity was skipped as ambiguous,
+  five were already present in Trakt, and 17 new history events were written and
+  verified with zero duplicates. Two titles remain resumable because execution
+  stopped safely on a Casino freshness-check identity/pagination mismatch before any
+  POST. Plex was not modified; media.db changes were limited to intended stable-ID
+  enrichment.
 
 current_state: >
-  The watched-history/My Cinema pipeline has now passed single-item, five-title and
-  medium-batch Trakt acceptance. The medium cohort contains 40 movies with persisted
-  TMDb+IMDb identities; history preflight produced 39 safe Trakt candidates and
-  excluded Backrooms because Plex event/title linkage remained ambiguous. All 39 safe
-  candidates are now verified in Trakt. Thirty-eight were verified immediately after
-  write; the final title, Podraz (TMDb 9277), initially returned HTTP 201 followed by a
-  network error on read-back. The POST was correctly not repeated. A later no-event
-  result was traced to invalid lookup semantics: item-specific Trakt history reads
-  require the internal Trakt item ID rather than the TMDb ID. The saved POST evidence
-  indicated the item was added, and a correctly scoped read-only reconciliation found
-  exactly one intended event with the intended date and captured its rollback ID
-  privately. Final medium-batch result: 39/39 verified, zero duplicates, rollback IDs
-  for every event. Across the batch, two events used Plex-confirmed dates and 37 used
-  explicit release-date legacy_placeholder dates. The six earlier accepted pilot
-  events remain unchanged. Plex and media.db were not modified. The temporary
-  encrypted local transfer artifact/key remains an explicit cleanup open loop with
-  restricted permissions.
+  The watched-history/My Cinema Trakt pipeline is proven through pilot, medium-batch
+  and follow-on production-style use. The accepted medium batch is 39/39 verified with
+  rollback IDs for every event and zero duplicates. In the next bounded batch, 25
+  remaining watched movies were considered. Stable identities were resolved for 24;
+  I Love You Phillip Morris was skipped rather than manually investigated. Five of the
+  qualified titles were already present in Trakt. Seventeen new events were written
+  and immediately verified: one used a Plex-confirmed date and 16 used explicit
+  release-date legacy_placeholder dates. Zero duplicates were introduced. Casino was
+  not written because its minimal freshness check returned an identity/pagination
+  mismatch; the stop-on-anomaly rule fired before POST. Richard Jewell was also left
+  unstarted and resumable. No POST was attempted for either remaining title. A private
+  checkpoint preserves completed work and rollback evidence. Backrooms remains
+  excluded from the earlier cohort. Plex historical-date automation remains unverified.
 
 exact_next_action: >
-  Decide the next watched-history scaling step using the accepted medium batch as the
-  durable reference. If continuing Trakt backfill, hand the remaining watched
-  population to Infrastructure & Agent Control Plane for stable TMDb/IMDb enrichment
-  in bounded cohorts or a reusable deterministic resolver, then perform narrow
-  history preflight and staged writes without re-researching already verified items.
-  Keep Backrooms excluded until its Plex event/title linkage can be resolved
-  independently. Separately, investigate a safe programmable Plex historical watched-
-  date write/read-back/rollback path before any automated Plex backfill.
+  Resume only the two unfinished titles from the saved checkpoint. First reconcile
+  Casino READ-ONLY: verify the freshness-check pagination/identity semantics using
+  correct Trakt internal-ID handling and durable stable identity; do not POST until
+  the mismatch is explained and the current Trakt state is unambiguous. If Casino is
+  clean, process it with the accepted minimal freshness-check -> single POST ->
+  immediate read-back -> rollback-ID pattern. Then process Richard Jewell the same
+  way. Do not revisit the 22 already-accounted-for titles and do not manually research
+  I Love You Phillip Morris in this low-budget continuation.
 
 blockers:
+  - "Casino freshness check returned an identity/pagination mismatch before POST; resolve read-only before any write."
   - "A safe programmable Plex account-level historical watched-date write method remains unconfirmed; do not automate Plex historical backfill yet."
 
 dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Infrastructure & Agent Control Plane"
     dependency: >
-      Own Movie Intelligence media.db, stable identity enrichment, CSFD/SerialZone
-      ingestion, agent tools and control-plane write wrappers. Future full-fleet
-      scaling should reuse verified resolver/provenance patterns and durable state
-      rather than repeat manual research.
+      Own Movie Intelligence media.db and stable identity enrichment. Follow-on
+      scaling should continue to prefer deterministic/high-confidence resolution and
+      skip expensive ambiguous identity investigations when budget is constrained.
   - component: "Trakt"
     dependency: >
-      OAuth is established privately. Preserve existing history, use explicit stable
-      IDs, retain event-specific rollback evidence and use correct Trakt internal-ID
-      semantics for item-specific history reads.
-  - component: "Plex watched/history"
-    dependency: >
-      Preserve genuine Plex cloud watch events. Existing cloud dates remain preferred
-      as real-date evidence. Plex historical backfill is still separate and unverified.
+      OAuth is established privately. Preserve existing history, use correct Trakt
+      internal-ID semantics for item-specific reads, retain event-specific rollback
+      evidence, and never repeat or initiate a write while freshness state is
+      ambiguous.
 
 important_open_loops:
-  - "Decide whether to scale Trakt import to the remaining watched fleet; reuse durable identity/provenance evidence and avoid repeating stable checks."
-  - "Keep Backrooms excluded until Plex event/title linkage can be independently resolved."
-  - "Preserve date provenance: Plex-confirmed, explicitly user-authorized earliest Plex date when multiple events exist, or release-date legacy_placeholder when no real date is known."
-  - "Never infer viewing dates from CSFD rating dates."
-  - "Use correct Trakt internal item IDs for item-specific history reads; do not treat TMDb IDs as endpoint path IDs."
-  - "Confirm a safe programmable Plex account-level watched-date write/read-back/rollback path before any automated Plex historical backfill; do not write Plex SQLite directly."
-  - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step; do not expose its contents or secrets."
+  - "Reconcile Casino read-only, then resume Casino and Richard Jewell only if safe."
+  - "Keep I Love You Phillip Morris as an identity-skip candidate for a later dedicated ambiguity pass rather than spending production-batch budget on manual research."
+  - "Keep Backrooms excluded until its Plex event/title linkage can be independently resolved."
+  - "Preserve date provenance and never infer viewing dates from CSFD rating dates."
+  - "Confirm a safe programmable Plex historical watched-date write/read-back/rollback path before automated Plex backfill."
+  - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step."
   - "Run one fresh real Sonarr/Radarr torrent import and verify hardlink inode/link count while qBittorrent is still seeding."
   - "Finish the Plex English-default subtitle client check opportunistically; broad Bazarr automation remains paused."
-  - "Tune Bazarr language/provider/scoring rules separately for movies and TV against real library items."
   - "Iterate Kometa v2 only after watched/history behavior is stable."
 
 stale_or_unknown:
-  - "Programmatic Plex historical watched-date editing is unverified; UI support alone is not sufficient for batch automation."
-  - "Backrooms Plex event/title linkage remains unresolved because available cloud references conflict."
-  - "Live ARR roots/mapping drift remains unresolved; historical direct hardlink capability does not verify a fresh actual ARR import."
-  - "English default subtitle client behavior without a remembered override remains pending and non-blocking."
+  - "Casino current Trakt freshness state is unknown until the identity/pagination mismatch is reconciled read-only."
+  - "Programmatic Plex historical watched-date editing is unverified."
+  - "Backrooms Plex event/title linkage remains unresolved."
 
 portfolio:
   milestone: true
   signal: >
-    The first medium Trakt history batch is fully accepted: 39 of 39 candidates were
-    verified with zero duplicates and complete rollback evidence. The final-item
-    reconciliation also exposed and resolved a reusable API semantics issue: item-
-    specific Trakt history reads require Trakt internal IDs, not TMDb IDs. The pipeline
-    is now proven at medium scale and ready for a deliberate full-fleet scaling decision.
+    The proven watched-history pipeline scaled into a second bounded production-style
+    cohort efficiently: 17 new verified Trakt events plus five safe pre-existing
+    skips, zero duplicates, one identity skip, and a clean stop before an anomalous
+    Casino write. The workflow is now behaving as a resumable production pipeline,
+    not a research pilot.
 
 verification:
   last_verified: "2026-10-05"
   sources:
-    - "2026-10-05 medium Trakt batch final status: 39/39 verified, zero duplicates, rollback IDs captured privately for every event."
-    - "2026-10-05 medium-batch provenance: 2 Plex-confirmed dates and 37 legacy_placeholder dates."
-    - "2026-10-05 Podraz reconciliation: previous lookup semantics invalid; original POST indicated added; correctly scoped Trakt-ID read found exactly one intended event with intended date; rollback ID captured."
-    - "2026-10-05 Plex and media.db remained unchanged during the medium Trakt batch."
-    - "2026-10-05 preflight: 40 identity-qualified candidates, 39 safe Trakt proposals, Backrooms excluded."
+    - "2026-10-05 follow-on batch checkpoint: 25 candidates considered, 24 identities resolved, 1 identity skip (I Love You Phillip Morris)."
+    - "2026-10-05 follow-on batch: 5 already in Trakt; 17 new events written and verified; 1 Plex-date and 16 legacy_placeholder; 0 duplicates."
+    - "2026-10-05 Casino freshness check returned identity/pagination mismatch before POST; Casino and Richard Jewell remain resumable with no POST attempted for either."
+    - "2026-10-05 first medium batch remains accepted at 39/39 verified with zero duplicates and rollback IDs for every event."
 
 sync:
   status: "synced"
