@@ -8,15 +8,17 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-single-item-write-accepted"
+phase: "watched-history-small-batch-ready"
 
 current_gate: >
   The first Trakt-only watched-history write is accepted. Smile 2 was written once,
   read back with the intended identity/date, and has an event-specific rollback ID.
-  The next gate is to expand the bounded 3-5 title pilot one item at a time, testing
-  both Plex-confirmed dates and explicitly synthetic legacy placeholders before any
-  medium batch. Plex historical-date automation remains unverified. Medium/full
-  backfill must still wait for stable TMDb/IMDb enrichment in media.db.
+  The next gate is a bounded small batch rather than title-by-title chat approval:
+  select roughly 5-10 additional watched titles, mix Plex-confirmed real dates with
+  at least one explicit legacy_placeholder case, preflight all identities/history,
+  then write sequentially inside the batch with per-item read-back and stop-on-anomaly.
+  Plex historical-date automation remains unverified. Medium/full backfill must still
+  wait for stable TMDb/IMDb enrichment in media.db.
 
 current_state: >
   Seerr is accepted end-to-end through Plex. Bazarr broad automation and the fresh
@@ -38,23 +40,29 @@ current_state: >
   exactly one event with no duplicates, and yielded a precise rollback event ID
   stored privately. The audit distinguishes the Plex-confirmed real watch date from
   the synthetic exact time. The other three pilot/control titles remained unchanged;
-  Plex and media.db were not modified. No anomalies were observed. A temporary
-  encrypted local transfer artifact/key remains as an explicit cleanup open loop
-  because automatic permission checks refused deletion; it remains local with
-  restricted permissions.
+  Plex and media.db were not modified. No anomalies were observed. The user then
+  explicitly chose to stop requiring separate chat approval after every individual
+  title and instead continue with a bounded small batch, while preserving per-item
+  verification and stop-on-anomaly behavior. A temporary encrypted local transfer
+  artifact/key remains as an explicit cleanup open loop because automatic permission
+  checks refused deletion; it remains local with restricted permissions.
 
 exact_next_action: >
-  Expand the pilot by exactly one more Trakt-only write: Heretic (2024), TMDb
-  1138194, using the Plex-confirmed real watch date 2026-07-12 and a synthetic
-  noon Europe/Bratislava exact time recorded separately in the private audit.
-  Preserve Plex and media.db, read back the new event, verify exactly one matching
-  history entry, capture its rollback ID, confirm Smile 2 and the control remain
-  unchanged, and stop. Do not yet write The Fifth Element; reserve it for the next
-  step because it specifically tests the legacy_placeholder date path.
+  Prepare and execute one bounded Trakt-only mini-batch of roughly 5-10 additional
+  watched movies. Include Heretic (TMDb 1138194) using Plex-confirmed date 2026-07-12,
+  The Fifth Element (TMDb 18) as the first explicit legacy_placeholder case, and
+  several additional watched candidates selected from media.db only after stable
+  TMDb/IMDb mapping is independently verified for the pilot. Before writes, snapshot
+  Plex cloud and Trakt history for every candidate, skip any existing Trakt event,
+  preserve any real Plex-confirmed date, otherwise use the agreed release-date
+  legacy placeholder with explicit provenance. Execute the batch sequentially,
+  read back each event, store its rollback ID privately, verify no duplicate, and
+  abort the remainder of the batch on the first ambiguous identity/date/write result.
+  Do not modify Plex or media.db.
 
 blockers:
   - "A safe programmable Plex account-level historical watched-date write method remains unconfirmed; this does not block the staged Trakt pilot."
-  - "Stable TMDb/IMDb enrichment for the 556 watched CSFD-only rows is required before medium/full backfill."
+  - "Stable TMDb/IMDb enrichment for the 556 watched CSFD-only rows is required before medium/full backfill; temporary independently verified mappings are acceptable only for the bounded pilot batch."
 
 dependencies:
   - project: "Homelab & Media Stack"
@@ -72,17 +80,17 @@ dependencies:
       mirror.
   - component: "Plex watched/history"
     dependency: >
-      Preserve genuine Plex cloud watch events. Smile 2, Heretic and Inglourious
-      Basterds already have cloud history and must not be overwritten during the
-      Trakt pilot. Imported legacy items must later skip existing Plex history and
-      use precise rollback semantics if programmable writes are introduced.
+      Preserve genuine Plex cloud watch events. Existing cloud dates are preferred
+      as real-date evidence when available. Imported legacy items must later skip
+      existing Plex history and use precise rollback semantics if programmable writes
+      are introduced.
 
 important_open_loops:
-  - "Run exactly one Trakt-only write for Heretic using the Plex-confirmed date, read it back, capture precise rollback ID, and stop."
-  - "After Heretic, test The Fifth Element separately as the first true legacy_placeholder date case because Plex cloud history has no matching event."
-  - "Complete the remaining 3-5 pilot with explicit per-title date provenance; never infer viewing dates from CSFD rating dates."
+  - "Run one bounded 5-10 title Trakt-only mini-batch with preflight, per-item read-back, rollback IDs and stop-on-anomaly behavior."
+  - "Include both provenance paths in that batch: Plex-confirmed real watch dates and at least one explicit legacy_placeholder case."
+  - "Never infer viewing dates from CSFD rating dates."
   - "Persist stable TMDb/IMDb enrichment for all 556 watched CSFD-only rows before medium/full backfill."
-  - "Run the watched-history rollout in stages: accepted single item, then 3-5 pilot, then ~25-50 batch, then full ingest only after acceptance."
+  - "After mini-batch acceptance, scale to roughly 25-50 items, then full ingest only after acceptance."
   - "Confirm a safe programmable Plex account-level watched-date write/read-back/rollback path before any automated Plex historical backfill; do not write Plex SQLite directly."
   - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step; do not expose its contents or secrets."
   - "Run one fresh real Sonarr/Radarr torrent import and verify hardlink inode/link count while qBittorrent is still seeding."
@@ -103,8 +111,8 @@ portfolio:
     The My Cinema history pipeline has its first successful live write acceptance:
     one precisely identified Trakt event was created, read back without duplication,
     and given event-specific rollback evidence while Plex and media.db remained
-    untouched. The rollout can now expand cautiously to provenance variants before
-    any batch synchronization.
+    untouched. The rollout now moves to a bounded small batch with per-item safety
+    checks rather than requiring manual approval after every single title.
 
 verification:
   last_verified: "2026-10-05"
@@ -112,6 +120,7 @@ verification:
     - "2026-10-05 first Trakt write accepted: Smile 2 (TMDb 1100782), watched_at 2026-08-04T10:00:00Z."
     - "2026-10-05 Smile 2 read-back returned the intended 2026-08-04 date, exactly one event, zero duplicates, and a precise rollback event ID stored privately."
     - "2026-10-05 audit distinguishes Plex-confirmed real watch date from synthetic exact time; no anomalies observed."
+    - "2026-10-05 user chose bounded small-batch progression rather than separate chat approval after each individual title."
     - "2026-10-05 other three pilot/control titles unchanged; Plex and media.db not modified."
     - "2026-10-05 Trakt OAuth verified; token stored privately on homelab with mode 0600."
     - "2026-10-05 Plex cloud snapshot: Smile 2 watched 2026-08-04, Heretic 2026-07-12, Inglourious Basterds 2026-09-01; The Fifth Element not found."
