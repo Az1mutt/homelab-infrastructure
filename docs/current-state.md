@@ -1,11 +1,10 @@
 # Current State
 
-## Stable identity enrichment gate — 2026-10-05
+## Stable identity enrichment and history preflight — 2026-10-05
 
-Verified stable identity enrichment: 40 candidates inspected; 35 received both TMDb and IMDb IDs; five unresolved candidates were skipped. Existing external_ids was reused without a schema change. Independent CSFD-to-stable-ID linkage was cross-checked against movie metadata. SQLite-aware backups, a disposable-copy rehearsal and a reopened read-only verification passed. All pre-existing rows and personal/source state were logically unchanged; no identity collisions were introduced. Provenance and rollback evidence remain private. No Trakt, Plex or watch-date writes occurred in this gate.
+Verified follow-up: all five previously excluded records now have confirmed TMDb and IMDb mappings, bringing the identity-qualified cohort to 40. Exact source metadata, credits and release history resolved festival/distribution year differences and rejected wrong-work hints. Existing external_ids was reused with a fresh SQLite-aware backup, disposable rehearsal, transactional invariant checks and reopened verification: 10 additive rows, no schema changes, no collisions, all pre-existing rows unchanged. A read-only history preflight qualified 39 proposals: two Plex-confirmed dates and 37 legacy placeholders; one unresolved Plex linkage is excluded. Zero cohort titles already exist in Trakt. All six previously accepted Trakt events remain unchanged and excluded. No Trakt/Plex/watch-date writes occurred.
 
-The 35-record cohort has passed the identity gate for a future 25–50-title batch. Fresh Plex/Trakt snapshots and date provenance are still required before that separate batch. CSFD rating timestamps are not proven viewing dates. No personal titles, IDs, snapshots, credentials or manifests are published here.
-
+The private 39-entry proposal is ready for separate review/authorization. Release-date placeholders are not genuine viewing dates; exact times are synthetic local noon. CSFD rating timestamps are never treated as viewing dates. Private identity/date/event evidence is not published.
 
 ## Whiplash completion — 2026-09-27 (Issue #17)
 
