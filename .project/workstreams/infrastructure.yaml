@@ -11,10 +11,13 @@ status: "active"
 phase: "post-migration-operations-and-agent-control-plane"
 
 current_gate: >
-  Issue 17 read-only completion is verified: Whiplash acquisition, Radarr import
-  and Plex visibility passed. No remaining Whiplash acceptance gate.
+  Stable identity enrichment is verified for 35 of 40 candidates.
+  The enriched cohort is ready for a separately authorized history preflight;
+  no further history writes are authorized by this gate.
 
 current_state: >
+  Verified stable identity enrichment: 40 candidates inspected; 35 received both TMDb and IMDb IDs; five unresolved candidates were skipped. Existing external_ids was reused without a schema change. Independent CSFD-to-stable-ID linkage was cross-checked against movie metadata. SQLite-aware backups, a disposable-copy rehearsal and a reopened read-only verification passed. All pre-existing rows and personal/source state were logically unchanged; no identity collisions were introduced. Provenance and rollback evidence remain private. No Trakt, Plex or watch-date writes occurred in this gate.
+  Earlier checkpoints below are historical.
   Issue 17 verified completion on 2026-09-27 at 19:04 UTC. Seerr request 2 is
   completed (status 5); Radarr has_file=true and matching queue is empty.
   Imported Bluray-2160p file 246, 23434594215 bytes, added 15:49:03 UTC,
@@ -84,8 +87,9 @@ current_state: >
   has now been checked successfully under Issue 13.
 
 exact_next_action: >
-  No remaining Whiplash acceptance work. Select the next separately scoped
-  control-plane task; do not submit another request for this pilot.
+  Hand the 35 enriched identities to the media workstream for a separately
+  scoped history snapshot, duplicate check and date-provenance preflight.
+  Keep five unresolved mappings excluded; do not start a Trakt batch here.
 
 blockers: []
 
@@ -136,8 +140,9 @@ portfolio:
     path to a fixed adapter, live acceptance and then controlled Seerr actions.
 
 verification:
-  last_verified: "2026-09-27"
+  last_verified: "2026-10-05"
   sources:
+    - "2026-10-05: 40 inspected, 35 enriched with both stable IDs, five skipped; SQLite backup/rehearsal/reopen checks passed, 70 additive rows, no schema change or identity collisions, all pre-existing rows unchanged. Private evidence retained."
     - "Issue 17, 2026-09-27 19:04 UTC: request 2 completed; Radarr has_file=true, file 246 Bluray-2160p and matching on-disk size; Plex TMDb 244786 and exact media file match. Read-only; playback not tested."
     - "Issue 16, 2026-09-27: owner-approved dry-run and one POST; request 2 approved/read-back confirmed TMDb 244786. Radarr handoff/default policy matches; downloading, import/Plex pending."
     - "Issue 14, 2026-09-26: 60 local tests passed, original 37 unchanged; dry-run, single mock POST, readback, replay, conflicts, redirects, privacy and policy dependency covered."

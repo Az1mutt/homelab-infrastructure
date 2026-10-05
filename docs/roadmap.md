@@ -1,5 +1,12 @@
 # Roadmap
 
+## Stable identity enrichment gate — 2026-10-05
+
+Verified stable identity enrichment: 40 candidates inspected; 35 received both TMDb and IMDb IDs; five unresolved candidates were skipped. Existing external_ids was reused without a schema change. Independent CSFD-to-stable-ID linkage was cross-checked against movie metadata. SQLite-aware backups, a disposable-copy rehearsal and a reopened read-only verification passed. All pre-existing rows and personal/source state were logically unchanged; no identity collisions were introduced. Provenance and rollback evidence remain private. No Trakt, Plex or watch-date writes occurred in this gate.
+
+The 35-record cohort has passed the identity gate for a future 25–50-title batch. Fresh Plex/Trakt snapshots and date provenance are still required before that separate batch. CSFD rating timestamps are not proven viewing dates. No personal titles, IDs, snapshots, credentials or manifests are published here.
+
+
 ## Infrastructure control plane — 2026-09-27
 
 - **Verified / live-accepted (Issue #13):** normalized Movie Intelligence + Radarr reads on PR #12 commit `0382d1c`, transient Node v24.21.0; system Node v22.22.1 unchanged. Heretik is Movie-Intelligence-only; TMDb 111 returns Radarr-only Scarface with the expected file/profile state. No confirmed cross-source identity was fabricated.
