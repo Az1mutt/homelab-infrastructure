@@ -8,54 +8,51 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-medium-batch-preflight-ready"
+phase: "watched-history-medium-batch-write-ready"
 
 current_gate: >
-  The stable identity gate for the first medium watched-history cohort is complete.
-  Infrastructure & Agent Control Plane inspected 40 watched candidates and persisted
-  trustworthy TMDb+IMDb identities for 35 using the existing external_ids model;
-  five ambiguous/mismatched candidates were excluded. PR #18 is merged on main at
-  cab43971f0d3df3d81cf5dd718dc733b6cf60b5d. The next gate is a read-only history
-  preflight for those 35 verified candidates across Plex cloud and Trakt before any
-  medium-batch write. Plex historical-date automation remains unverified and must not
-  be used for bulk historical backfill.
+  The first medium-cohort identity and history preflight gates are complete. All five
+  previously unresolved identities were resolved and persisted, bringing the verified
+  cohort to 40 movies with TMDb+IMDb identities. Read-only Plex/Trakt preflight found
+  39 safe write candidates and one excluded ambiguous Plex linkage (Backrooms). No
+  Trakt or Plex mutation occurred during preflight. The next gate is one bounded
+  39-title Trakt-only write batch with per-item read-back, rollback evidence and
+  stop-on-anomaly behavior. Plex historical-date automation remains unverified and
+  must not be used for bulk historical backfill yet.
 
 current_state: >
   Seerr is accepted end-to-end through Plex. Bazarr broad automation and the fresh
-  torrent hardlink check remain non-blocking follow-up. The watched-history/My
-  Cinema design has passed both a single-item Trakt write acceptance and a bounded
-  five-title mini-batch with zero duplicates and precise rollback evidence. The
-  identity bottleneck for the first medium cohort is now resolved: 40 watched
-  candidates were checked, 35 received both stable TMDb and IMDb IDs in the existing
-  external_ids representation, and five were deliberately skipped rather than
-  guessed. The skipped titles are Hra s vrahem, Chuckuv zivot and Posedlost because
-  of conflicting years, plus Zhoubne zlo and Skrys because the ID linkage remained
-  ambiguous. No schema change was required, zero identity collisions were introduced,
-  and watched/rating/CSFD data remained unchanged. A safe DB checkpoint/backup and
-  private evidence were retained. PR #18 documenting the verified identity gate is
-  merged and main was verified at cab43971f0d3df3d81cf5dd718dc733b6cf60b5d.
-  Trakt OAuth remains established privately. Existing accepted Trakt events are Smile
-  2 plus the five-title mini-batch: Heretic, Tetris, The Fifth Element, Inside Out 2
-  and The Batman. Plex and media.db were not modified by those history writes. The
-  next operation is read-only: preflight all 35 newly identity-qualified candidates
-  against Plex cloud and Trakt history, derive per-title date provenance, and exclude
-  any unsafe or already-imported item before authorizing the medium write batch. A
-  temporary encrypted local transfer artifact/key remains an explicit cleanup open
-  loop because automatic permission checks refused deletion; it remains local with
-  restricted permissions.
+  torrent hardlink check remain non-blocking follow-up. The watched-history/My Cinema
+  design has passed a single-item Trakt write acceptance and a bounded five-title
+  mini-batch with zero duplicates and precise rollback evidence. The first medium
+  cohort is now fully identity-qualified: 40 watched candidates have persisted TMDb
+  and IMDb identities in the existing external_ids representation. The five previously
+  unresolved cases were resolved without schema change or collision: Hra s vrahem ->
+  Woman of the Hour (TMDb 835113), Chuckuv zivot -> The Life of Chuck (TMDb 842924),
+  Posedlost -> Obsession (TMDb 1339713; the earlier Forbannelsen hypothesis was a
+  different film), Zhoubne zlo -> Malignant (TMDb 619778), and Skrys -> 6 Souls
+  (TMDb 41505). watched/rating/CSFD state remained unchanged; backup and detailed
+  provenance remain private. Read-only history preflight across all 40 candidates
+  found none already present in Trakt from this cohort, 39 safe proposed imports,
+  two Plex-confirmed dates, zero earliest-of-multiple Plex-date cases, and 37 explicit
+  release-date legacy_placeholder cases. Backrooms was excluded because Plex history
+  and metadata exposed conflicting references and the required detail pages were not
+  available to establish a stable event-to-title link. The six previously accepted
+  Trakt titles remained unchanged and were not proposed again. Sanitized repository
+  documentation/state was reported verified on main at 499eb94. A temporary encrypted
+  local transfer artifact/key remains an explicit cleanup open loop because automatic
+  permission checks previously refused deletion; it remains local with restricted
+  permissions.
 
 exact_next_action: >
-  Run one read-only history preflight across all 35 identity-qualified watched movies.
-  For each candidate, verify TMDb/IMDb identity from media.db, snapshot current Trakt
-  history, snapshot Plex cloud watch history where available, and derive the proposed
-  import date provenance without writing anything. Skip any title already present in
-  Trakt history. Prefer a real Plex watch date when available; where multiple Plex
-  dates exist, use the previously user-authorized earliest-date rule and record that
-  provenance privately. Never use CSFD rating dates as viewing dates. Where no real
-  watch date is known, propose the agreed release-date legacy_placeholder with a
-  synthetic noon Europe/Bratislava exact time. Return the final safe write cohort,
-  counts by provenance/skip reason, and any ambiguity. Do not modify Trakt, Plex or
-  media.db during this preflight.
+  Execute one bounded Trakt-only write batch for the 39 already preflighted safe
+  candidates using the existing verified identities and proposed date provenance.
+  Reuse the completed preflight rather than re-researching stable identities or
+  re-running broad account discovery. Before each write, perform only the minimal
+  freshness check needed to avoid duplicates; then write sequentially, read back the
+  event, verify identity/date/exactly-one-event, store its rollback ID privately, and
+  stop the remaining batch on the first ambiguous or anomalous result. Preserve Plex
+  and media.db. Keep Backrooms excluded. Do not use CSFD rating dates as viewing dates.
 
 blockers:
   - "A safe programmable Plex account-level historical watched-date write method remains unconfirmed; do not automate Plex historical backfill yet."
@@ -65,9 +62,9 @@ dependencies:
     workstream: "Infrastructure & Agent Control Plane"
     dependency: >
       Own Movie Intelligence media.db, stable identity enrichment, CSFD/SerialZone
-      ingestion, agent tools and control-plane write wrappers. The first medium-cohort
-      identity gate is now complete for 35 candidates; unresolved titles remain
-      intentionally excluded rather than guessed.
+      ingestion, agent tools and control-plane write wrappers. The first 40-title
+      medium cohort now has persisted TMDb+IMDb identities; future full-fleet scaling
+      should reuse this resolver/provenance pattern rather than repeat manual research.
   - component: "Trakt"
     dependency: >
       OAuth is established privately. Preserve existing history, skip already-present
@@ -76,18 +73,17 @@ dependencies:
       Plex mirror.
   - component: "Plex watched/history"
     dependency: >
-      Preserve genuine Plex cloud watch events. Existing cloud dates are preferred
-      as real-date evidence when available. Where multiple Plex dates exist, the
-      explicitly user-authorized earliest-date rule may be used and must be recorded
-      in the private audit. Imported legacy items must not overwrite Plex history.
+      Preserve genuine Plex cloud watch events. Existing cloud dates are preferred as
+      real-date evidence when available. Where multiple Plex dates exist, the explicitly
+      user-authorized earliest-date rule may be used and must be recorded privately.
+      Imported legacy items must not overwrite Plex history.
 
 important_open_loops:
-  - "Run the read-only Plex/Trakt history preflight for all 35 identity-qualified candidates and produce the final safe medium-batch cohort."
-  - "After a clean preflight, execute one medium Trakt-only batch from the safe cohort with sequential writes, per-item read-back, rollback IDs and stop-on-anomaly behavior."
-  - "Keep the five unresolved identity candidates excluded until independently resolved; never guess title/year or ID linkage."
+  - "Run the already-preflighted 39-title Trakt-only medium batch with minimal freshness checks, per-item read-back, rollback IDs and stop-on-anomaly behavior."
+  - "Keep Backrooms excluded until Plex event/title linkage can be independently resolved."
   - "Preserve date provenance: Plex-confirmed, explicitly user-authorized earliest Plex date when multiple events exist, or release-date legacy_placeholder when no real date is known."
   - "Never infer viewing dates from CSFD rating dates."
-  - "After medium-batch acceptance, perform full Trakt ingest only after another explicit review gate."
+  - "After medium-batch acceptance, decide whether to scale identity enrichment/history import to the remaining watched fleet; reuse durable resolver evidence and avoid repeating stable checks."
   - "Confirm a safe programmable Plex account-level watched-date write/read-back/rollback path before any automated Plex historical backfill; do not write Plex SQLite directly."
   - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step; do not expose its contents or secrets."
   - "Run one fresh real Sonarr/Radarr torrent import and verify hardlink inode/link count while qBittorrent is still seeding."
@@ -98,30 +94,28 @@ important_open_loops:
 
 stale_or_unknown:
   - "Programmatic Plex historical watched-date editing is unverified; UI support alone is not sufficient for batch automation."
-  - "The five excluded identity candidates remain unresolved until a stronger independent mapping source is available."
+  - "Backrooms Plex event/title linkage remains unresolved because the available cloud references conflict and detail pages were unavailable during preflight."
   - "Live ARR roots/mapping drift remains unresolved; historical direct hardlink capability does not verify a fresh actual ARR import."
   - "English default subtitle client behavior without a remembered override remains pending and non-blocking."
 
 portfolio:
   milestone: true
   signal: >
-    The first medium-cohort identity gate is complete: 35 watched movies now have
-    persisted TMDb+IMDb identities with zero collisions and preserved existing
-    personal-state data. The history pipeline can move from identity work to one
-    read-only 35-title account preflight, after which write-path risk rather than
-    entity matching becomes the remaining Trakt scaling concern.
+    The watched-history pipeline has completed its first medium-cohort preparation:
+    40 movies have stable persisted identities and a full read-only history preflight
+    produced 39 safe Trakt write candidates with explicit date provenance and only one
+    excluded ambiguity. The next operation is execution, not more broad research.
 
 verification:
   last_verified: "2026-10-05"
   sources:
-    - "2026-10-05 PR #18 merged: stable identity enrichment gate documented; merge commit cab43971f0d3df3d81cf5dd718dc733b6cf60b5d."
-    - "2026-10-05 identity enrichment: 40 candidates inspected, 35 enriched with both TMDb and IMDb via existing external_ids, 5 skipped, 0 collisions."
-    - "2026-10-05 skipped identity cases: Hra s vrahem, Chuckuv zivot, Posedlost due to year mismatch; Zhoubne zlo and Skrys due to ambiguous ID linkage."
-    - "2026-10-05 watched/rating/CSFD state unchanged; backup/checkpoint and private evidence retained; Plex and Trakt unchanged during enrichment."
-    - "2026-10-05 five-title Trakt mini-batch accepted: Heretic, Tetris, The Fifth Element, Inside Out 2 and The Batman; zero duplicates and rollback IDs retained privately."
+    - "2026-10-05 all five previously unresolved identities resolved and persisted with both TMDb and IMDb; no schema change, no collisions, watched/rating/CSFD state preserved."
+    - "2026-10-05 correction: Posedlost maps to Obsession (TMDb 1339713); Forbannelsen is a different film."
+    - "2026-10-05 read-only history preflight: 40 identity-qualified candidates, 0 already in Trakt, 39 safe proposals, 2 Plex-confirmed dates, 0 earliest-of-multiple cases, 37 legacy_placeholder cases, 1 excluded Backrooms ambiguity."
+    - "2026-10-05 six previously accepted Trakt titles remained unchanged and were not proposed again; no Trakt or Plex mutation occurred during preflight."
+    - "2026-10-05 sanitized docs/state reported verified on main at 499eb94."
+    - "2026-10-05 five-title Trakt mini-batch accepted with zero duplicates and rollback IDs retained privately."
     - "2026-10-05 first Trakt write accepted: Smile 2 (TMDb 1100782), watched_at 2026-08-04T10:00:00Z."
-    - "2026-10-05 Trakt OAuth verified; token stored privately on homelab with mode 0600."
-    - "2026-09-27 user confirmed Plex Watch History UX is acceptable for the My Cinema visual shelf and wants historical metadata backfill plus Trakt portability."
 
 sync:
   status: "synced"
