@@ -1,5 +1,11 @@
 # Current State
 
+## Watched-history Trakt backfill complete — 2026-10-06
+
+**Verified:** all 558 watched movies are fully accounted in the Trakt historical pipeline. Bulk production, ambiguity resolution and the final Backrooms exception are closed. Backrooms was written with release date 2026-05-29 as explicit `legacy_placeholder` provenance after its retained Plex event could not be safely linked to the verified metadata item. The final write was read back successfully with zero duplicates or anomalies and private rollback evidence was captured.
+
+Plex was not modified. Historical Plex watched-date backfill remains a separate unaccepted gate. `media.db` remains the internal durable data layer; Trakt is now the portable external history layer. Next media work should focus on ongoing synchronization/automation, Kometa iteration, or the remaining non-blocking ARR/Bazarr acceptance checks rather than repeating historical backfill.
+
 ## Stable identity enrichment and history preflight — 2026-10-05
 
 Verified follow-up: all five previously excluded records now have confirmed TMDb and IMDb mappings, bringing the identity-qualified cohort to 40. Exact source metadata, credits and release history resolved festival/distribution year differences and rejected wrong-work hints. Existing external_ids was reused with a fresh SQLite-aware backup, disposable rehearsal, transactional invariant checks and reopened verification: 10 additive rows, no schema changes, no collisions, all pre-existing rows unchanged. A read-only history preflight qualified 39 proposals: two Plex-confirmed dates and 37 legacy placeholders; one unresolved Plex linkage is excluded. Zero cohort titles already exist in Trakt. All six previously accepted Trakt events remain unchanged and excluded. No Trakt/Plex/watch-date writes occurred.
