@@ -8,45 +8,44 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-next-batch-checkpoint"
+phase: "watched-history-second-production-batch-accepted"
 
 current_gate: >
-  The first medium Trakt batch remains accepted at 39/39. A subsequent 25-title
-  production-style batch reused the proven resolver and Trakt pipeline. Of 25
-  candidates, 24 identities were resolved, one identity was skipped as ambiguous,
-  five were already present in Trakt, and 17 new history events were written and
-  verified with zero duplicates. Two titles remain resumable because execution
-  stopped safely on a Casino freshness-check identity/pagination mismatch before any
-  POST. Plex was not modified; media.db changes were limited to intended stable-ID
+  The first medium Trakt batch remains accepted at 39/39. The subsequent 25-title
+  production-style batch is now also complete for every identity-qualified candidate:
+  24 identities were resolved, one identity was skipped as ambiguous, five titles were
+  already present in Trakt, and 19 new history events were written and verified with
+  zero duplicates. Casino and Richard Jewell, which had remained at the previous
+  checkpoint, were both safely completed and verified with rollback IDs captured
+  privately. Plex was not modified; media.db changes were limited to intended stable-ID
   enrichment.
 
 current_state: >
   The watched-history/My Cinema Trakt pipeline is proven through pilot, medium-batch
-  and follow-on production-style use. The accepted medium batch is 39/39 verified with
+  and repeated production-style use. The accepted medium batch is 39/39 verified with
   rollback IDs for every event and zero duplicates. In the next bounded batch, 25
   remaining watched movies were considered. Stable identities were resolved for 24;
   I Love You Phillip Morris was skipped rather than manually investigated. Five of the
-  qualified titles were already present in Trakt. Seventeen new events were written
-  and immediately verified: one used a Plex-confirmed date and 16 used explicit
-  release-date legacy_placeholder dates. Zero duplicates were introduced. Casino was
-  not written because its minimal freshness check returned an identity/pagination
-  mismatch; the stop-on-anomaly rule fired before POST. Richard Jewell was also left
-  unstarted and resumable. No POST was attempted for either remaining title. A private
-  checkpoint preserves completed work and rollback evidence. Backrooms remains
-  excluded from the earlier cohort. Plex historical-date automation remains unverified.
+  qualified titles were already present in Trakt. Nineteen new events are now written
+  and verified with zero duplicates and rollback IDs captured privately, including
+  Casino and Richard Jewell after their saved checkpoint was resumed. The earlier
+  partial result had 17 verified writes, of which one used a Plex-confirmed date and
+  16 used explicit release-date legacy_placeholder dates; the exact provenance for the
+  two resumed writes remains in the private checkpoint evidence and is not restated
+  here without fresh evidence. Backrooms remains excluded from the earlier cohort.
+  Plex historical-date automation remains unverified.
 
 exact_next_action: >
-  Resume only the two unfinished titles from the saved checkpoint. First reconcile
-  Casino READ-ONLY: verify the freshness-check pagination/identity semantics using
-  correct Trakt internal-ID handling and durable stable identity; do not POST until
-  the mismatch is explained and the current Trakt state is unambiguous. If Casino is
-  clean, process it with the accepted minimal freshness-check -> single POST ->
-  immediate read-back -> rollback-ID pattern. Then process Richard Jewell the same
-  way. Do not revisit the 22 already-accounted-for titles and do not manually research
-  I Love You Phillip Morris in this low-budget continuation.
+  When continuing watched-history backfill, select the next bounded cohort from the
+  remaining watched population and reuse the accepted production pipeline: deterministic
+  high-confidence identity enrichment, narrow Trakt/Plex history preflight, minimal
+  freshness check, single write, immediate read-back and private rollback capture.
+  Skip expensive ambiguous identity cases instead of turning a production batch into
+  manual research. Keep I Love You Phillip Morris and Backrooms in the dedicated
+  ambiguity backlog. Separately, investigate a safe programmable Plex historical
+  watched-date write/read-back/rollback path before any automated Plex backfill.
 
 blockers:
-  - "Casino freshness check returned an identity/pagination mismatch before POST; resolve read-only before any write."
   - "A safe programmable Plex account-level historical watched-date write method remains unconfirmed; do not automate Plex historical backfill yet."
 
 dependencies:
@@ -55,17 +54,16 @@ dependencies:
     dependency: >
       Own Movie Intelligence media.db and stable identity enrichment. Follow-on
       scaling should continue to prefer deterministic/high-confidence resolution and
-      skip expensive ambiguous identity investigations when budget is constrained.
+      skip expensive ambiguous identity investigations during production batches.
   - component: "Trakt"
     dependency: >
       OAuth is established privately. Preserve existing history, use correct Trakt
       internal-ID semantics for item-specific reads, retain event-specific rollback
-      evidence, and never repeat or initiate a write while freshness state is
-      ambiguous.
+      evidence, and never repeat an ambiguous POST.
 
 important_open_loops:
-  - "Reconcile Casino read-only, then resume Casino and Richard Jewell only if safe."
-  - "Keep I Love You Phillip Morris as an identity-skip candidate for a later dedicated ambiguity pass rather than spending production-batch budget on manual research."
+  - "Continue Trakt import in bounded production cohorts using the now-proven resumable pipeline."
+  - "Keep I Love You Phillip Morris as an identity-skip candidate for a later dedicated ambiguity pass."
   - "Keep Backrooms excluded until its Plex event/title linkage can be independently resolved."
   - "Preserve date provenance and never infer viewing dates from CSFD rating dates."
   - "Confirm a safe programmable Plex historical watched-date write/read-back/rollback path before automated Plex backfill."
@@ -75,25 +73,25 @@ important_open_loops:
   - "Iterate Kometa v2 only after watched/history behavior is stable."
 
 stale_or_unknown:
-  - "Casino current Trakt freshness state is unknown until the identity/pagination mismatch is reconciled read-only."
   - "Programmatic Plex historical watched-date editing is unverified."
   - "Backrooms Plex event/title linkage remains unresolved."
+  - "I Love You Phillip Morris stable identity remains intentionally unresolved from the low-budget production batch."
 
 portfolio:
   milestone: true
   signal: >
-    The proven watched-history pipeline scaled into a second bounded production-style
-    cohort efficiently: 17 new verified Trakt events plus five safe pre-existing
-    skips, zero duplicates, one identity skip, and a clean stop before an anomalous
-    Casino write. The workflow is now behaving as a resumable production pipeline,
-    not a research pilot.
+    The watched-history pipeline has now completed a second bounded production-style
+    cohort: 24 identity-qualified candidates were fully accounted for, with five
+    pre-existing Trakt events and 19 new verified writes, zero duplicates and safe
+    resumability across an anomaly checkpoint. The workflow is operating as a proven
+    production pipeline rather than a research pilot.
 
 verification:
-  last_verified: "2026-10-05"
+  last_verified: "2026-10-06"
   sources:
-    - "2026-10-05 follow-on batch checkpoint: 25 candidates considered, 24 identities resolved, 1 identity skip (I Love You Phillip Morris)."
-    - "2026-10-05 follow-on batch: 5 already in Trakt; 17 new events written and verified; 1 Plex-date and 16 legacy_placeholder; 0 duplicates."
-    - "2026-10-05 Casino freshness check returned identity/pagination mismatch before POST; Casino and Richard Jewell remain resumable with no POST attempted for either."
+    - "2026-10-06 follow-on 25-title batch final status: 24 identities resolved, 1 identity skip (I Love You Phillip Morris), 5 already in Trakt, 19 new events written and verified."
+    - "2026-10-06 resumed checkpoint: Casino written+verified; Richard Jewell written+verified; 2 new writes, 0 duplicates, rollback IDs captured."
+    - "2026-10-05 prior partial checkpoint: 17 new verified writes, including 1 Plex-date and 16 legacy_placeholder events, zero duplicates."
     - "2026-10-05 first medium batch remains accepted at 39/39 verified with zero duplicates and rollback IDs for every event."
 
 sync:
