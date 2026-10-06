@@ -1,5 +1,14 @@
 # Roadmap
 
+## Ongoing Trakt delivery — ready for first real write — 2026-10-06
+
+- HTTP 403 root cause resolved: missing explicit `User-Agent`; failed refresh path also used the legacy host.
+- Public Trakt read: HTTP 200. OAuth-required read: HTTP 200. Current access token remains valid; no refresh needed.
+- Mortgully resolved to the correct internal Trakt episode identity.
+- Item-specific freshness check: HTTP 200, **0 existing history events**.
+- No delivery row and no POST exist yet.
+- **Next:** `in_flight` -> exactly one real Trakt POST -> immediate exact read-back -> capture Trakt history ID -> mark success. No further observation-only or identity ceremony is needed unless the write path itself exposes a new issue.
+
 ## Ongoing Trakt delivery — blocked on OAuth/API 403 — 2026-10-06
 
 - First target selected: Rick and Morty, *Mortgully: The Last Rickforest*.
