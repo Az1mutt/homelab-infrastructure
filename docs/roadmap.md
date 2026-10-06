@@ -1,5 +1,13 @@
 # Roadmap
 
+## Ongoing Trakt delivery — blocked on OAuth/API 403 — 2026-10-06
+
+- First target selected: Rick and Morty, *Mortgully: The Last Rickforest*.
+- Read-only Trakt identity lookup returned HTTP 403; OAuth refresh also returned HTTP 403.
+- Safe stop occurred **before** `in_flight` creation and before any Trakt POST.
+- Ledger remains 3 events / 3 external links / 0 deliveries; DB integrity is OK.
+- **Next:** narrow OAuth/API 403 diagnosis only. Once read-only access is restored, resume at identity lookup/freshness check and proceed to the already-approved single live Trakt delivery. Do not retest earlier accepted layers.
+
 ## Ongoing watched-sync observation automation — accepted — 2026-10-06
 
 - **PASS:** merged Tautulli reconciliation runner accepted live on a bounded real window.
