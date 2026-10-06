@@ -1,5 +1,13 @@
 # Current State
 
+## First ongoing Trakt delivery — SAFE CHECKPOINT after ambiguous POST — 2026-10-06
+
+For Rick and Morty — *Mortgully: The Last Rickforest*, a durable `in_flight` delivery was created and **exactly one** Trakt history POST was attempted. The POST outcome could not be confirmed. Immediate item-specific read-back and a subsequent read-only reconciliation both found **0 matching history events**.
+
+No Trakt history ID was captured, duplicate count is 0, and the delivery is durably marked `ambiguous`. Plex writes: 0. No unexpected DB changes; `PRAGMA quick_check = ok`.
+
+**Do not retry automatically.** Next inspect only the sanitized original POST response/audit. If that evidence definitively proves no event was created (for example explicit `added: 0` / not-found semantics), one explicit retry can be considered separately. Otherwise leave the delivery ambiguous.
+
 ## First ongoing Trakt delivery — read-only blocker resolved, ready for write — 2026-10-06
 
 The previous HTTP 403 blocker is resolved. The original Trakt client lacked an explicit `User-Agent`, and the failed refresh attempt used the legacy `api.trakt.tv` host instead of the current auth host. With the corrected request shape, a public API read and an OAuth-required read both returned HTTP 200; refresh was unnecessary because the existing access token remains valid.
