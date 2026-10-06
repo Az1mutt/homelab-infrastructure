@@ -8,7 +8,7 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "torrent-cleanup-policy-selected"
+phase: "torrent-cleanup-awaiting-qbittorrent-52"
 
 current_gate: >
   Historical Trakt backfill remains complete at 558/558. Watched Event Ledger v0.1 is
@@ -25,24 +25,25 @@ current_state: >
   The Sonarr path-normalization fix is fully proven. The Pitt S01E04 fresh torrent import
   produced a real hardlink between qBittorrent source and Sonarr library file. Completed
   Download Handling and ARR removal are enabled. qBittorrent 5.1.4 does not support native
-  per-category share limits; that support arrives in 5.2.x. The chosen direction is
-  therefore per-indexer seed goals in Prowlarr: public ARR indexers can use an immediate
-  stop goal, private indexers can later carry their required ratio/time, and manual
-  torrents keep the global unlimited qBittorrent policy. No cleanup configuration change
-  has yet been applied. Ongoing watched-sync code remains merged and ready for bounded
-  live reconciliation acceptance.
+  per-category share limits. A live Prowlarr 2.3.5.5327 preflight also ruled out exact
+  zero-seeding via per-indexer goals because its validator requires positive ratio/time
+  values and zero-valued synchronization is unsafe. No settings were changed. The safest
+  exact path is now a controlled qBittorrent upgrade to 5.2.x followed by native
+  per-category limits for tv-sonarr and movies, while leaving the global policy unlimited
+  for manual/future private-tracker torrents. Ongoing watched-sync code remains merged and
+  ready for bounded live reconciliation acceptance.
 
 exact_next_action: >
   Run the bounded live observation-only acceptance of the merged Tautulli reconciliation
-  runner, keeping Trakt/Plex writes disabled. Separately, implement the selected
-  Prowlarr per-indexer seed policy after a read-only preflight: public ARR indexers should
-  receive an immediate stop goal, private indexers should remain unchanged until their
-  tracker-specific requirements are known, and qBittorrent global unlimited policy must
-  remain unchanged. Any live seed-goal mutation requires explicit authorization.
+  runner, keeping Trakt/Plex writes disabled. Separately, if authorized, perform a
+  controlled qBittorrent upgrade from 5.1.4 to a compatible 5.2.x release through the
+  operational Change/Review path, then configure native per-category immediate-stop limits
+  for tv-sonarr and movies while keeping the global policy unlimited. Do not use the
+  Prowlarr zero-value workaround.
 
 blockers:
   - "Merged Tautulli reconciliation runner has not yet been live-accepted against real incremental watch history."
-  - "Torrent cleanup policy is chosen but Prowlarr per-indexer seed goals are not yet applied."
+  - "Exact ARR-only zero-seeding cleanup requires qBittorrent 5.2.x or later; Prowlarr 2.3.5.5327 cannot safely express the zero-valued seed goal."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
@@ -56,14 +57,14 @@ dependencies:
 important_open_loops:
   - "Run bounded live observation-only acceptance of the merged Tautulli reconciliation runner."
   - "After observation automation is accepted, separately accept one controlled media.db to Trakt delivery."
-  - "Apply the selected Prowlarr per-indexer seed-goal policy: immediate stop for public ARR indexers, tracker-specific goals later for private indexers, global qBittorrent policy unchanged."
+  - "Upgrade qBittorrent to a compatible 5.2.x release, then set native per-category immediate-stop limits for tv-sonarr and movies while leaving global/manual policy unlimited."
   - "Do not start historical Plex backfill implicitly."
   - "Plan layered server backup/restore for configuration, databases and durable media-brain state."
   - "Iterate Kometa v2 after the ongoing-sync observation path is automated."
 
 stale_or_unknown:
   - "Live runner behavior is unverified until bounded reconciliation acceptance completes."
-  - "Exact public-indexer seed-goal field values still require live Prowlarr preflight before mutation; private tracker requirements are future per-indexer policy."
+  - "Target qBittorrent 5.2.x release and upgrade compatibility have not yet been preflighted; no torrent-cleanup mutation has been applied."
 
 portfolio:
   milestone: true
@@ -79,7 +80,9 @@ verification:
     - "2026-10-06 feat/tautulli-reconciliation-runner deleted successfully; merged main remains intact."
     - "2026-10-06 The Pitt S01E04 fresh Sonarr import: same device 2049, same inode 256212996, link count 2, exact size 8008236700 bytes; hardlink PASS."
     - "2026-10-06 ARR Completed Download Handling and completed-torrent removal are enabled; qBittorrent global share ratio/time are unlimited."
-    - "2026-10-06 qBittorrent 5.1.4 lacks per-category share limits; Prowlarr per-indexer seed goals selected so public ARR grabs can stop immediately while future private trackers retain tracker-specific ratio/time requirements."
+    - "2026-10-06 qBittorrent 5.1.4 lacks per-category share limits."
+    - "2026-10-06 Prowlarr 2.3.5.5327 preflight: public torrent indexers have blank seed goals; validator requires positive values, zero is unsafe for synchronization; no settings changed."
+    - "2026-10-06 selected safe path: controlled qBittorrent 5.2.x upgrade, then native per-category immediate-stop limits; global/manual policy remains unlimited."
 
 sync:
   status: "synced"
