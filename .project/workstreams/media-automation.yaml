@@ -8,71 +8,78 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "hardlink-acceptance-failed-diagnosis-needed"
+phase: "hardlink-root-cause-confirmed-fix-ready"
 
 current_gate: >
   Historical watched-history backfill to Trakt is complete for all 558 watched movies.
-  The next non-blocking roadmap check, a fresh real ARR torrent hardlink acceptance,
-  failed on a completed Sonarr import. Rick and Morty S09E05 was imported successfully
-  and source/library files are on the same device with identical size, but they have
-  different inodes and link count 1 on both sides. The import therefore produced a
-  separate copy rather than a hardlink.
+  Fresh real Sonarr torrent hardlink acceptance failed on Rick and Morty S09E05, and the
+  root cause is now confirmed. Sonarr has hardlinks enabled, but imported the qBittorrent
+  source through /downloads and the library destination through /tv, which are separate
+  Docker bind mounts. Even though both host paths are on the same filesystem, hardlinks
+  cannot be created across those container mount boundaries, so Sonarr copied the file.
+  The stale Remote Path Mapping used singular /download/ and did not normalize the actual
+  /downloads/ source into the existing common /data mount.
 
 current_state: >
-  Trakt historical migration is complete and Plex historical backfill has not started.
-  Fresh real hardlink acceptance is now verified FAIL rather than unknown: a completed
-  qBittorrent torrent retained after Sonarr import was compared against the managed
-  library file. Sonarr confirms the episode is imported; source and library files share
-  the same filesystem/device and byte size, but not the same inode, and both report
-  nlink=1. No files or applications were modified during verification. The previously
-  assumed hardlink topology is therefore not accepted end-to-end.
+  Sonarr currently sees the torrent source at /downloads/... via host /data/torrents and
+  the TV library at /tv/... via host /data/media/tv. Sonarr also already has a common
+  /data -> /data bind mount that can expose both source and destination through one mount.
+  qBittorrent uses /data/torrents -> /downloads. Remote Path Mapping is qBittorrent
+  remote /download/ -> local /data/torrents/, but the tested import reported
+  /downloads/... and therefore did not match that mapping. No explicit hardlink or
+  permission failure was retained in logs; the mount topology itself is sufficient to
+  explain the copy behavior. The verified failed sample remains untouched.
 
 exact_next_action: >
-  Run a read-only hardlink root-cause diagnosis before changing configuration. Inspect
-  the current Sonarr hardlink/copy setting, Sonarr container mount topology and visible
-  paths, qBittorrent container mount topology, remote path mapping, and the import log
-  for the verified failed sample. Determine whether Sonarr is configured to copy, sees
-  source/library through incompatible mount paths, encountered a hardlink failure and
-  fell back to copy, or has another specific cause. Do not reimport, move, relink,
-  delete, or modify the current files during diagnosis.
+  Apply the smallest safe Sonarr path-normalization fix: update the qBittorrent Remote
+  Path Mapping to match /downloads/ -> /data/torrents/ and ensure Sonarr uses
+  /data/media/tv as its library root so both torrent source and library destination are
+  addressed under Sonarr's existing common /data mount. This is a live configuration
+  change and must use the Change / Review Lane with branch + PR for repository changes
+  and explicit authorization before live mutation. After the fix, verify current paths
+  read-only and wait for one future fresh torrent import; acceptance PASS requires same
+  device, same inode, matching size and link count >= 2 while qBittorrent retains the
+  source.
 
 blockers:
-  - "Fresh real Sonarr torrent hardlink acceptance failed: same device and size, different inode, nlink=1 on both source and library files."
+  - "Fresh Sonarr torrent imports currently copy instead of hardlink because source and destination are addressed through separate container bind mounts."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
   - component: "Sonarr/qBittorrent"
-    dependency: "Hardlink acceptance requires compatible shared filesystem visibility and Sonarr hardlink behavior at import time."
+    dependency: "Remote Path Mapping and Sonarr library root must normalize both source and destination beneath the common /data mount."
   - component: "Trakt"
     dependency: "Historical backfill is complete; future work should treat Trakt as a portable history layer while media.db remains the internal durable source of truth."
 
 important_open_loops:
-  - "Diagnose the fresh hardlink failure read-only, then make the smallest safe configuration fix and retest on a future fresh import."
-  - "Design ongoing synchronization for new Plex/external watches and ratings; historical Trakt backfill itself is complete."
+  - "Apply the minimal Sonarr path-normalization fix, then re-test on one future fresh torrent import."
+  - "Do not mutate the verified Rick and Morty/Tokyo Vice samples merely to make them appear hardlinked."
+  - "Design ongoing synchronization for new Plex/external watches and ratings."
   - "Confirm a safe Plex historical watched-date write/read-back/rollback path before any historical Plex backfill."
   - "Finish the Plex English-default subtitle client check opportunistically; broad Bazarr automation remains paused."
   - "Iterate Kometa v2 now that watched/history behavior is stable."
   - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step."
 
 stale_or_unknown:
-  - "Root cause of the hardlink failure is not yet established."
+  - "The recommended path-normalization fix has not yet been applied or accepted on a fresh import."
   - "Programmatic Plex historical watched-date editing remains unverified."
   - "Ongoing automatic synchronization between Plex, media.db and Trakt is not yet designed/accepted."
 
 portfolio:
   milestone: true
   signal: >
-    Historical watched-history normalization remains complete at 558/558. A separate
-    storage-efficiency acceptance check surfaced a real configuration/runtime defect:
-    fresh Sonarr torrent imports are still copying instead of hardlinking. The failure
-    is now bounded to diagnosis rather than left as an unverified assumption.
+    Historical watched-history normalization remains complete at 558/558. The separate
+    storage-efficiency defect is now root-caused: Docker path topology, not filesystem
+    capability or Sonarr hardlink policy, caused copies. The remediation is narrow and
+    does not require container recreation.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 final watched-history coverage: 558/558; final status complete."
-    - "2026-10-06 Rick and Morty S09E05 hardlink acceptance: Sonarr import confirmed; same device yes; same inode no; source nlink 1; library nlink 1; size match yes; result FAIL."
-    - "2026-10-06 hardlink verification was read-only; no reimport, file move, relink, deletion, or service/configuration mutation occurred."
+    - "2026-10-06 Rick and Morty S09E05 hardlink acceptance: import confirmed, same device, different inode, nlink 1 on both files, size match, result FAIL."
+    - "2026-10-06 live read-only diagnosis: Sonarr hardlinks enabled; source seen as /downloads/... and destination as /tv/... through separate bind mounts."
+    - "2026-10-06 live read-only diagnosis: Sonarr also has /data -> /data; qBittorrent uses /data/torrents -> /downloads; stale Remote Path Mapping is /download/ -> /data/torrents/ and did not apply to /downloads/."
+    - "2026-10-06 diagnosis: root cause confirmed; recommended fix requires no container recreation and a future fresh download/import for acceptance."
 
 sync:
   status: "synced"
