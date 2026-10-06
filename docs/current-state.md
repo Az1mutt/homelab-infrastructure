@@ -1,5 +1,11 @@
 # Current State
 
+## Tautulli reconciliation runner merged — 2026-10-06
+
+**Verified:** PR #10 in `Az1mutt/personal-ai-brain` was squash-merged. `main` is verified at `0285d235c55b5d1d73c9eaaa12ae487f484e7e10`; required CI passed and the post-merge suite reports **118 passing tests**. Scope remained exactly six approved files, with clean diff/secrets checks and no live Plex/Trakt writes or deployment.
+
+The restart-safe incremental reconciliation runner is now on main with durable cursor semantics. **Next gate:** bounded live observation-only acceptance against genuine recent watch events; Trakt/Plex writes remain disabled. Branch deletion was authorized but has not yet been independently confirmed complete.
+
 ## Watched Event Ledger live observation accepted — 2026-10-06
 
 **Verified PASS:** Rick and Morty S09E06, *Erickerhead*, was observed as a real Plex/Tautulli watch at `2026-10-06T13:20:09Z`. Stable episode identity resolved across TMDb/IMDb/TVDB. The adapter inserted exactly one canonical `watch_event`, preserved exact timestamp/provenance and source event ID, and an immediate replay created no duplicate. No Trakt or Plex write was attempted.
