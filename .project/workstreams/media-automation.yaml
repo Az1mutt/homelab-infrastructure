@@ -8,75 +8,61 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "hardlink-fix-applied-awaiting-fresh-acceptance"
+phase: "ongoing-sync-ledger-v01-merged"
 
 current_gate: >
-  Historical watched-history backfill to Trakt is complete for all 558 watched movies.
-  The confirmed Sonarr hardlink path-topology defect has now been fixed live without
-  container restart or recreation. Remote Path Mapping now matches qBittorrent's actual
-  /downloads/ path and normalizes it into /data/torrents/, while all 50 Sonarr series
-  paths were updated to the /data/media/tv root with moveFiles=false. Read-back
-  verification confirms the mapping and all 50 logical paths. Existing library files
-  remain visible and no unexpected path breakage was found. A future fresh torrent
-  import is still required for end-to-end hardlink acceptance.
+  Historical Trakt backfill remains complete at 558/558. Watched Event Ledger v0.1 is
+  now merged and verified on main in the personal AI brain repository. CI passed and
+  the full 104-test suite passed again after merge. No live Plex or Trakt write path
+  was enabled by this milestone. The Sonarr hardlink fix remains applied and awaits
+  one fresh post-fix torrent import for acceptance.
 
 current_state: >
-  The prior failed sample proved that Sonarr copied rather than hardlinked because the
-  source and destination were addressed through separate /downloads and /tv bind mounts.
-  The minimal fix is now applied: both source and library paths resolve beneath the
-  existing common /data mount. Sonarr's internal path rewrite completed for 50 series.
-  Eleven series directories are absent under both the new path and the old alias, with
-  zero alias-existence mismatches; this is consistent with already-missing/non-local
-  series rather than a regression. All 475 recorded episode files were checked and zero
-  are missing under their rewritten series paths. No media was moved and the container
-  was not restarted or recreated.
+  The deterministic ongoing-sync foundation is now on main: additive event-ledger
+  schema, ingestion/deduplication logic, delivery-state machinery, historical migration
+  boundary handling, and read-only Plex/Tautulli observation support. The merge is
+  verified at commit 9578817 with 104 passing tests. Historical Plex backfill has not
+  started.
 
 exact_next_action: >
-  Wait for or deliberately choose one future fresh torrent import through Sonarr while
-  qBittorrent retains the source. Then verify the exact source and managed library files
-  read-only. Acceptance PASS requires same device, identical inode, matching size and
-  link count >= 2. Do not use the old Rick and Morty or Tokyo Vice samples as proof of
-  the new configuration because they were imported before the fix.
+  Run a separate live observation-only acceptance using one genuinely new Plex watch
+  event. Verify stable identity, exactly one canonical event, and idempotent handling
+  of duplicate/reconciliation observations. Do not enable Trakt or Plex writes yet.
 
 blockers:
-  - "Hardlink configuration fix is applied but not yet end-to-end accepted on a fresh post-fix torrent import."
+  - "Live observation-only acceptance has not yet been run against a new Plex watch event."
+  - "Hardlink fix awaits one fresh post-fix torrent import."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
-  - component: "Sonarr/qBittorrent"
-    dependency: "Future fresh torrent imports must continue to resolve both download and library paths beneath the common /data mount."
+  - component: "Watched Event Ledger v0.1"
+    dependency: "Merged and verified on main at commit 9578817 with 104 passing tests."
   - component: "Trakt"
-    dependency: "Historical backfill is complete; future work should treat Trakt as a portable history layer while media.db remains the internal durable source of truth."
+    dependency: "Historical backfill is complete; ongoing write enablement remains a later phase."
 
 important_open_loops:
-  - "Run one fresh post-fix Sonarr torrent import hardlink acceptance check."
-  - "Do not mutate pre-fix samples merely to make them appear hardlinked."
-  - "Design ongoing synchronization for new Plex/external watches and ratings."
-  - "Confirm a safe Plex historical watched-date write/read-back/rollback path before any historical Plex backfill."
-  - "Finish the Plex English-default subtitle client check opportunistically; broad Bazarr automation remains paused."
-  - "Iterate Kometa v2 now that watched/history behavior is stable."
-  - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step."
+  - "Run one live observation-only acceptance for a new Plex watch event."
+  - "After observation acceptance, separately accept one controlled media.db to Trakt delivery."
+  - "Run one fresh post-fix Sonarr torrent hardlink acceptance check."
+  - "Do not start historical Plex backfill implicitly."
+  - "Iterate Kometa v2 after the ongoing-sync foundation is accepted live."
 
 stale_or_unknown:
+  - "Live observation behavior of the merged ledger is not yet accepted on a real watch event."
   - "End-to-end hardlink behavior after the fix is unverified until a new torrent import completes."
-  - "Programmatic Plex historical watched-date editing remains unverified."
-  - "Ongoing automatic synchronization between Plex, media.db and Trakt is not yet designed/accepted."
 
 portfolio:
   milestone: true
   signal: >
-    The Sonarr hardlink defect has moved from diagnosis to a verified live configuration
-    fix with no observed library regression. Only one fresh post-fix import is required
-    to close the storage-efficiency acceptance loop.
+    Watched Event Ledger v0.1 is merged and verified with 104 passing tests, turning the
+    ongoing-sync design into an implemented deterministic foundation.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 live fix: Remote Path Mapping corrected to match qBittorrent's /downloads/ path and normalize to /data/torrents/."
-    - "2026-10-06 live fix: 50 Sonarr series paths rewritten to /data/media/tv with moveFiles=false; no container restart or recreation."
-    - "2026-10-06 read-back: mapping and all 50 logical series paths persisted."
-    - "2026-10-06 verification: 11 missing new directories were also missing through the old alias, with 0 existence mismatches; 475 episode files checked, 0 missing."
-    - "2026-10-06 final watched-history coverage remains 558/558 complete."
+    - "2026-10-06 merge verified on main at commit 9578817."
+    - "2026-10-06 CI passed and 104 tests passed after merge."
+    - "2026-10-06 historical watched-history coverage remains 558/558."
 
 sync:
   status: "synced"
