@@ -59,6 +59,16 @@ Run a secret scan before every commit that introduces configuration, logs, or ge
 - Treat partition deletion, filesystem creation, formatting, burn-in tests, recursive permission changes, and data movement as destructive operations requiring explicit confirmation and exact targets.
 - Keep rollback options until acceptance criteria are met and retirement is explicitly decided.
 
+## Codex live homelab access
+
+For tasks that explicitly authorize live homelab access, use the Codex environment's preconfigured SSH host alias `homelab`.
+
+- Treat `homelab` as an environment capability, not repository configuration. Do not commit or infer the underlying hostname/IP, username, key path, private key, or other connection credentials.
+- Start with a non-mutating connectivity check such as `ssh -o BatchMode=yes -o ConnectTimeout=10 homelab true` before issuing live commands.
+- If the `homelab` alias is unavailable or authentication fails, stop and report that the Codex environment is missing or cannot use the expected connection. Do not create ad-hoc SSH configuration, request secrets in chat, or fall back to hard-coded connection details.
+- A new Codex task may reuse this access only when it is started in a published environment that contains the required SSH/access setup. Repository instructions alone do not provide credentials.
+- Documentation-only tasks remain subject to the rule above: do not connect to the live homelab unless the task explicitly authorizes it.
+
 ## Documentation style
 
 - Write public documentation in English.
