@@ -8,76 +8,70 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-production-backfill-complete"
+phase: "watched-history-ambiguity-inventory-ready"
 
 current_gate: >
-  The normal-production Trakt watched-history backfill is complete. The final saved
-  15-title checkpoint was resumed successfully: the previously reconciled absent event
-  was retry-written and verified, the remaining 14 titles were then processed, and all
-  15 new events were verified with zero duplicates and zero new anomalies. The
-  production remainder is now exhausted. Only the separate 20-title ambiguity backlog
-  remains outside full acceptance.
+  Normal-production Trakt backfill is complete at 538 of 558 watched movies fully
+  accounted. The remaining 20-title ambiguity backlog has now been inventoried
+  read-only and classified. Fifteen titles are medium-confidence deterministic/easy
+  candidates based on retained unique linkage that failed title/year validation, four
+  require targeted external identity research, and one (Backrooms) requires Plex
+  event/title linkage investigation. No ambiguity-case writes were made.
 
 current_state: >
-  The watched-history/My Cinema Trakt workflow has completed the normal production
-  backlog across pilot, medium, 25-title, 50-title, repeated 100-title and final large
-  batches. Prior verified state had 523 of 558 watched movies fully accounted, leaving
-  15 identity-qualified production titles and a separate 20-title ambiguity backlog.
-  The final 15-title checkpoint is now complete: the rate-limited title was
-  retry-written and verified after read-only reconciliation established that the prior
-  POST had not created an event, and the remaining 14 titles were written and verified
-  cleanly. There were zero already-present skips, zero duplicates and zero new
-  anomalies. Derived final normal-production count is 538 of 558 watched movies fully
-  accounted, with exactly 20 ambiguity-backlog titles remaining. Plex was not modified.
+  The exact 20 ambiguity titles are now known. Fifteen cases retain a unique linked
+  identity candidate but failed metadata identity/year validation; these are expected
+  to be resolvable deterministically with focused validation. Four cases lack a stable
+  retained identity and require targeted external research: I Love You Phillip Morris,
+  Válka policajtů, Helloween, and Attonitas. Backrooms already has TMDb 1083381 and
+  IMDb tt26657236 but remains blocked on conflicting Plex history/metadata linkage.
+  The 538 fully-accounted titles remain untouched.
 
 exact_next_action: >
-  Switch from production backfill to the dedicated 20-title ambiguity pass. First
-  inventory the exact 20 titles and classify why each is ambiguous without writing to
-  Trakt or Plex. Reuse all prior identity evidence and checkpoints; do not reprocess the
-  538 fully-accounted titles. Group ambiguity cases by resolution type (identity
-  ambiguity, Plex linkage ambiguity, or other), resolve the cheapest/high-confidence
-  cases first, and keep any genuinely unresolved cases explicitly excluded rather than
-  forcing a mapping. Plex historical watched-date backfill remains a separate gate.
+  Validate and resolve the 15 deterministic/easy ambiguity cases first, without touching
+  the four research-heavy titles or Backrooms. Reuse retained unique linkage evidence,
+  perform only narrow title/year/identity validation, persist a mapping only when the
+  result is high-confidence and non-conflicting, then process any newly resolved titles
+  through the standard Trakt freshness -> single POST if absent -> read-back -> rollback
+  capture workflow. Stop and defer any case that remains ambiguous.
 
 blockers:
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
+  - "Backrooms Plex event/title linkage remains unresolved."
 
 dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Infrastructure & Agent Control Plane"
-    dependency: "Own media.db and stable identity enrichment; ambiguity resolution should reuse existing resolver evidence."
+    dependency: "Own media.db stable identity enrichment; deterministic ambiguity resolution may persist only verified non-conflicting TMDb/IMDb mappings."
   - component: "Trakt"
-    dependency: "Production backfill is complete; any ambiguity-case writes must retain the same freshness/read-back/rollback safety rules."
+    dependency: "Any ambiguity-case history writes must use the same freshness/read-back/rollback safety rules as production."
 
 important_open_loops:
-  - "Run a read-only inventory/classification of the 20-title ambiguity backlog."
-  - "Resolve ambiguity cases separately from the completed production pipeline; do not revisit the 538 fully-accounted titles."
-  - "Preserve provenance and never infer watch dates from CSFD rating dates."
+  - "Resolve the 15 deterministic/easy ambiguity cases first."
+  - "Research the four missing/nonunique identity cases separately after the deterministic pass."
+  - "Investigate Backrooms Plex linkage last."
+  - "Do not revisit the 538 fully-accounted titles."
+  - "Preserve date provenance and never infer viewing dates from CSFD rating dates."
   - "Confirm a safe Plex historical watched-date write/read-back/rollback path before automated Plex backfill."
-  - "Keep Backrooms excluded unless its Plex event/title linkage can be independently resolved."
-  - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step."
-  - "Run one fresh real Sonarr/Radarr torrent import and verify hardlink inode/link count while qBittorrent is still seeding."
-  - "Finish the Plex English-default subtitle client check opportunistically; broad Bazarr automation remains paused."
-  - "Iterate Kometa v2 only after watched/history behavior is stable."
 
 stale_or_unknown:
+  - "The 15 deterministic/easy cases are not yet accepted until focused validation completes."
+  - "The four research-heavy titles have no accepted stable TMDb/IMDb mapping yet."
   - "Programmatic Plex historical watched-date editing remains unverified."
-  - "Exact identities and ambiguity reasons for all 20 backlog titles remain in operational checkpoints until the dedicated read-only inventory is run."
 
 portfolio:
   milestone: true
   signal: >
-    Normal watched-history production backfill is complete: 538 of 558 watched movies
-    are fully accounted in the Trakt pipeline, with zero remaining production titles.
-    Only a deliberately isolated 20-title ambiguity backlog remains, so the project can
-    now transition from bulk execution to targeted exception handling.
+    Exception handling is now bounded and classified: 15 likely deterministic cases,
+    four targeted-research cases, and one Plex-linkage case. Bulk production is complete,
+    so remaining work is small, explicit and risk-contained.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 final 15-title checkpoint: reconciled title retry-written+verified."
-    - "2026-10-06 final 15-title checkpoint: 14 remaining titles processed, 15 total new writes verified, 0 already-present skips, 0 duplicates, 0 new anomalies, 0 remaining/resumable."
-    - "Derived from prior verified state: fully accounted increases from 523 to 538 of 558; only the separate 20-title ambiguity backlog remains."
+    - "2026-10-06 ambiguity inventory: 20 total titles, 15 deterministic/easy candidates, 4 targeted-research candidates, 1 Plex-linkage candidate, 0 likely unresolved."
+    - "2026-10-06 ambiguity inventory identified I Love You Phillip Morris, Válka policajtů, Helloween and Attonitas as targeted-research cases."
+    - "2026-10-06 ambiguity inventory identified Backrooms (TMDb 1083381 / IMDb tt26657236) as the single Plex event/title linkage case."
 
 sync:
   status: "synced"
