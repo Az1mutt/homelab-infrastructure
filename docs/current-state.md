@@ -1,5 +1,15 @@
 # Current State
 
+## Fresh Sonarr hardlink acceptance PASS — 2026-10-06
+
+**Verified PASS:** The Pitt S01E04 (*10:00 A.M.*) imported successfully through Sonarr after the path-normalization fix. qBittorrent source and Sonarr library file are on the same device (`2049`), have the same inode (`256212996`), link count `2`, and exact size `8,008,236,700` bytes. This closes the fresh post-fix hardlink acceptance loop.
+
+The torrent remains in qBittorrent for a separate reason: ARR Completed Download Handling and completed-torrent removal are enabled, but qBittorrent has unlimited global share ratio and seeding time. Its configured action is Stop only after a share limit is reached, so the torrent never becomes eligible for automatic ARR removal. No cleanup policy change has been applied yet.
+
+## Tautulli reconciliation runner branch cleanup — 2026-10-06
+
+The merged feature branch `feat/tautulli-reconciliation-runner` was deleted successfully. PR #10 remains merged and main remains intact.
+
 ## Tautulli reconciliation runner merged — 2026-10-06
 
 **Verified:** PR #10 in `Az1mutt/personal-ai-brain` was squash-merged. `main` is verified at `0285d235c55b5d1d73c9eaaa12ae487f484e7e10`; required CI passed and the post-merge suite reports **118 passing tests**. Scope remained exactly six approved files, with clean diff/secrets checks and no live Plex/Trakt writes or deployment.
