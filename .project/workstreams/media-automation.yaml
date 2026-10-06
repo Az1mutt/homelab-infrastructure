@@ -8,77 +8,60 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-ambiguity-research-pass-accepted"
+phase: "watched-history-backrooms-only"
 
 current_gate: >
-  Normal-production Trakt backfill remains complete, and the four research-heavy
-  ambiguity cases have now been resolved successfully. I Love You Phillip Morris,
-  Válka policajtů, Helloween, and Attonitas each received a high-confidence stable
-  TMDb/IMDb mapping, the mapping was persisted, and one Trakt history event was written
-  and verified for each with zero reported duplicates or unresolved research cases.
-  The ambiguity backlog is reduced from 20 to 16: 15 deterministic/easy candidates
-  remain plus Backrooms as the single Plex-linkage case.
+  All 15 previously deterministic/easy ambiguity cases are now resolved with verified
+  TMDb/IMDb mappings persisted in media.db and verified Trakt history events. Fully
+  accounted watched-history coverage is now 557 of 558. Exactly one ambiguity case
+  remains: Backrooms.
 
 current_state: >
-  Fully-accounted watched-history coverage is now 542 of 558 watched movies. The
-  completed research pass resolved all four previously missing/nonunique identity cases:
-  I Love You Phillip Morris -> TMDb 8952 / IMDb tt1045772; Válka policajtů (Vojna
-  policajtov / Once Upon a Time in East) -> TMDb 1231374 / IMDb tt30870259; Helloween
-  (2025) -> TMDb 1355583 / IMDb tt31065246; Attonitas (2012) -> TMDb 372282 /
-  IMDb tt3353872. All four mappings were persisted and all four new Trakt history writes
-  were verified. The remaining 16 ambiguity cases are the 15 retained-linkage
-  deterministic candidates, whose prior validation path was blocked by HTTP 429, plus
-  Backrooms. Plex was not modified.
+  Normal production backfill is complete. The latest targeted validation pass resolved
+  Gentlemani, Vrchní, prchni!, Only You, Nenávist, Kingsman: Tajná služba, Ex Machina,
+  Tiché místo: Část II, Země nomádů, V jako Vendeta, Chata, Černý telefon, Temný dům,
+  Zabiják proti své vůli, Hotel Mumbai, and Nepřítel. All mappings were persisted and
+  all corresponding Trakt writes were verified. Backrooms remains the sole unresolved
+  case. Its stable identity is known as TMDb 1083381 / IMDb tt26657236, but the retained
+  Plex history and metadata linkage has not yet been independently verified.
 
 exact_next_action: >
-  Resolve the remaining 15 deterministic/easy ambiguity cases using a narrow targeted
-  validation path that does not depend on the rate-limited retained-linkage endpoint.
-  Reuse the known title/year and retained unique-linkage evidence, validate each against
-  authoritative/public metadata, and accept only high-confidence non-conflicting
-  TMDb/IMDb pairs. Persist verified mappings and process newly resolved titles through
-  the standard Trakt freshness -> single POST if absent -> immediate read-back ->
-  rollback capture pattern. Leave Backrooms for a separate final Plex-linkage
-  investigation and do not revisit the 542 fully-accounted titles.
+  Investigate Backrooms only. Keep the task read-only until its Plex event/title linkage
+  is independently established or disproven. Reuse its known stable identity and
+  retained private Plex evidence. If the linkage becomes high-confidence, preserve any
+  trustworthy Plex watched date and process the title through the standard Trakt
+  freshness, single-write, immediate read-back and rollback-capture pattern. Otherwise,
+  leave it explicitly unresolved.
 
 blockers:
-  - "The original retained-linkage validation endpoint was HTTP 429 for the 15 deterministic/easy cases; use a targeted alternate validation path instead of repeating that blocked loop."
-  - "Safe programmable Plex historical watched-date writes remain unconfirmed."
   - "Backrooms Plex event/title linkage remains unresolved."
+  - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
-  - project: "Homelab & Media Stack"
-    workstream: "Infrastructure & Agent Control Plane"
-    dependency: "Own media.db stable identity enrichment; ambiguity resolution may persist only verified non-conflicting TMDb/IMDb mappings."
   - component: "Trakt"
-    dependency: "Any remaining ambiguity-case history writes must use the same freshness/read-back/rollback safety rules as production."
+    dependency: "Any final Backrooms history write must use the accepted freshness/read-back/rollback safety rules."
 
 important_open_loops:
-  - "Resolve the 15 remaining deterministic/easy ambiguity cases via narrow targeted validation that bypasses the blocked retained-linkage endpoint."
-  - "Investigate Backrooms Plex linkage last."
-  - "Do not revisit the 542 fully-accounted titles."
+  - "Investigate Backrooms as the final watched-history exception."
+  - "Do not revisit the 557 fully-accounted titles."
   - "Preserve date provenance and never infer viewing dates from CSFD rating dates."
-  - "Confirm a safe Plex historical watched-date write/read-back/rollback path before automated Plex backfill."
 
 stale_or_unknown:
-  - "The 15 deterministic/easy cases remain unresolved; their prior failure was an HTTP 429 validation blocker rather than contradictory identity evidence."
+  - "Backrooms Plex event/title linkage is still unverified."
   - "Programmatic Plex historical watched-date editing remains unverified."
 
 portfolio:
   milestone: true
   signal: >
-    All four research-heavy ambiguity cases were resolved and written successfully,
-    shrinking the exception backlog from 20 to 16 and increasing fully-accounted
-    watched-history coverage from 538 to 542 of 558. Only 15 targeted validation cases
-    and one Plex-linkage case remain.
+    Watched-history coverage is now 557 of 558 fully accounted, with only one isolated
+    Plex-linkage exception left before complete Trakt historical closure.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 research pass: I Love You Phillip Morris resolved as TMDb 8952 / IMDb tt1045772; mapping persisted and Trakt write verified."
-    - "2026-10-06 research pass: Válka policajtů resolved as TMDb 1231374 / IMDb tt30870259; mapping persisted and Trakt write verified."
-    - "2026-10-06 research pass: Helloween (2025) resolved as TMDb 1355583 / IMDb tt31065246; mapping persisted and Trakt write verified."
-    - "2026-10-06 research pass: Attonitas (2012) resolved as TMDb 372282 / IMDb tt3353872; mapping persisted and Trakt write verified."
-    - "2026-10-06 research pass: ambiguity backlog reduced to 16."
+    - "2026-10-06 targeted ambiguity pass: all 15 deterministic/easy titles resolved, mappings persisted, and Trakt writes verified."
+    - "2026-10-06 ambiguity backlog reduced from 16 to 1."
+    - "Derived coverage increases from 542 to 557 of 558 fully accounted."
 
 sync:
   status: "synced"
