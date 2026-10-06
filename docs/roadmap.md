@@ -1,5 +1,13 @@
 # Roadmap
 
+## Watched-history milestone — 2026-10-06
+
+- **Verified complete:** historical Trakt backfill covers all 558 watched movies.
+- Stable identity enrichment, ambiguity resolution, provenance handling, duplicate protection, read-back verification and private rollback capture are complete for the historical set.
+- The final Backrooms exception used a policy-compliant release-date `legacy_placeholder`; its old Plex event remains intentionally unlinked rather than falsely inferred.
+- Plex historical watched-date backfill has **not** started and remains a separate gate.
+- **Next media choices:** close the fresh real torrent hardlink acceptance check if a suitable candidate exists; design ongoing Plex/media.db/Trakt synchronization for new watches; or begin Kometa v2 iteration now that watched/history behavior is stable.
+
 ## Stable identity enrichment and history preflight — 2026-10-05
 
 Verified follow-up: all five previously excluded records now have confirmed TMDb and IMDb mappings, bringing the identity-qualified cohort to 40. Exact source metadata, credits and release history resolved festival/distribution year differences and rejected wrong-work hints. Existing external_ids was reused with a fresh SQLite-aware backup, disposable rehearsal, transactional invariant checks and reopened verification: 10 additive rows, no schema changes, no collisions, all pre-existing rows unchanged. A read-only history preflight qualified 39 proposals: two Plex-confirmed dates and 37 legacy placeholders; one unresolved Plex linkage is excluded. Zero cohort titles already exist in Trakt. All six previously accepted Trakt events remain unchanged and excluded. No Trakt/Plex/watch-date writes occurred.
