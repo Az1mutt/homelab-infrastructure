@@ -8,7 +8,7 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "trakt-delivery-ready-for-first-write"
+phase: "trakt-delivery-ambiguous-safe-checkpoint"
 
 current_gate: >
   Historical Trakt backfill remains complete at 558/558. Watched Event Ledger v0.1 and the
@@ -21,30 +21,29 @@ current_gate: >
   is one controlled real media.db -> Trakt delivery with read-back/rollback evidence.
 
 current_state: >
-  The ongoing watch-observation path is automated and accepted end-to-end up to the
-  canonical media.db boundary. The Trakt HTTP 403 blocker is now resolved: the prior
-  client lacked an explicit User-Agent and the attempted refresh used the legacy
-  api.trakt.tv host instead of auth.trakt.tv. With an explicit User-Agent, a public read
-  and OAuth-required read both returned HTTP 200; refresh was not needed because the
-  current access token remains valid. Mortgully: The Last Rickforest resolved
-  unambiguously to the correct internal Trakt episode identity and its item-specific
-  freshness lookup returned HTTP 200 with zero existing history events. No delivery row
-  or POST has yet been created. The next boundary is therefore the already-authorized
-  first durable in_flight -> single POST -> exact read-back -> rollback-ID capture flow.
-  Separately, the one-minute public torrent cleanup policy remains applied and awaits its
-  next qualifying public torrent for final cleanup acceptance.
+  The first real media.db -> Trakt delivery reached a safe ambiguous checkpoint for
+  Mortgully: The Last Rickforest. A durable in_flight delivery was created and exactly
+  one Trakt history POST was attempted. The POST result could not be confirmed, and both
+  the immediate item-specific read-back and a subsequent read-only reconciliation found
+  zero matching history events. No Trakt history ID was captured, duplicate count is zero,
+  and the delivery is durably marked ambiguous. No Plex writes or unexpected DB changes
+  occurred and PRAGMA quick_check passed. The POST must not be retried automatically.
+  The next boundary is to inspect the sanitized original POST response/audit only; an
+  explicit single retry may be considered only if that evidence definitively proves that
+  Trakt did not create the event. Separately, the one-minute public torrent cleanup policy
+  remains applied and awaits its next qualifying public torrent for final cleanup acceptance.
 
 exact_next_action: >
-  Resume the already-selected Mortgully event directly at the durable delivery boundary:
-  create the in_flight sync_deliveries record, issue exactly one Trakt history POST,
-  immediately perform the item-specific read-back, capture the Trakt history ID as
-  rollback evidence, and mark the delivery successful. Do not repeat identity/freshness
-  lookup unless required by the write path itself and do not retest earlier accepted
-  layers. Separately, accept the one-minute public torrent cleanup policy on the next
+  Inspect only the sanitized original Mortgully POST response/audit and classify the
+  ambiguous attempt. Do not issue another POST. If the saved response definitively proves
+  not_found/added=0/no event created, surface that as evidence for one explicit retry
+  decision; otherwise keep the delivery ambiguous. Do not repeat observation, identity,
+  OAuth or freshness diagnostics except a narrow read if required to interpret the saved
+  audit. Separately, accept the one-minute public torrent cleanup policy on the next
   qualifying public-indexer ARR grab.
 
 blockers:
-  - "Controlled ongoing media.db -> Trakt delivery is ready for its first real write; read-only Trakt access and freshness are confirmed."
+  - "First media.db -> Trakt POST is durably ambiguous: exactly one POST was attempted, read-back found 0 events, and automatic retry is forbidden pending audit classification."
   - "One-minute public-indexer cleanup policy is applied but has not yet been accepted end-to-end on a new qualifying ARR torrent."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
@@ -57,7 +56,7 @@ dependencies:
     dependency: "Hardlink topology is now accepted end-to-end; future cleanup depends only on the chosen qBittorrent seeding/share policy."
 
 important_open_loops:
-  - "Complete the already-authorized Mortgully delivery: durable in_flight -> one POST -> immediate read-back -> capture rollback history ID -> success state."
+  - "Classify the sanitized original Mortgully POST response/audit. Keep delivery ambiguous unless the evidence definitively proves no Trakt event was created; only then consider one explicit retry."
   - "After observation automation is accepted, separately accept one controlled media.db to Trakt delivery."
   - "Accept the one-minute public-indexer seed policy on the next qualifying ARR torrent. Keep Sk-CzTorrent unchanged until its seeding requirements are known."
   - "Do not start historical Plex backfill implicitly."
@@ -65,7 +64,7 @@ important_open_loops:
   - "Iterate Kometa v2 after the ongoing-sync observation path is automated."
 
 stale_or_unknown:
-  - "No uncertainty remains on read-only Trakt access for Mortgully; freshness check showed zero existing events. The first outbound write is still pending."
+  - "The first outbound write was attempted exactly once but remains ambiguous; no matching history event is visible and no rollback history ID exists."
   - "End-to-end automatic cleanup after the new one-minute seed policy is unverified until the next qualifying public-indexer torrent completes."
 
 portfolio:
@@ -92,7 +91,8 @@ verification:
     - "2026-10-06 post-acceptance ledger: 3 watch_events / 3 external_event_links; cursor 42; identity/provenance/timestamps correct; Trakt writes 0; Plex writes 0; PRAGMA quick_check ok; private DB backup created."
     - "2026-10-06 first media.db -> Trakt acceptance SAFE CHECKPOINT: selected Mortgully: The Last Rickforest; Trakt identity lookup HTTP 403 and OAuth refresh HTTP 403; no in-flight delivery, no POST attempted, sync_deliveries 0, ledger unchanged, quick_check ok."
     - "2026-10-06 Trakt 403 blocker resolved: explicit User-Agent restored API access; legacy refresh host identified; public read 200, OAuth read 200, refresh not required."
-    - "2026-10-06 Mortgully resolved unambiguously to the correct internal Trakt episode identity; item-specific freshness read returned HTTP 200 with 0 history events; no delivery/POST created yet."
+    - "2026-10-06 Mortgully resolved unambiguously to the correct internal Trakt episode identity; item-specific freshness read returned HTTP 200 with 0 history events."
+    - "2026-10-06 first live Mortgully delivery SAFE CHECKPOINT: durable in_flight created, exactly one Trakt POST attempted, outcome ambiguous, immediate and follow-up read-only reconciliation both found 0 matching events, no history ID captured, duplicate count 0, delivery state ambiguous, Plex writes 0, quick_check ok."
 
 sync:
   status: "synced"
