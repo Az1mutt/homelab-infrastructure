@@ -1,5 +1,13 @@
 # Current State
 
+## Public ARR torrent one-minute cleanup policy applied — 2026-10-06
+
+Prowlarr 2.3.5.5327 now applies `torrentBaseSettings.seedTime = 1` minute with seed ratio left `null` to ten confirmed public torrent indexers: Bangumi Moe, dmhy, Knaben, LimeTorrents, nekoBT, Nyaa.si, SubsPlease, The Pirate Bay, TorrentDownload and YTS. Sk-CzTorrent remains unchanged because its ratio requirements are not yet known.
+
+qBittorrent global ratio/time remain unlimited with action `Stop`; Sonarr/Radarr Completed Download Handling and removal remain enabled. No existing torrents or data were deleted while applying the policy, and a private rollback snapshot was created.
+
+**Next acceptance:** on the next qualifying public-indexer ARR grab, verify the torrent receives a 1-minute seed-time limit, imports by hardlink, stops after roughly one minute, is removed by ARR with its download-side file, and leaves the library file intact and playable.
+
 ## qBittorrent 5.2.4 zero-seed preflight — NO-GO — 2026-10-06
 
 A read-only preflight evaluated LinuxServer qBittorrent `5.2.4_v2.0.15-ls479` as the candidate upgrade from `5.1.4`. General Sonarr/Radarr compatibility and rollback risk are acceptable, but the released 5.2.4 WebUI/WebAPI still does not reliably expose the category share-limit fields required to set `tv-sonarr` and `movies` to exact ratio `0.0` in this headless deployment. The upgrade would therefore not satisfy the reason for upgrading.
