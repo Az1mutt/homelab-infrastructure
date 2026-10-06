@@ -8,60 +8,65 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-backrooms-only"
+phase: "watched-history-backrooms-fallback-ready"
 
 current_gate: >
-  All 15 previously deterministic/easy ambiguity cases are now resolved with verified
-  TMDb/IMDb mappings persisted in media.db and verified Trakt history events. Fully
-  accounted watched-history coverage is now 557 of 558. Exactly one ambiguity case
-  remains: Backrooms.
+  Backrooms remains the sole watched-history exception. A read-only investigation could
+  not safely link the retained Plex history event to the verified Backrooms metadata
+  item, so the Plex event remains INDETERMINATE. However, Backrooms watched status is
+  independently established, its stable identity remains high-confidence as TMDb
+  1083381 / IMDb tt26657236, and the existing provenance policy allows a release-date
+  legacy_placeholder fallback using 2026-05-29. No write has yet been made for this
+  final title.
 
 current_state: >
-  Normal production backfill is complete. The latest targeted validation pass resolved
-  Gentlemani, Vrchní, prchni!, Only You, Nenávist, Kingsman: Tajná služba, Ex Machina,
-  Tiché místo: Část II, Země nomádů, V jako Vendeta, Chata, Černý telefon, Temný dům,
-  Zabiják proti své vůli, Hotel Mumbai, and Nepřítel. All mappings were persisted and
-  all corresponding Trakt writes were verified. Backrooms remains the sole unresolved
-  case. Its stable identity is known as TMDb 1083381 / IMDb tt26657236, but the retained
-  Plex history and metadata linkage has not yet been independently verified.
+  Watched-history coverage remains 557 of 558 fully accounted. For Backrooms, retained
+  Plex evidence contains an event slug "backrooms-2026" while verified Plex metadata
+  uses "the-backrooms-2026" with GUID 63e28b6d774d2d504b6ff241. No retained rating key
+  or event GUID connects those two records, so the historical Plex event cannot be
+  treated as a trustworthy watched-date source. Independently, media.db records the
+  title as watched and preserves the stable identity TMDb 1083381 / IMDb tt26657236.
+  Retained metadata gives release date 2026-05-29, which is acceptable only as explicit
+  legacy_placeholder provenance under the existing policy. Plex was not modified.
 
 exact_next_action: >
-  Investigate Backrooms only. Keep the task read-only until its Plex event/title linkage
-  is independently established or disproven. Reuse its known stable identity and
-  retained private Plex evidence. If the linkage becomes high-confidence, preserve any
-  trustworthy Plex watched date and process the title through the standard Trakt
-  freshness, single-write, immediate read-back and rollback-capture pattern. Otherwise,
-  leave it explicitly unresolved.
+  Perform one final authorized Trakt-only Backrooms write using the verified stable
+  identity and 2026-05-29 as explicit legacy_placeholder provenance. First run a minimal
+  Trakt freshness check. If absent, send exactly one POST, immediately read back using
+  correct Trakt internal-ID semantics, verify identity/date/exactly-one event and capture
+  rollback/history ID privately. Do not use the indeterminate Plex event as date
+  provenance and do not modify Plex.
 
 blockers:
-  - "Backrooms Plex event/title linkage remains unresolved."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
   - component: "Trakt"
-    dependency: "Any final Backrooms history write must use the accepted freshness/read-back/rollback safety rules."
+    dependency: "Final Backrooms write must use the accepted freshness/read-back/rollback safety rules."
 
 important_open_loops:
-  - "Investigate Backrooms as the final watched-history exception."
+  - "Complete the final Backrooms Trakt fallback write and verify it."
   - "Do not revisit the 557 fully-accounted titles."
-  - "Preserve date provenance and never infer viewing dates from CSFD rating dates."
+  - "Preserve the Plex event as unlinked/indeterminate rather than forcing a false linkage."
+  - "Confirm a safe Plex historical watched-date write/read-back/rollback path before automated Plex backfill."
 
 stale_or_unknown:
-  - "Backrooms Plex event/title linkage is still unverified."
+  - "Backrooms Plex event/title linkage remains indeterminate."
   - "Programmatic Plex historical watched-date editing remains unverified."
 
 portfolio:
   milestone: true
   signal: >
-    Watched-history coverage is now 557 of 558 fully accounted, with only one isolated
-    Plex-linkage exception left before complete Trakt historical closure.
+    All identity ambiguity has been eliminated. The final exception is now reduced to a
+    provenance-only decision with a policy-compliant fallback, so complete Trakt
+    historical closure is one verified write away.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 targeted ambiguity pass: all 15 deterministic/easy titles resolved, mappings persisted, and Trakt writes verified."
-    - "2026-10-06 ambiguity backlog reduced from 16 to 1."
-    - "Derived coverage increases from 542 to 557 of 558 fully accounted."
+    - "2026-10-06 Backrooms read-only investigation: linkage INDETERMINATE; Plex event identity not established; no trustworthy Plex watched date."
+    - "2026-10-06 Backrooms read-only investigation: watched status independently established; stable identity high-confidence; legacy_placeholder fallback safe."
+    - "2026-10-06 retained metadata: release date 2026-05-29; stable identity TMDb 1083381 / IMDb tt26657236."
 
 sync:
   status: "synced"
