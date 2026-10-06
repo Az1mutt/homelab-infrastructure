@@ -1,5 +1,13 @@
 # Current State
 
+## Watched Event Ledger live observation accepted — 2026-10-06
+
+**Verified PASS:** Rick and Morty S09E06, *Erickerhead*, was observed as a real Plex/Tautulli watch at `2026-10-06T13:20:09Z`. Stable episode identity resolved across TMDb/IMDb/TVDB. The adapter inserted exactly one canonical `watch_event`, preserved exact timestamp/provenance and source event ID, and an immediate replay created no duplicate. No Trakt or Plex write was attempted.
+
+The additive migration created the four ledger tables. Post-acceptance state is one `watch_event`, one `external_event_link`, zero deliveries and zero cursors; pre-existing `media.db` tables remained logically unchanged and a private backup was created.
+
+**Next exact action:** implement a narrow restart-safe Tautulli reconciliation runner with a durable source cursor in a separate Change/Review PR. Keep the next phase observation-only; no Trakt/Plex writes.
+
 ## Sonarr hardlink path fix applied — 2026-10-06
 
 **Verified live change:** the qBittorrent Remote Path Mapping now matches `/downloads/` and normalizes it to `/data/torrents/`. Sonarr's 50 series paths were rewritten to the common `/data/media/tv` root with `moveFiles=false`; no media move, container restart, or container recreation occurred. Read-back confirms the mapping and all 50 logical paths persisted.
