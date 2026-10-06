@@ -1,5 +1,13 @@
 # Current State
 
+## First ongoing Trakt delivery — SAFE CHECKPOINT on OAuth/API 403 — 2026-10-06
+
+The first controlled `media.db -> Trakt` acceptance selected Rick and Morty, *Mortgully: The Last Rickforest*, but stopped safely before any delivery checkpoint or external write. Trakt returned HTTP 403 during read-only identity lookup, and the OAuth refresh request also returned HTTP 403.
+
+No `sync_deliveries` row was created, no Trakt POST was attempted or could have occurred, and no Plex write occurred. Ledger state remains **3 watch_events / 3 external_event_links / 0 sync_deliveries**; `PRAGMA quick_check = ok` and no unexpected DB changes were observed.
+
+**Resume exactly here:** diagnose and restore read-only Trakt OAuth/API access, then repeat only identity lookup + freshness check for the already-selected event. Do not repeat the accepted observation/reconciliation layer. Once read access works, create the durable in-flight delivery and continue with the already-authorized single POST -> exact read-back -> Trakt history ID capture.
+
 ## Tautulli reconciliation runner live acceptance PASS — 2026-10-06
 
 **Verified PASS:** the deployed runtime tree matched merged `personal-ai-brain` commit `0285d235c55b5d1d73c9eaaa12ae487f484e7e10`. With no prior source cursor, the runner safely bootstrapped at `38`, inspected a bounded window and durably advanced to `42` after ingesting exactly two eligible Rick and Morty episode watches.
