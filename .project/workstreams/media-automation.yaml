@@ -8,65 +8,64 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-backrooms-fallback-ready"
+phase: "watched-history-trakt-backfill-complete"
 
 current_gate: >
-  Backrooms remains the sole watched-history exception. A read-only investigation could
-  not safely link the retained Plex history event to the verified Backrooms metadata
-  item, so the Plex event remains INDETERMINATE. However, Backrooms watched status is
-  independently established, its stable identity remains high-confidence as TMDb
-  1083381 / IMDb tt26657236, and the existing provenance policy allows a release-date
-  legacy_placeholder fallback using 2026-05-29. No write has yet been made for this
-  final title.
+  Historical watched-history backfill to Trakt is complete for all 558 watched movies.
+  Backrooms, the final exception, was written using the approved 2026-05-29
+  legacy_placeholder fallback after its Plex event linkage remained indeterminate.
+  The final write was verified with zero duplicates or anomalies and a private rollback
+  ID was captured. Plex was not modified.
 
 current_state: >
-  Watched-history coverage remains 557 of 558 fully accounted. For Backrooms, retained
-  Plex evidence contains an event slug "backrooms-2026" while verified Plex metadata
-  uses "the-backrooms-2026" with GUID 63e28b6d774d2d504b6ff241. No retained rating key
-  or event GUID connects those two records, so the historical Plex event cannot be
-  treated as a trustworthy watched-date source. Independently, media.db records the
-  title as watched and preserves the stable identity TMDb 1083381 / IMDb tt26657236.
-  Retained metadata gives release date 2026-05-29, which is acceptable only as explicit
-  legacy_placeholder provenance under the existing policy. Plex was not modified.
+  All 558 watched movies are now fully accounted in the Trakt historical pipeline.
+  Bulk production, ambiguity resolution and the final Backrooms provenance exception
+  are closed. media.db retains stable identity/provenance state; Trakt is the portable
+  external history layer. Historical Plex backfill has not started and remains a
+  separate future gate. The next media work can move to post-history roadmap items such
+  as ongoing Trakt/Plex synchronization design, Kometa v2 iteration, or remaining
+  non-blocking ARR/Bazarr acceptance checks.
 
 exact_next_action: >
-  Perform one final authorized Trakt-only Backrooms write using the verified stable
-  identity and 2026-05-29 as explicit legacy_placeholder provenance. First run a minimal
-  Trakt freshness check. If absent, send exactly one POST, immediately read back using
-  correct Trakt internal-ID semantics, verify identity/date/exactly-one event and capture
-  rollback/history ID privately. Do not use the indeterminate Plex event as date
-  provenance and do not modify Plex.
+  Do not start historical Plex backfill implicitly. Choose the next bounded media
+  roadmap task. Preferred credit-efficient options are: (1) close the fresh real
+  torrent hardlink acceptance check if a suitable completed/seeding import exists;
+  (2) design and document the ongoing Plex/media.db/Trakt synchronization contract;
+  or (3) begin a read-only Kometa v2 audit and prepare a small Home/Recommended
+  iteration for later acceptance.
 
 blockers:
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
   - component: "Trakt"
-    dependency: "Final Backrooms write must use the accepted freshness/read-back/rollback safety rules."
+    dependency: "Historical backfill is complete; future work should treat Trakt as a portable history layer while media.db remains the internal durable source of truth."
 
 important_open_loops:
-  - "Complete the final Backrooms Trakt fallback write and verify it."
-  - "Do not revisit the 557 fully-accounted titles."
-  - "Preserve the Plex event as unlinked/indeterminate rather than forcing a false linkage."
-  - "Confirm a safe Plex historical watched-date write/read-back/rollback path before automated Plex backfill."
+  - "Design ongoing synchronization for new Plex/external watches and ratings; historical Trakt backfill itself is complete."
+  - "Confirm a safe Plex historical watched-date write/read-back/rollback path before any historical Plex backfill."
+  - "Run one fresh real Sonarr/Radarr torrent import hardlink acceptance check if a suitable live candidate exists."
+  - "Finish the Plex English-default subtitle client check opportunistically; broad Bazarr automation remains paused."
+  - "Iterate Kometa v2 now that watched/history behavior is stable."
+  - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step."
 
 stale_or_unknown:
-  - "Backrooms Plex event/title linkage remains indeterminate."
   - "Programmatic Plex historical watched-date editing remains unverified."
+  - "Ongoing automatic synchronization between Plex, media.db and Trakt is not yet designed/accepted."
 
 portfolio:
   milestone: true
   signal: >
-    All identity ambiguity has been eliminated. The final exception is now reduced to a
-    provenance-only decision with a policy-compliant fallback, so complete Trakt
-    historical closure is one verified write away.
+    Historical watched-history normalization is complete end-to-end: 558 of 558 watched
+    movies are fully accounted in Trakt with identity, provenance, duplicate protection,
+    read-back verification and rollback evidence. The workstream can now leave bulk
+    history migration and move to ongoing automation and UX improvements.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 Backrooms read-only investigation: linkage INDETERMINATE; Plex event identity not established; no trustworthy Plex watched date."
-    - "2026-10-06 Backrooms read-only investigation: watched status independently established; stable identity high-confidence; legacy_placeholder fallback safe."
-    - "2026-10-06 retained metadata: release date 2026-05-29; stable identity TMDb 1083381 / IMDb tt26657236."
+    - "2026-10-06 final Backrooms write: already present no, new write verified yes, duplicates 0, anomaly no, rollback ID captured yes."
+    - "2026-10-06 final watched-history coverage: 558/558; final status complete."
 
 sync:
   status: "synced"
