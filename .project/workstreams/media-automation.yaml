@@ -8,74 +8,76 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "tautulli-reconciliation-runner-merged"
+phase: "hardlink-accepted-runner-merged"
 
 current_gate: >
   Historical Trakt backfill remains complete at 558/558. Watched Event Ledger v0.1 is
-  live observation-accepted, and the restart-safe Tautulli reconciliation runner has now
-  been squash-merged in Az1mutt/personal-ai-brain PR #10. Main is verified at commit
-  0285d235c55b5d1d73c9eaaa12ae487f484e7e10 with required CI green and 118 tests passing
-  after merge. No live Plex/Trakt writes or deployment were part of this implementation.
-  Branch deletion has been authorized but not yet independently confirmed complete.
-  Separately, a fresh post-fix hardlink acceptance check is currently being run.
+  live observation-accepted and the restart-safe Tautulli reconciliation runner is merged
+  on main via PR #10 at 0285d235c55b5d1d73c9eaaa12ae487f484e7e10 with 118 passing
+  tests. The merged feature branch has now been deleted successfully. Separately, the
+  Sonarr hardlink remediation is now end-to-end accepted on a fresh post-fix import:
+  The Pitt S01E04 imported successfully with source/library on the same device, identical
+  inode 256212996, link count 2 and exact size match. The remaining torrent source stays
+  only because qBittorrent has unlimited seeding ratio/time, not because ARR cleanup is
+  broken.
 
 current_state: >
-  The ongoing observation pipeline now has both an accepted canonical event ledger and a
-  merged restart-safe incremental reconciliation runner with durable cursor semantics.
-  Scope remained exactly six approved files, security/secrets checks were clean, and the
-  merged main test suite passes 118 tests. The next functional gate is live acceptance of
-  the reconciliation runner on a bounded set of genuine recent watches, still without
-  outbound Trakt/Plex writes. The Sonarr hardlink remediation remains a parallel open loop
-  pending the result of the current fresh post-fix torrent check.
+  The Sonarr path-normalization fix is fully proven. The Pitt S01E04 fresh torrent import
+  produced a real hardlink between qBittorrent source and Sonarr library file. Completed
+  Download Handling and ARR removal are enabled. qBittorrent currently inherits unlimited
+  global share ratio and seeding time with Stop only after a share limit is reached, so
+  completed jobs never become eligible for ARR cleanup. No cleanup configuration change
+  has yet been applied. Ongoing watched-sync code remains merged and ready for bounded
+  live reconciliation acceptance.
 
 exact_next_action: >
-  After branch cleanup is confirmed, run a bounded live observation-only acceptance of
-  the merged Tautulli reconciliation runner. Verify durable cursor advance, idempotent
-  replay/restart behavior, and correct canonical ingestion for a small set of genuine
-  recent watches. Keep all Trakt/Plex writes disabled. In parallel, record the result of
-  the current fresh Sonarr hardlink acceptance test when available.
+  Run the bounded live observation-only acceptance of the merged Tautulli reconciliation
+  runner, keeping Trakt/Plex writes disabled. Separately, decide torrent retention policy:
+  if zero seeding is desired globally, apply an explicit qBittorrent share limit that
+  makes completed ARR torrents immediately stoppable/removable; if manual torrents may
+  still need seeding, first scope cleanup to ARR-managed categories instead of changing
+  the global policy. Any automatic deletion policy change requires explicit authorization
+  before mutation.
 
 blockers:
   - "Merged Tautulli reconciliation runner has not yet been live-accepted against real incremental watch history."
-  - "Fresh post-fix Sonarr hardlink acceptance result is pending."
+  - "Automatic torrent-source cleanup policy is not yet chosen/applied."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
   - component: "Watched Event Ledger v0.1"
     dependency: "Merged and live observation-accepted for one real episode event."
   - component: "Tautulli reconciliation runner"
-    dependency: "Merged in PR #10; main 0285d235c55b5d1d73c9eaaa12ae487f484e7e10; 118 tests passing."
-  - component: "Trakt"
-    dependency: "Historical backfill is complete; ongoing write enablement remains deferred until observation automation is live-accepted."
+    dependency: "Merged in PR #10; main 0285d235c55b5d1d73c9eaaa12ae487f484e7e10; 118 tests passing; feature branch deleted."
+  - component: "Sonarr/qBittorrent"
+    dependency: "Hardlink topology is now accepted end-to-end; future cleanup depends only on the chosen qBittorrent seeding/share policy."
 
 important_open_loops:
-  - "Confirm deletion of feat/tautulli-reconciliation-runner after already-authorized cleanup."
   - "Run bounded live observation-only acceptance of the merged Tautulli reconciliation runner."
   - "After observation automation is accepted, separately accept one controlled media.db to Trakt delivery."
-  - "Record and close the fresh post-fix Sonarr hardlink acceptance result."
+  - "Choose and apply a safe torrent cleanup/seeding policy; prefer category scoping if non-ARR torrents should retain seeding."
   - "Do not start historical Plex backfill implicitly."
   - "Plan layered server backup/restore for configuration, databases and durable media-brain state."
   - "Iterate Kometa v2 after the ongoing-sync observation path is automated."
 
 stale_or_unknown:
-  - "Branch deletion is authorized but completion has not yet been confirmed."
   - "Live runner behavior is unverified until bounded reconciliation acceptance completes."
-  - "Hardlink end-to-end status is pending the current fresh import check."
+  - "Exact scope for zero-seeding cleanup (global vs ARR-only categories) has not yet been chosen."
 
 portfolio:
   milestone: true
   signal: >
-    Ongoing watched observation automation is now merged and fully tested on main. The
-    media brain has moved from one-off live observation to a restart-safe incremental
-    reconciliation foundation, still with zero outbound write risk.
+    The storage-efficiency loop is closed: a fresh post-fix Sonarr import now hardlinks
+    correctly, proving the shared-path remediation end-to-end. The remaining torrent
+    retention issue is policy-only, not a filesystem/import defect.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 PR #10 squash-merged in Az1mutt/personal-ai-brain."
-    - "2026-10-06 main verified at 0285d235c55b5d1d73c9eaaa12ae487f484e7e10."
-    - "2026-10-06 required CI passed; post-merge suite 118 tests passed."
-    - "2026-10-06 scope remained six approved files; no security/secrets issue; no live Plex/Trakt writes or deployment."
+    - "2026-10-06 PR #10 remains merged; main 0285d235c55b5d1d73c9eaaa12ae487f484e7e10; 118 tests passing."
+    - "2026-10-06 feat/tautulli-reconciliation-runner deleted successfully; merged main remains intact."
+    - "2026-10-06 The Pitt S01E04 fresh Sonarr import: same device 2049, same inode 256212996, link count 2, exact size 8008236700 bytes; hardlink PASS."
+    - "2026-10-06 ARR Completed Download Handling and completed-torrent removal are enabled; qBittorrent global share ratio/time are unlimited."
 
 sync:
   status: "synced"
