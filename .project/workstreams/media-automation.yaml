@@ -8,42 +8,43 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-second-production-batch-accepted"
+phase: "watched-history-50-title-production-batch-accepted"
 
 current_gate: >
-  The first medium Trakt batch remains accepted at 39/39. The subsequent 25-title
-  production-style batch is now also complete for every identity-qualified candidate:
-  24 identities were resolved, one identity was skipped as ambiguous, five titles were
-  already present in Trakt, and 19 new history events were written and verified with
-  zero duplicates. Casino and Richard Jewell, which had remained at the previous
-  checkpoint, were both safely completed and verified with rollback IDs captured
-  privately. Plex was not modified; media.db changes were limited to intended stable-ID
-  enrichment.
+  The watched-history Trakt pipeline has now completed a clean 50-title production
+  batch after the earlier pilot, medium and 25-title cohorts. Of 50 candidates, 46
+  identities were resolved and four were skipped as ambiguous. All 46 identity-qualified
+  titles were absent from Trakt, then written and verified successfully with zero
+  duplicates, zero pre-POST anomalies, zero write anomalies and rollback/history IDs
+  captured privately for every new event. All 46 used explicit release-date
+  legacy_placeholder provenance; no Plex date was available in this cohort. Plex was
+  not modified; media.db changes were limited to intended stable-ID enrichment.
 
 current_state: >
-  The watched-history/My Cinema Trakt pipeline is proven through pilot, medium-batch
-  and repeated production-style use. The accepted medium batch is 39/39 verified with
-  rollback IDs for every event and zero duplicates. In the next bounded batch, 25
-  remaining watched movies were considered. Stable identities were resolved for 24;
-  I Love You Phillip Morris was skipped rather than manually investigated. Five of the
-  qualified titles were already present in Trakt. Nineteen new events are now written
-  and verified with zero duplicates and rollback IDs captured privately, including
-  Casino and Richard Jewell after their saved checkpoint was resumed. The earlier
-  partial result had 17 verified writes, of which one used a Plex-confirmed date and
-  16 used explicit release-date legacy_placeholder dates; the exact provenance for the
-  two resumed writes remains in the private checkpoint evidence and is not restated
-  here without fresh evidence. Backrooms remains excluded from the earlier cohort.
-  Plex historical-date automation remains unverified.
+  The watched-history/My Cinema Trakt workflow is operating as a proven production
+  pipeline. The accepted first medium batch remains 39/39 verified with zero duplicates,
+  followed by a completed 25-title cohort with 24 identity-qualified candidates fully
+  accounted for (five pre-existing Trakt events and 19 new verified writes). The next
+  50-title cohort completed without a single history anomaly: 46 stable identities
+  resolved, four ambiguous identity skips, zero already-present Trakt events, and 46
+  new history events written and immediately verified. All 46 new events used explicit
+  release-date legacy_placeholder dates, rollback IDs were captured privately for every
+  event, and no duplicates were introduced. The user reported this 50-title production
+  batch consumed about 3% of the current Codex credit allocation, indicating the
+  deterministic production path is now materially cheaper than the earlier research
+  phases. Backrooms and I Love You Phillip Morris remain known ambiguity-backlog items;
+  four additional identity skips from this 50-title cohort remain in the saved private
+  checkpoint. Plex historical-date automation remains unverified.
 
 exact_next_action: >
-  When continuing watched-history backfill, select the next bounded cohort from the
-  remaining watched population and reuse the accepted production pipeline: deterministic
-  high-confidence identity enrichment, narrow Trakt/Plex history preflight, minimal
-  freshness check, single write, immediate read-back and private rollback capture.
-  Skip expensive ambiguous identity cases instead of turning a production batch into
-  manual research. Keep I Love You Phillip Morris and Backrooms in the dedicated
-  ambiguity backlog. Separately, investigate a safe programmable Plex historical
-  watched-date write/read-back/rollback path before any automated Plex backfill.
+  Continue full-fleet Trakt backfill in a larger bounded production cohort, preferably
+  100 watched movies, reusing the exact accepted pipeline. Use deterministic
+  high-confidence identity enrichment, skip ambiguous identities immediately, perform
+  narrow Trakt/Plex preflight and minimal freshness checks, then write once, read back,
+  verify and capture rollback evidence privately. Stop cleanly on any ambiguous POST,
+  but isolate read-only/pre-POST anomalies when safe rather than discarding the whole
+  cohort. Do not re-research already completed titles. Keep ambiguity cases for a
+  separate later pass. Plex backfill remains a separate gate.
 
 blockers:
   - "A safe programmable Plex account-level historical watched-date write method remains unconfirmed; do not automate Plex historical backfill yet."
@@ -52,9 +53,9 @@ dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Infrastructure & Agent Control Plane"
     dependency: >
-      Own Movie Intelligence media.db and stable identity enrichment. Follow-on
+      Own Movie Intelligence media.db and stable identity enrichment. Production
       scaling should continue to prefer deterministic/high-confidence resolution and
-      skip expensive ambiguous identity investigations during production batches.
+      defer ambiguous identities to a separate pass.
   - component: "Trakt"
     dependency: >
       OAuth is established privately. Preserve existing history, use correct Trakt
@@ -62,8 +63,9 @@ dependencies:
       evidence, and never repeat an ambiguous POST.
 
 important_open_loops:
-  - "Continue Trakt import in bounded production cohorts using the now-proven resumable pipeline."
-  - "Keep I Love You Phillip Morris as an identity-skip candidate for a later dedicated ambiguity pass."
+  - "Continue Trakt import in larger bounded production cohorts; 100 titles is now a reasonable next batch size."
+  - "Keep ambiguous identity skips in a dedicated later pass rather than spending production-batch budget on manual research."
+  - "Keep I Love You Phillip Morris as a known identity-skip candidate for the later ambiguity pass."
   - "Keep Backrooms excluded until its Plex event/title linkage can be independently resolved."
   - "Preserve date provenance and never infer viewing dates from CSFD rating dates."
   - "Confirm a safe programmable Plex historical watched-date write/read-back/rollback path before automated Plex backfill."
@@ -75,23 +77,25 @@ important_open_loops:
 stale_or_unknown:
   - "Programmatic Plex historical watched-date editing is unverified."
   - "Backrooms Plex event/title linkage remains unresolved."
-  - "I Love You Phillip Morris stable identity remains intentionally unresolved from the low-budget production batch."
+  - "I Love You Phillip Morris stable identity remains intentionally unresolved."
+  - "The four identity skips from the latest 50-title cohort are preserved in the private checkpoint; their exact identities are not repeated in public state without fresh sanitized evidence."
 
 portfolio:
   milestone: true
   signal: >
-    The watched-history pipeline has now completed a second bounded production-style
-    cohort: 24 identity-qualified candidates were fully accounted for, with five
-    pre-existing Trakt events and 19 new verified writes, zero duplicates and safe
-    resumability across an anomaly checkpoint. The workflow is operating as a proven
-    production pipeline rather than a research pilot.
+    A 50-title production cohort completed with 46 of 46 identity-qualified titles
+    written and verified, zero duplicates and zero history anomalies. The reported
+    roughly 3% Codex credit cost shows the watched-history pipeline has crossed from
+    expensive research/pilot work into efficient repeatable production execution.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 follow-on 25-title batch final status: 24 identities resolved, 1 identity skip (I Love You Phillip Morris), 5 already in Trakt, 19 new events written and verified."
-    - "2026-10-06 resumed checkpoint: Casino written+verified; Richard Jewell written+verified; 2 new writes, 0 duplicates, rollback IDs captured."
-    - "2026-10-05 prior partial checkpoint: 17 new verified writes, including 1 Plex-date and 16 legacy_placeholder events, zero duplicates."
+    - "2026-10-06 50-title production batch: 50 considered, 46 identities resolved, 4 identity skips, 0 already in Trakt."
+    - "2026-10-06 50-title production batch: 46 new Trakt events written and verified; 46 legacy_placeholder, 0 Plex-date."
+    - "2026-10-06 50-title production batch: 0 pre-POST anomaly skips, 0 write anomalies, 0 duplicates, rollback IDs captured for all new events, 0 remaining/resumable."
+    - "2026-10-06 user-reported Codex cost for the completed 50-title batch: approximately 3% of current credit allocation."
+    - "2026-10-06 prior 25-title production batch accepted with 19 new verified writes, 5 pre-existing Trakt events and zero duplicates."
     - "2026-10-05 first medium batch remains accepted at 39/39 verified with zero duplicates and rollback IDs for every event."
 
 sync:
