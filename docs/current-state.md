@@ -1,5 +1,11 @@
 # Current State
 
+## Fresh torrent hardlink acceptance failed — 2026-10-06
+
+**Verified:** a completed Sonarr torrent import for Rick and Morty S09E05 is a separate copy, not a hardlink. qBittorrent source and Sonarr library files are on the same device and have identical size, but their inodes differ and both report link count 1. Sonarr reports the episode imported successfully. The check was read-only; no reimport, relink, move, delete, or configuration change was performed.
+
+**Next exact action:** diagnose the root cause read-only by checking Sonarr's hardlink setting, current container mount/path topology, qBittorrent path visibility, Remote Path Mapping, and the relevant Sonarr import log. Do not treat the previously intended shared-`/data` topology as end-to-end accepted until a future fresh import passes same-inode/link-count verification.
+
 ## Watched-history Trakt backfill complete — 2026-10-06
 
 **Verified:** all 558 watched movies are fully accounted in the Trakt historical pipeline. Bulk production, ambiguity resolution and the final Backrooms exception are closed. Backrooms was written with release date 2026-05-29 as explicit `legacy_placeholder` provenance after its retained Plex event could not be safely linked to the verified metadata item. The final write was read back successfully with zero duplicates or anomalies and private rollback evidence was captured.
