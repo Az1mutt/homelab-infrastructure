@@ -1,5 +1,14 @@
 # Roadmap
 
+## Ongoing watched-sync observation automation — accepted — 2026-10-06
+
+- **PASS:** merged Tautulli reconciliation runner accepted live on a bounded real window.
+- Cursor safely bootstrapped `38 -> 42` and advanced only after durable handling.
+- Two eligible Rick and Morty episode events were inserted with correct identity, timestamps, provenance and source IDs.
+- Replay/re-entry produced zero duplicate rows and preserved cursor/state.
+- Trakt writes: 0. Plex writes: 0. DB integrity check passed.
+- **Next:** one controlled real `media.db -> Trakt` delivery. This is the next unverified boundary; no additional observation-only ceremony is required without new evidence.
+
 ## Public ARR torrent cleanup — policy applied, acceptance pending — 2026-10-06
 
 - Ten confirmed public Prowlarr torrent indexers now use a **1-minute seed-time goal** with ratio unset.
