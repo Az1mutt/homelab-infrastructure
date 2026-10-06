@@ -2,8 +2,9 @@
 
 ## Hardlink acceptance follow-up — 2026-10-06
 
-- **Verified FAIL:** a fresh completed Sonarr torrent import produced separate source/library copies despite both files being on the same device and the same size; inodes differ and both have link count 1.
-- **Next:** perform a read-only root-cause diagnosis of Sonarr hardlink settings, container mounts/path visibility, Remote Path Mapping and import logs.
+- **Verified FAIL:** a fresh completed Sonarr torrent import produced separate source/library copies; same device and size, different inodes, link count 1 on both.
+- **Root cause confirmed:** Sonarr imported the source through `/downloads` and the library through `/tv`, which are separate Docker bind mounts. Hardlinks cannot cross those container mount boundaries. The stale Remote Path Mapping `/download/` -> `/data/torrents/` did not match qBittorrent's actual `/downloads/` path.
+- **Recommended fix:** normalize `/downloads/` -> `/data/torrents/` and use `/data/media/tv` as the Sonarr library root so both paths resolve beneath the existing common `/data` mount. No container recreation is expected.
 - After the smallest safe fix, repeat acceptance on a **future fresh import** while the torrent source is still retained. PASS requires same device, same inode, matching size and link count >= 2.
 - Do not mutate the currently verified sample merely to make the test pass.
 
