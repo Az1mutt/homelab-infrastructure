@@ -1,5 +1,13 @@
 # Current State
 
+## First ongoing Trakt delivery — read-only blocker resolved, ready for write — 2026-10-06
+
+The previous HTTP 403 blocker is resolved. The original Trakt client lacked an explicit `User-Agent`, and the failed refresh attempt used the legacy `api.trakt.tv` host instead of the current auth host. With the corrected request shape, a public API read and an OAuth-required read both returned HTTP 200; refresh was unnecessary because the existing access token remains valid.
+
+The selected target, Rick and Morty — *Mortgully: The Last Rickforest*, now resolves unambiguously to the correct internal Trakt episode identity. Its item-specific history freshness check returned HTTP 200 with **0 events**, so the exact watch is absent. No `sync_deliveries` row exists yet and no Trakt POST has occurred.
+
+**Next:** resume directly at the durable write boundary: create `in_flight`, issue exactly one history POST, immediately read back the exact event, capture its Trakt history ID as rollback evidence, and mark the delivery successful. Do not repeat earlier accepted observation or read-only diagnostics without new evidence.
+
 ## First ongoing Trakt delivery — SAFE CHECKPOINT on OAuth/API 403 — 2026-10-06
 
 The first controlled `media.db -> Trakt` acceptance selected Rick and Morty, *Mortgully: The Last Rickforest*, but stopped safely before any delivery checkpoint or external write. Trakt returned HTTP 403 during read-only identity lookup, and the OAuth refresh request also returned HTTP 403.
