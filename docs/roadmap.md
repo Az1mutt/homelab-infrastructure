@@ -1,5 +1,12 @@
 # Roadmap
 
+## Hardlink acceptance follow-up — 2026-10-06
+
+- **Verified FAIL:** a fresh completed Sonarr torrent import produced separate source/library copies despite both files being on the same device and the same size; inodes differ and both have link count 1.
+- **Next:** perform a read-only root-cause diagnosis of Sonarr hardlink settings, container mounts/path visibility, Remote Path Mapping and import logs.
+- After the smallest safe fix, repeat acceptance on a **future fresh import** while the torrent source is still retained. PASS requires same device, same inode, matching size and link count >= 2.
+- Do not mutate the currently verified sample merely to make the test pass.
+
 ## Watched-history milestone — 2026-10-06
 
 - **Verified complete:** historical Trakt backfill covers all 558 watched movies.
