@@ -1,5 +1,13 @@
 # Roadmap
 
+## ARR torrent cleanup exact zero-seed — deferred — 2026-10-06
+
+- qBittorrent 5.1.4 cannot apply native category share limits.
+- Prowlarr 2.3.5.5327 cannot safely synchronize a zero-valued seed goal.
+- qBittorrent 5.2.4 was preflighted but its released WebUI/WebAPI still does not reliably expose the required category share-limit fields for this headless stack.
+- **Decision:** no upgrade and no cleanup mutation for now.
+- Revisit when a released LinuxServer qBittorrent build exposes stable category limit configuration, or only if a short positive seed-time compromise is explicitly accepted.
+
 ## Hardlink acceptance closed — 2026-10-06
 
 - **PASS:** fresh post-fix Sonarr import for The Pitt S01E04 is a true hardlink: same device, same inode, link count 2, exact size match.
