@@ -1,5 +1,14 @@
 # Roadmap
 
+## First ongoing Trakt delivery — ambiguous safe checkpoint — 2026-10-06
+
+- Durable `in_flight` created for Mortgully.
+- Exactly one real Trakt POST attempted.
+- POST result is ambiguous; immediate and follow-up item-specific reads found **0 matching events**.
+- No history ID captured; duplicates 0; delivery state `ambiguous`; DB integrity OK; Plex writes 0.
+- **No automatic retry.**
+- **Next:** inspect the sanitized saved POST response/audit only. If it definitively proves no event was created, decide separately whether to allow one explicit retry; otherwise keep the delivery ambiguous.
+
 ## Ongoing Trakt delivery — ready for first real write — 2026-10-06
 
 - HTTP 403 root cause resolved: missing explicit `User-Agent`; failed refresh path also used the legacy host.
