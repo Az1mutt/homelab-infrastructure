@@ -1,5 +1,11 @@
 # Current State
 
+## qBittorrent 5.2.4 zero-seed preflight — NO-GO — 2026-10-06
+
+A read-only preflight evaluated LinuxServer qBittorrent `5.2.4_v2.0.15-ls479` as the candidate upgrade from `5.1.4`. General Sonarr/Radarr compatibility and rollback risk are acceptable, but the released 5.2.4 WebUI/WebAPI still does not reliably expose the category share-limit fields required to set `tv-sonarr` and `movies` to exact ratio `0.0` in this headless deployment. The upgrade would therefore not satisfy the reason for upgrading.
+
+**Decision:** do not upgrade solely for ARR-category zero-seeding. Keep the current qBittorrent/Prowlarr configuration unchanged and revisit when a released build exposes stable category share-limit configuration through WebUI/WebAPI. No live or Git configuration changes were made by the preflight.
+
 ## Fresh Sonarr hardlink acceptance PASS — 2026-10-06
 
 **Verified PASS:** The Pitt S01E04 (*10:00 A.M.*) imported successfully through Sonarr after the path-normalization fix. qBittorrent source and Sonarr library file are on the same device (`2049`), have the same inode (`256212996`), link count `2`, and exact size `8,008,236,700` bytes. This closes the fresh post-fix hardlink acceptance loop.
