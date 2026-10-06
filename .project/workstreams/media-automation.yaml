@@ -8,7 +8,7 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "tautulli-reconciliation-live-accepted"
+phase: "trakt-delivery-blocked-oauth-403"
 
 current_gate: >
   Historical Trakt backfill remains complete at 558/558. Watched Event Ledger v0.1 and the
@@ -21,27 +21,28 @@ current_gate: >
   is one controlled real media.db -> Trakt delivery with read-back/rollback evidence.
 
 current_state: >
-  The ongoing watch-observation path is now automated and accepted end-to-end up to the
-  canonical media.db boundary. The runtime tree matched merged commit
-  0285d235c55b5d1d73c9eaaa12ae487f484e7e10. With no prior cursor, the runner safely
-  bootstrapped at 38, inspected a bounded window, durably ingested two eligible episode
-  events, then advanced to 42 only after successful handling. A separate replay/re-entry
-  process preserved cursor 42 and counts at 3 watch_events / 3 external_event_links with
-  zero duplicate inserts. Stable episode identity, exact real timestamps, Plex source,
-  tautulli_reconciliation provenance and original history IDs were preserved. No Trakt or
-  Plex writes occurred and no unexpected database changes were observed. Separately, the
-  one-minute public torrent cleanup policy remains applied and awaits its next qualifying
-  public torrent for final cleanup acceptance.
+  The ongoing watch-observation path is automated and accepted end-to-end up to the
+  canonical media.db boundary. The first real outbound Trakt acceptance selected Rick and
+  Morty - Mortgully: The Last Rickforest, but stopped safely during the narrow read-only
+  implementation/identity phase because Trakt returned HTTP 403 on identity lookup and the
+  OAuth refresh request also returned HTTP 403. No in-flight delivery was created and no
+  Trakt POST could have occurred. Ledger state remains 3 watch_events / 3 external links,
+  sync_deliveries remains 0, PRAGMA quick_check passed, Plex writes were 0 and there were
+  no unexpected DB changes. The delivery state machine exists, but the network Trakt
+  writer still needs the OAuth/API access issue resolved before the first live delivery.
+  Separately, the one-minute public torrent cleanup policy remains applied and awaits its
+  next qualifying public torrent for final cleanup acceptance.
 
 exact_next_action: >
-  Move to the next unverified watched-sync boundary: perform one controlled real
-  media.db -> Trakt delivery for a single canonical event using the already-proven
-  item-specific Trakt freshness/read-back/rollback safety pattern. Do not repeat further
-  observation-only acceptance unless new evidence warrants it. Separately, accept the
+  Resolve the Trakt HTTP 403 using the smallest read-only OAuth/API diagnostic needed,
+  then resume the same selected Rick and Morty event at identity lookup and freshness
+  check. Do not repeat Tautulli/ledger acceptance. Only after read-only Trakt access is
+  confirmed should the delivery create its durable in-flight record and proceed to the
+  already-authorized single POST/read-back/rollback-ID acceptance. Separately, accept the
   one-minute public torrent cleanup policy on the next qualifying public-indexer ARR grab.
 
 blockers:
-  - "Controlled ongoing media.db -> Trakt delivery has not yet been live-accepted."
+  - "Controlled ongoing media.db -> Trakt delivery is blocked by HTTP 403 on Trakt read-only identity lookup and OAuth refresh."
   - "One-minute public-indexer cleanup policy is applied but has not yet been accepted end-to-end on a new qualifying ARR torrent."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
@@ -54,7 +55,7 @@ dependencies:
     dependency: "Hardlink topology is now accepted end-to-end; future cleanup depends only on the chosen qBittorrent seeding/share policy."
 
 important_open_loops:
-  - "Accept one controlled real media.db -> Trakt delivery using freshness check, single write, read-back and rollback ID capture."
+  - "Resolve Trakt OAuth/API HTTP 403 read-only, then resume the already-selected single-event delivery at identity lookup/freshness check; do not repeat earlier accepted layers."
   - "After observation automation is accepted, separately accept one controlled media.db to Trakt delivery."
   - "Accept the one-minute public-indexer seed policy on the next qualifying ARR torrent. Keep Sk-CzTorrent unchanged until its seeding requirements are known."
   - "Do not start historical Plex backfill implicitly."
@@ -62,7 +63,7 @@ important_open_loops:
   - "Iterate Kometa v2 after the ongoing-sync observation path is automated."
 
 stale_or_unknown:
-  - "Ongoing outbound Trakt delivery remains unverified; observation/reconciliation is accepted."
+  - "Cause of Trakt HTTP 403 is not yet confirmed; no Trakt POST occurred and no delivery row exists."
   - "End-to-end automatic cleanup after the new one-minute seed policy is unverified until the next qualifying public-indexer torrent completes."
 
 portfolio:
@@ -87,6 +88,7 @@ verification:
     - "2026-10-06 qBittorrent global unlimited ratio/time and Stop action unchanged; Sonarr/Radarr CDH+removal unchanged; no existing torrents/data removed; private rollback snapshot created."
     - "2026-10-06 bounded live Tautulli reconciliation acceptance PASS: runtime matched merged commit 0285d235..., cursor bootstrapped 38 -> 42, 2 eligible Rick and Morty episodes inserted, replay/re-entry produced 0 duplicate rows."
     - "2026-10-06 post-acceptance ledger: 3 watch_events / 3 external_event_links; cursor 42; identity/provenance/timestamps correct; Trakt writes 0; Plex writes 0; PRAGMA quick_check ok; private DB backup created."
+    - "2026-10-06 first media.db -> Trakt acceptance SAFE CHECKPOINT: selected Mortgully: The Last Rickforest; Trakt identity lookup HTTP 403 and OAuth refresh HTTP 403; no in-flight delivery, no POST attempted, sync_deliveries 0, ledger unchanged, quick_check ok."
 
 sync:
   status: "synced"
