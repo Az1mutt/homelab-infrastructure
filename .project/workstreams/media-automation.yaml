@@ -8,70 +8,71 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-ambiguity-inventory-ready"
+phase: "watched-history-ambiguity-pass-rate-limited"
 
 current_gate: >
-  Normal-production Trakt backfill is complete at 538 of 558 watched movies fully
-  accounted. The remaining 20-title ambiguity backlog has now been inventoried
-  read-only and classified. Fifteen titles are medium-confidence deterministic/easy
-  candidates based on retained unique linkage that failed title/year validation, four
-  require targeted external identity research, and one (Backrooms) requires Plex
-  event/title linkage investigation. No ambiguity-case writes were made.
+  Normal-production Trakt backfill remains complete at 538 of 558 watched movies fully
+  accounted. The first focused pass over the 15 deterministic/easy ambiguity cases was
+  blocked before identity acceptance because the retained-linkage endpoint remained
+  HTTP 429. No mappings were persisted, no Trakt writes were attempted, and all 15
+  cases remain unresolved only because validation could not run. The total ambiguity
+  backlog therefore remains 20.
 
 current_state: >
-  The exact 20 ambiguity titles are now known. Fifteen cases retain a unique linked
-  identity candidate but failed metadata identity/year validation; these are expected
-  to be resolvable deterministically with focused validation. Four cases lack a stable
-  retained identity and require targeted external research: I Love You Phillip Morris,
-  Válka policajtů, Helloween, and Attonitas. Backrooms already has TMDb 1083381 and
-  IMDb tt26657236 but remains blocked on conflicting Plex history/metadata linkage.
-  The 538 fully-accounted titles remain untouched.
+  The 20-title ambiguity backlog is still split into 15 deterministic/easy candidates,
+  four targeted-research candidates, and one Plex-linkage case. The attempted
+  deterministic validation pass made no durable changes: 15 titles were attempted,
+  zero identities were accepted, zero mappings were persisted, and zero history writes
+  occurred. The blocker was a continuing HTTP 429 from the retained-linkage endpoint,
+  not new contradictory identity evidence. The 538 fully-accounted titles remain
+  untouched.
 
 exact_next_action: >
-  Validate and resolve the 15 deterministic/easy ambiguity cases first, without touching
-  the four research-heavy titles or Backrooms. Reuse retained unique linkage evidence,
-  perform only narrow title/year/identity validation, persist a mapping only when the
-  result is high-confidence and non-conflicting, then process any newly resolved titles
-  through the standard Trakt freshness -> single POST if absent -> read-back -> rollback
-  capture workflow. Stop and defer any case that remains ambiguous.
+  Do not repeat the same 15-title validation loop while the retained-linkage endpoint
+  is still rate-limited. Either wait for that endpoint to recover and resume the same
+  read-only validation pass, or deliberately switch to a targeted external-research
+  validation path that does not depend on the blocked endpoint. Keep all writes disabled
+  until each identity is high-confidence and non-conflicting. Do not revisit the 538
+  fully-accounted titles.
 
 blockers:
+  - "Retained-linkage validation endpoint is currently HTTP 429, blocking the 15 deterministic/easy ambiguity cases before identity acceptance."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
   - "Backrooms Plex event/title linkage remains unresolved."
 
 dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Infrastructure & Agent Control Plane"
-    dependency: "Own media.db stable identity enrichment; deterministic ambiguity resolution may persist only verified non-conflicting TMDb/IMDb mappings."
+    dependency: "Own media.db stable identity enrichment; ambiguity resolution may persist only verified non-conflicting TMDb/IMDb mappings."
   - component: "Trakt"
-    dependency: "Any ambiguity-case history writes must use the same freshness/read-back/rollback safety rules as production."
+    dependency: "Any future ambiguity-case history writes must use the same freshness/read-back/rollback safety rules as production."
 
 important_open_loops:
-  - "Resolve the 15 deterministic/easy ambiguity cases first."
-  - "Research the four missing/nonunique identity cases separately after the deterministic pass."
+  - "Resume or bypass the blocked validation path for the 15 deterministic/easy cases without forcing mappings."
+  - "Research the four missing/nonunique identity cases separately."
   - "Investigate Backrooms Plex linkage last."
   - "Do not revisit the 538 fully-accounted titles."
   - "Preserve date provenance and never infer viewing dates from CSFD rating dates."
-  - "Confirm a safe Plex historical watched-date write/read-back/rollback path before automated Plex backfill."
 
 stale_or_unknown:
-  - "The 15 deterministic/easy cases are not yet accepted until focused validation completes."
+  - "The 15 deterministic/easy cases are still unresolved because validation was rate-limited; this is not evidence that their retained candidates are wrong."
+  - "Exact reset time for the retained-linkage endpoint is unknown."
   - "The four research-heavy titles have no accepted stable TMDb/IMDb mapping yet."
   - "Programmatic Plex historical watched-date editing remains unverified."
 
 portfolio:
-  milestone: true
+  milestone: false
   signal: >
-    Exception handling is now bounded and classified: 15 likely deterministic cases,
-    four targeted-research cases, and one Plex-linkage case. Bulk production is complete,
-    so remaining work is small, explicit and risk-contained.
+    No milestone advanced in this pass. The exception backlog remains bounded at 20 and
+    no unsafe writes occurred; the only new verified state is an external rate-limit
+    blocker on the retained-linkage validation path.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 ambiguity inventory: 20 total titles, 15 deterministic/easy candidates, 4 targeted-research candidates, 1 Plex-linkage candidate, 0 likely unresolved."
-    - "2026-10-06 ambiguity inventory identified I Love You Phillip Morris, Válka policajtů, Helloween and Attonitas as targeted-research cases."
-    - "2026-10-06 ambiguity inventory identified Backrooms (TMDb 1083381 / IMDb tt26657236) as the single Plex event/title linkage case."
+    - "2026-10-06 deterministic ambiguity pass: 15 attempted, 0 identities resolved, 0 mappings persisted, 0 Trakt writes."
+    - "2026-10-06 deterministic ambiguity pass: retained-linkage endpoint remained HTTP 429; all 15 cases remain unresolved."
+    - "2026-10-06 ambiguity backlog remains 20 total."
 
 sync:
   status: "synced"
