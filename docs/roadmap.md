@@ -1,5 +1,13 @@
 # Roadmap
 
+## Tautulli reconciliation runner milestone — 2026-10-06
+
+- **Merged:** PR #10 squash-merged; main `0285d235c55b5d1d73c9eaaa12ae487f484e7e10`.
+- **Verified:** required CI green; **118 tests passed** after merge; six-file scope unchanged; secrets/security checks clean.
+- No Plex/Trakt writes or deployment were introduced.
+- **Next:** bounded live observation-only acceptance of incremental reconciliation and durable cursor behavior.
+- Hardlink acceptance remains a parallel open loop; a fresh post-fix check is currently in progress.
+
 ## Ongoing watched-sync acceptance — 2026-10-06
 
 - **Verified PASS:** first real episode observation accepted for Rick and Morty S09E06 (*Erickerhead*) at `2026-10-06T13:20:09Z`.
