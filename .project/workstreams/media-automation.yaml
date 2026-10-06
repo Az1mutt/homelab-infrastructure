@@ -8,64 +8,71 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-trakt-backfill-complete"
+phase: "hardlink-acceptance-failed-diagnosis-needed"
 
 current_gate: >
   Historical watched-history backfill to Trakt is complete for all 558 watched movies.
-  Backrooms, the final exception, was written using the approved 2026-05-29
-  legacy_placeholder fallback after its Plex event linkage remained indeterminate.
-  The final write was verified with zero duplicates or anomalies and a private rollback
-  ID was captured. Plex was not modified.
+  The next non-blocking roadmap check, a fresh real ARR torrent hardlink acceptance,
+  failed on a completed Sonarr import. Rick and Morty S09E05 was imported successfully
+  and source/library files are on the same device with identical size, but they have
+  different inodes and link count 1 on both sides. The import therefore produced a
+  separate copy rather than a hardlink.
 
 current_state: >
-  All 558 watched movies are now fully accounted in the Trakt historical pipeline.
-  Bulk production, ambiguity resolution and the final Backrooms provenance exception
-  are closed. media.db retains stable identity/provenance state; Trakt is the portable
-  external history layer. Historical Plex backfill has not started and remains a
-  separate future gate. The next media work can move to post-history roadmap items such
-  as ongoing Trakt/Plex synchronization design, Kometa v2 iteration, or remaining
-  non-blocking ARR/Bazarr acceptance checks.
+  Trakt historical migration is complete and Plex historical backfill has not started.
+  Fresh real hardlink acceptance is now verified FAIL rather than unknown: a completed
+  qBittorrent torrent retained after Sonarr import was compared against the managed
+  library file. Sonarr confirms the episode is imported; source and library files share
+  the same filesystem/device and byte size, but not the same inode, and both report
+  nlink=1. No files or applications were modified during verification. The previously
+  assumed hardlink topology is therefore not accepted end-to-end.
 
 exact_next_action: >
-  Do not start historical Plex backfill implicitly. Choose the next bounded media
-  roadmap task. Preferred credit-efficient options are: (1) close the fresh real
-  torrent hardlink acceptance check if a suitable completed/seeding import exists;
-  (2) design and document the ongoing Plex/media.db/Trakt synchronization contract;
-  or (3) begin a read-only Kometa v2 audit and prepare a small Home/Recommended
-  iteration for later acceptance.
+  Run a read-only hardlink root-cause diagnosis before changing configuration. Inspect
+  the current Sonarr hardlink/copy setting, Sonarr container mount topology and visible
+  paths, qBittorrent container mount topology, remote path mapping, and the import log
+  for the verified failed sample. Determine whether Sonarr is configured to copy, sees
+  source/library through incompatible mount paths, encountered a hardlink failure and
+  fell back to copy, or has another specific cause. Do not reimport, move, relink,
+  delete, or modify the current files during diagnosis.
 
 blockers:
+  - "Fresh real Sonarr torrent hardlink acceptance failed: same device and size, different inode, nlink=1 on both source and library files."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
+  - component: "Sonarr/qBittorrent"
+    dependency: "Hardlink acceptance requires compatible shared filesystem visibility and Sonarr hardlink behavior at import time."
   - component: "Trakt"
     dependency: "Historical backfill is complete; future work should treat Trakt as a portable history layer while media.db remains the internal durable source of truth."
 
 important_open_loops:
+  - "Diagnose the fresh hardlink failure read-only, then make the smallest safe configuration fix and retest on a future fresh import."
   - "Design ongoing synchronization for new Plex/external watches and ratings; historical Trakt backfill itself is complete."
   - "Confirm a safe Plex historical watched-date write/read-back/rollback path before any historical Plex backfill."
-  - "Run one fresh real Sonarr/Radarr torrent import hardlink acceptance check if a suitable live candidate exists."
   - "Finish the Plex English-default subtitle client check opportunistically; broad Bazarr automation remains paused."
   - "Iterate Kometa v2 now that watched/history behavior is stable."
   - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step."
 
 stale_or_unknown:
+  - "Root cause of the hardlink failure is not yet established."
   - "Programmatic Plex historical watched-date editing remains unverified."
   - "Ongoing automatic synchronization between Plex, media.db and Trakt is not yet designed/accepted."
 
 portfolio:
   milestone: true
   signal: >
-    Historical watched-history normalization is complete end-to-end: 558 of 558 watched
-    movies are fully accounted in Trakt with identity, provenance, duplicate protection,
-    read-back verification and rollback evidence. The workstream can now leave bulk
-    history migration and move to ongoing automation and UX improvements.
+    Historical watched-history normalization remains complete at 558/558. A separate
+    storage-efficiency acceptance check surfaced a real configuration/runtime defect:
+    fresh Sonarr torrent imports are still copying instead of hardlinking. The failure
+    is now bounded to diagnosis rather than left as an unverified assumption.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 final Backrooms write: already present no, new write verified yes, duplicates 0, anomaly no, rollback ID captured yes."
     - "2026-10-06 final watched-history coverage: 558/558; final status complete."
+    - "2026-10-06 Rick and Morty S09E05 hardlink acceptance: Sonarr import confirmed; same device yes; same inode no; source nlink 1; library nlink 1; size match yes; result FAIL."
+    - "2026-10-06 hardlink verification was read-only; no reimport, file move, relink, deletion, or service/configuration mutation occurred."
 
 sync:
   status: "synced"
