@@ -1,5 +1,13 @@
 # Current State
 
+## Tautulli reconciliation runner live acceptance PASS — 2026-10-06
+
+**Verified PASS:** the deployed runtime tree matched merged `personal-ai-brain` commit `0285d235c55b5d1d73c9eaaa12ae487f484e7e10`. With no prior source cursor, the runner safely bootstrapped at `38`, inspected a bounded window and durably advanced to `42` after ingesting exactly two eligible Rick and Morty episode watches.
+
+The two new canonical events preserved stable episode identity, exact real watched timestamps, Plex source, `tautulli_reconciliation` provenance and original Tautulli history IDs. A separate replay/re-entry process preserved cursor `42` and ledger counts at **3 watch_events / 3 external_event_links**, with one duplicate recognized and **zero duplicate inserts**. Trakt writes: 0. Plex writes: 0. No unexpected DB changes; `PRAGMA quick_check = ok`. A private backup was created before execution.
+
+**Next watched-sync boundary:** one controlled real `media.db -> Trakt` delivery with freshness check, single write, read-back verification and rollback ID capture. Do not repeat further observation-only acceptance unless new evidence warrants it.
+
 ## Public ARR torrent one-minute cleanup policy applied — 2026-10-06
 
 Prowlarr 2.3.5.5327 now applies `torrentBaseSettings.seedTime = 1` minute with seed ratio left `null` to ten confirmed public torrent indexers: Bangumi Moe, dmhy, Knaben, LimeTorrents, nekoBT, Nyaa.si, SubsPlease, The Pirate Bay, TorrentDownload and YTS. Sk-CzTorrent remains unchanged because its ratio requirements are not yet known.
