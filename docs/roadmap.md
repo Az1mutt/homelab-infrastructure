@@ -1,5 +1,13 @@
 # Roadmap
 
+## Public ARR torrent cleanup — policy applied, acceptance pending — 2026-10-06
+
+- Ten confirmed public Prowlarr torrent indexers now use a **1-minute seed-time goal** with ratio unset.
+- Sk-CzTorrent is intentionally unchanged until its seeding/ratio requirements are known.
+- qBittorrent global unlimited policy is unchanged; ARR Completed Download Handling/removal is unchanged.
+- No existing torrents/data were deleted when applying the policy; private rollback snapshot exists.
+- **Next gate:** accept on one new public-indexer ARR torrent: hardlink import -> ~1 minute seed -> Stop -> ARR removes job/download-side data -> library file remains playable.
+
 ## ARR torrent cleanup exact zero-seed — deferred — 2026-10-06
 
 - qBittorrent 5.1.4 cannot apply native category share limits.
