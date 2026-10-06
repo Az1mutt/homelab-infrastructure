@@ -8,74 +8,74 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "ongoing-sync-observation-accepted"
+phase: "tautulli-reconciliation-runner-merged"
 
 current_gate: >
   Historical Trakt backfill remains complete at 558/558. Watched Event Ledger v0.1 is
-  merged on main and has now passed its first live observation-only acceptance using
-  Rick and Morty S09E06 "Erickerhead". The real Plex/Tautulli observation at
-  2026-10-06T13:20:09Z resolved stable episode identity across TMDb/IMDb/TVDB, inserted
-  exactly one canonical watch_event, preserved exact provenance and source event ID, and
-  replayed idempotently without creating a duplicate. No Trakt or Plex write was attempted.
-  The next gate is a narrow restart-safe Tautulli reconciliation runner with a durable cursor.
+  live observation-accepted, and the restart-safe Tautulli reconciliation runner has now
+  been squash-merged in Az1mutt/personal-ai-brain PR #10. Main is verified at commit
+  0285d235c55b5d1d73c9eaaa12ae487f484e7e10 with required CI green and 118 tests passing
+  after merge. No live Plex/Trakt writes or deployment were part of this implementation.
+  Branch deletion has been authorized but not yet independently confirmed complete.
+  Separately, a fresh post-fix hardlink acceptance check is currently being run.
 
 current_state: >
-  The live ledger now contains one accepted episode watch event and one external event
-  link, with zero deliveries and zero cursors. The additive migration created four ledger
-  tables while the pre-existing media.db tables remained logically unchanged; a private
-  backup was created before acceptance. This proves real episode identity resolution,
-  canonical event insertion, provenance preservation and duplicate suppression in the
-  merged observation path. Separately, the Sonarr hardlink fix remains applied and awaits
-  one fresh post-fix torrent import for final acceptance.
+  The ongoing observation pipeline now has both an accepted canonical event ledger and a
+  merged restart-safe incremental reconciliation runner with durable cursor semantics.
+  Scope remained exactly six approved files, security/secrets checks were clean, and the
+  merged main test suite passes 118 tests. The next functional gate is live acceptance of
+  the reconciliation runner on a bounded set of genuine recent watches, still without
+  outbound Trakt/Plex writes. The Sonarr hardlink remediation remains a parallel open loop
+  pending the result of the current fresh post-fix torrent check.
 
 exact_next_action: >
-  Implement a narrow restart-safe Tautulli reconciliation runner with a durable source
-  cursor in a separate Change/Review PR. Keep it observation-only: no Trakt writes and no
-  Plex writes. The runner should incrementally discover new completed watches, normalize
-  them through the accepted adapter, advance the cursor only after durable event handling,
-  and remain idempotent across retries/restarts. After merge, run a bounded live acceptance
-  over a small set of genuine recent watch events.
+  After branch cleanup is confirmed, run a bounded live observation-only acceptance of
+  the merged Tautulli reconciliation runner. Verify durable cursor advance, idempotent
+  replay/restart behavior, and correct canonical ingestion for a small set of genuine
+  recent watches. Keep all Trakt/Plex writes disabled. In parallel, record the result of
+  the current fresh Sonarr hardlink acceptance test when available.
 
 blockers:
-  - "Ongoing observation is not yet automated; no durable Tautulli reconciliation cursor/runner exists in production."
-  - "Hardlink fix awaits one fresh post-fix torrent import."
+  - "Merged Tautulli reconciliation runner has not yet been live-accepted against real incremental watch history."
+  - "Fresh post-fix Sonarr hardlink acceptance result is pending."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
   - component: "Watched Event Ledger v0.1"
     dependency: "Merged and live observation-accepted for one real episode event."
-  - component: "Tautulli"
-    dependency: "Next phase should use read-only incremental reconciliation with durable cursor semantics."
+  - component: "Tautulli reconciliation runner"
+    dependency: "Merged in PR #10; main 0285d235c55b5d1d73c9eaaa12ae487f484e7e10; 118 tests passing."
   - component: "Trakt"
-    dependency: "Historical backfill is complete; ongoing write enablement remains deferred until observation automation is accepted."
+    dependency: "Historical backfill is complete; ongoing write enablement remains deferred until observation automation is live-accepted."
 
 important_open_loops:
-  - "Implement and accept the restart-safe Tautulli reconciliation runner with source cursor."
+  - "Confirm deletion of feat/tautulli-reconciliation-runner after already-authorized cleanup."
+  - "Run bounded live observation-only acceptance of the merged Tautulli reconciliation runner."
   - "After observation automation is accepted, separately accept one controlled media.db to Trakt delivery."
-  - "Run one fresh post-fix Sonarr torrent hardlink acceptance check."
+  - "Record and close the fresh post-fix Sonarr hardlink acceptance result."
   - "Do not start historical Plex backfill implicitly."
   - "Plan layered server backup/restore for configuration, databases and durable media-brain state."
   - "Iterate Kometa v2 after the ongoing-sync observation path is automated."
 
 stale_or_unknown:
-  - "Automated ongoing reconciliation behavior is unverified until the cursor runner exists and is live-accepted."
-  - "End-to-end hardlink behavior after the fix is unverified until a new torrent import completes."
+  - "Branch deletion is authorized but completion has not yet been confirmed."
+  - "Live runner behavior is unverified until bounded reconciliation acceptance completes."
+  - "Hardlink end-to-end status is pending the current fresh import check."
 
 portfolio:
   milestone: true
   signal: >
-    Ongoing-sync moved from unit/component confidence to a real live episode observation.
-    Stable TV identity, provenance and idempotency are now proven on the homelab with zero
-    external write risk.
+    Ongoing watched observation automation is now merged and fully tested on main. The
+    media brain has moved from one-off live observation to a restart-safe incremental
+    reconciliation foundation, still with zero outbound write risk.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 live observation acceptance: Rick and Morty S09E06 Erickerhead; watched_at 2026-10-06T13:20:09Z."
-    - "2026-10-06 stable episode identity resolved via TMDb/IMDb/TVDB; exactly one canonical event inserted."
-    - "2026-10-06 duplicate replay created no second event; provenance correct; zero Trakt/Plex writes."
-    - "2026-10-06 ledger state after acceptance: 1 watch_event, 1 external_event_link, 0 deliveries, 0 cursors."
-    - "2026-10-06 original media.db tables logically unchanged; private backup created."
+    - "2026-10-06 PR #10 squash-merged in Az1mutt/personal-ai-brain."
+    - "2026-10-06 main verified at 0285d235c55b5d1d73c9eaaa12ae487f484e7e10."
+    - "2026-10-06 required CI passed; post-merge suite 118 tests passed."
+    - "2026-10-06 scope remained six approved files; no security/secrets issue; no live Plex/Trakt writes or deployment."
 
 sync:
   status: "synced"
