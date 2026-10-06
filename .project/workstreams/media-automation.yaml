@@ -8,87 +8,71 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-full-fleet-inventory-ready"
+phase: "watched-history-production-backfill-243-eligible"
 
 current_gate: >
-  Full-fleet watched-history inventory is now available from durable current state.
-  media.db contains 558 watched movies. The inventory reports 205 as fully accounted
-  for in the Trakt pipeline and 353 remaining. Of those 353, one is already
-  identity-qualified and 352 still lack stable TMDb/IMDb identity. Ten titles are in
-  the known ambiguity backlog and are excluded from production selection, leaving
-  343 production-eligible remaining movies. The accepted recommendation is to process
-  the next 100 production-eligible titles using the proven large-batch pipeline.
+  Latest 100-title production batch completed cleanly. Of 100 candidates, 95 identities
+  were resolved and five were deferred as ambiguous. One resolved title was already in
+  Trakt and 94 new history events were written and verified. There were zero duplicates,
+  zero pre-POST anomalies and zero write anomalies. All 94 new writes used
+  legacy_placeholder provenance. Starting from 343 production-eligible remaining and
+  10 ambiguity cases, the deterministic current remainder is 243 production-eligible
+  and 15 ambiguity-backlog titles.
 
 current_state: >
-  The watched-history/My Cinema Trakt workflow is operating as a proven production
-  pipeline across pilot, medium, 25-title, 50-title and 100-title cohorts. The latest
-  accepted 100-title cohort completed with 96 identity-qualified titles verified in
-  Trakt, zero duplicates and complete private rollback evidence; one mid-batch
-  read-back anomaly was safely reconciled without retrying the POST. A narrow
-  read-only inventory now reports 558 total watched movies, 205 fully accounted in
-  the production pipeline and 353 remaining. One remaining title already has stable
-  identity, 352 still need stable identity enrichment, and ten known ambiguity cases
-  are excluded from production selection. This leaves 343 production-eligible titles.
-  Plex historical-date automation remains unverified and separate from Trakt backfill.
+  Prior verified inventory: 558 watched, 205 fully accounted, 353 remaining, including
+  10 ambiguity-backlog titles and 343 production-eligible titles. The latest 100-title
+  batch fully accounted for 95 more watched movies: 94 new verified Trakt events and
+  one already-present event. Five additional ambiguous identities were deferred.
+  Therefore the derived current counts are 300 fully accounted, 258 remaining total,
+  15 ambiguity-backlog titles and 243 production-eligible remaining. Plex was not
+  modified. Plex historical-date automation remains unverified.
 
 exact_next_action: >
-  Process the next 100 of the 343 production-eligible remaining watched movies using
-  the exact accepted large-batch workflow. Reuse durable state and completed checkpoints;
-  do not revisit accounted titles or known ambiguity cases. Perform deterministic
-  high-confidence TMDb/IMDb enrichment, skip new ambiguous identities immediately,
-  run narrow Trakt/Plex preflight, use minimal freshness checks, write exactly once,
-  read back with correct Trakt internal-ID semantics, verify identity/date/exactly-one
-  event and capture rollback evidence privately. Stop the write stream on an ambiguous
-  POST and preserve a resumable checkpoint. Do not modify Plex.
+  Process the next 100 of 243 production-eligible remaining watched movies using the
+  accepted large-batch pipeline. Reuse durable state and checkpoints, exclude accounted
+  and ambiguity-backlog titles, resolve only high-confidence TMDb/IMDb identities,
+  skip new ambiguity immediately, use narrow history preflight and minimal freshness
+  checks, write once, read back using correct Trakt internal-ID semantics, verify and
+  retain rollback evidence. Stop on an ambiguous write and keep a resumable checkpoint.
 
 blockers:
-  - "A safe programmable Plex account-level historical watched-date write method remains unconfirmed; do not automate Plex historical backfill yet."
+  - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
   - project: "Homelab & Media Stack"
     workstream: "Infrastructure & Agent Control Plane"
-    dependency: >
-      Own Movie Intelligence media.db and stable identity enrichment. Production
-      scaling should continue to prefer deterministic/high-confidence resolution and
-      defer ambiguous identities to a separate pass.
+    dependency: "Own media.db and stable identity enrichment."
   - component: "Trakt"
-    dependency: >
-      OAuth is established privately. Preserve existing history, use correct Trakt
-      internal-ID semantics for item-specific reads, retain event-specific rollback
-      evidence, and never repeat an ambiguous POST.
+    dependency: "Use correct Trakt internal-ID read semantics and never repeat an ambiguous POST."
 
 important_open_loops:
-  - "Process the next 100 of 343 production-eligible remaining watched movies."
-  - "Keep the 10 known ambiguity-backlog titles excluded from production cohorts."
-  - "Keep newly ambiguous identity skips in the dedicated later ambiguity pass rather than spending production-batch budget on manual research."
-  - "Preserve date provenance and never infer viewing dates from CSFD rating dates."
-  - "Confirm a safe programmable Plex historical watched-date write/read-back/rollback path before automated Plex backfill."
-  - "Clean up the temporary local encrypted transfer artifact/key only through an explicitly authorized safe cleanup step."
-  - "Run one fresh real Sonarr/Radarr torrent import and verify hardlink inode/link count while qBittorrent is still seeding."
-  - "Finish the Plex English-default subtitle client check opportunistically; broad Bazarr automation remains paused."
-  - "Iterate Kometa v2 only after watched/history behavior is stable."
+  - "Process the next 100 of 243 production-eligible remaining watched movies."
+  - "Keep 15 known ambiguity-backlog titles out of normal production batches."
+  - "Preserve provenance and never infer watch dates from CSFD rating dates."
+  - "Confirm a safe Plex historical watched-date write/read-back/rollback path."
+  - "Keep Backrooms excluded until its Plex event/title linkage is resolved."
+  - "Handle ambiguity cases in a dedicated later pass."
 
 stale_or_unknown:
-  - "Programmatic Plex historical watched-date editing is unverified."
-  - "Backrooms Plex event/title linkage remains unresolved."
-  - "The exact identities of ambiguity-backlog items remain in private checkpoints unless separately sanitized."
-  - "The inventory's fully-accounted count is accepted as current operational inventory output; if completion percentages or final reconciliation depend on pilot-era accounting semantics, verify that definition narrowly before final closure."
+  - "Programmatic Plex historical watched-date editing remains unverified."
+  - "Exact ambiguity-title identities remain in operational checkpoints."
+  - "The 300/258/15/243 counts are deterministic deltas from the verified prior inventory and latest accepted batch; no full recount is needed before the next production batch."
 
 portfolio:
   milestone: true
   signal: >
-    The watched-history backfill now has an exact production remainder: 343 watched
-    movies are eligible for normal batch processing, while ten known ambiguity cases
-    are isolated for a separate pass. The large-batch workflow is proven and the
-    remaining work can now be consumed predictably rather than estimated.
+    Another 100-title cohort completed with 95 of 95 identity-qualified titles fully
+    accounted for, including 94 new verified writes, one pre-existing Trakt event,
+    zero duplicates and zero anomalies. Production remainder is now 243.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 read-only inventory: 558 total watched movies, 205 fully accounted, 353 remaining."
-    - "2026-10-06 read-only inventory: 1 remaining identity-qualified, 352 missing stable identity, 10 known ambiguity-backlog titles excluded from production."
-    - "2026-10-06 inventory recommendation: process the next 100 of 343 production-eligible remaining movies."
-    - "2026-10-06 latest accepted 100-title production batch: 96 identity-qualified titles verified, zero duplicates, resumable anomaly handling accepted."
+    - "2026-10-06 latest batch: 100 considered, 95 identities resolved, 5 identity skips."
+    - "2026-10-06 latest batch: 1 already in Trakt, 94 new events written and verified, 94 legacy_placeholder, 0 Plex-date."
+    - "2026-10-06 latest batch: 0 pre-POST anomalies, 0 write anomalies, 0 duplicates, rollback evidence retained for all new events, 0 remaining/resumable."
+    - "Derived from prior verified inventory: 343 production-eligible minus 100 considered = 243; ambiguity backlog rises from 10 to 15; fully accounted rises from 205 to 300."
 
 sync:
   status: "synced"
