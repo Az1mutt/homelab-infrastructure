@@ -1,5 +1,12 @@
 # Roadmap
 
+## Hardlink acceptance closed — 2026-10-06
+
+- **PASS:** fresh post-fix Sonarr import for The Pitt S01E04 is a true hardlink: same device, same inode, link count 2, exact size match.
+- ARR import/removal behavior is healthy; the remaining source retention is caused by qBittorrent's unlimited seeding policy.
+- **Next policy decision:** choose zero-seeding cleanup scope. Global ratio `0.0` is suitable only if all qBittorrent torrents should stop immediately; otherwise prefer ARR-category-specific cleanup if supported.
+- No cleanup/seeding configuration change has been applied yet.
+
 ## Tautulli reconciliation runner milestone — 2026-10-06
 
 - **Merged:** PR #10 squash-merged; main `0285d235c55b5d1d73c9eaaa12ae487f484e7e10`.
