@@ -1,10 +1,12 @@
 # Current State
 
-## Fresh torrent hardlink root cause confirmed — 2026-10-06
+## Sonarr hardlink path fix applied — 2026-10-06
 
-**Verified:** the Rick and Morty S09E05 Sonarr import is a copy rather than a hardlink. Sonarr has hardlinks enabled, but the torrent source was imported through `/downloads/...` while the library destination was addressed through `/tv/...`. Those are separate Docker bind mounts inside the Sonarr container, so Sonarr cannot create a hardlink across them even though both host paths live on the same filesystem. The stale Remote Path Mapping uses singular `/download/` -> `/data/torrents/` and did not match qBittorrent's actual `/downloads/...` path. Sonarr already has a common `/data -> /data` mount that can expose both sides through one mount.
+**Verified live change:** the qBittorrent Remote Path Mapping now matches `/downloads/` and normalizes it to `/data/torrents/`. Sonarr's 50 series paths were rewritten to the common `/data/media/tv` root with `moveFiles=false`; no media move, container restart, or container recreation occurred. Read-back confirms the mapping and all 50 logical paths persisted.
 
-**Recommended fix:** normalize qBittorrent's path with Remote Path Mapping `/downloads/` -> `/data/torrents/` and use `/data/media/tv` as the Sonarr library root, so both source and destination resolve beneath the common `/data` mount. No container recreation is expected. After the change, acceptance still requires one **future fresh import** with same device, same inode, matching size and link count >= 2. Do not mutate the current failed sample merely to make it pass.
+**Regression check:** 11 series directories are absent through both the new path and the previous alias, with zero existence mismatches. All 475 recorded episode files were checked and zero are missing under their rewritten series paths. Existing library visibility is therefore preserved.
+
+**Next acceptance:** one **future fresh post-fix torrent import** must still prove the fix end-to-end. PASS requires source/library same device, identical inode, matching size and link count >= 2 while qBittorrent retains the source. Pre-fix samples do not count as acceptance evidence.
 
 ## Watched-history Trakt backfill complete — 2026-10-06
 
