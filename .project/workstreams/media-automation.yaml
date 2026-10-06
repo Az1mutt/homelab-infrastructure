@@ -8,61 +8,74 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "ongoing-sync-ledger-v01-merged"
+phase: "ongoing-sync-observation-accepted"
 
 current_gate: >
   Historical Trakt backfill remains complete at 558/558. Watched Event Ledger v0.1 is
-  now merged and verified on main in the personal AI brain repository. CI passed and
-  the full 104-test suite passed again after merge. No live Plex or Trakt write path
-  was enabled by this milestone. The Sonarr hardlink fix remains applied and awaits
-  one fresh post-fix torrent import for acceptance.
+  merged on main and has now passed its first live observation-only acceptance using
+  Rick and Morty S09E06 "Erickerhead". The real Plex/Tautulli observation at
+  2026-10-06T13:20:09Z resolved stable episode identity across TMDb/IMDb/TVDB, inserted
+  exactly one canonical watch_event, preserved exact provenance and source event ID, and
+  replayed idempotently without creating a duplicate. No Trakt or Plex write was attempted.
+  The next gate is a narrow restart-safe Tautulli reconciliation runner with a durable cursor.
 
 current_state: >
-  The deterministic ongoing-sync foundation is now on main: additive event-ledger
-  schema, ingestion/deduplication logic, delivery-state machinery, historical migration
-  boundary handling, and read-only Plex/Tautulli observation support. The merge is
-  verified at commit 9578817 with 104 passing tests. Historical Plex backfill has not
-  started.
+  The live ledger now contains one accepted episode watch event and one external event
+  link, with zero deliveries and zero cursors. The additive migration created four ledger
+  tables while the pre-existing media.db tables remained logically unchanged; a private
+  backup was created before acceptance. This proves real episode identity resolution,
+  canonical event insertion, provenance preservation and duplicate suppression in the
+  merged observation path. Separately, the Sonarr hardlink fix remains applied and awaits
+  one fresh post-fix torrent import for final acceptance.
 
 exact_next_action: >
-  Run a separate live observation-only acceptance using one genuinely new Plex watch
-  event. Verify stable identity, exactly one canonical event, and idempotent handling
-  of duplicate/reconciliation observations. Do not enable Trakt or Plex writes yet.
+  Implement a narrow restart-safe Tautulli reconciliation runner with a durable source
+  cursor in a separate Change/Review PR. Keep it observation-only: no Trakt writes and no
+  Plex writes. The runner should incrementally discover new completed watches, normalize
+  them through the accepted adapter, advance the cursor only after durable event handling,
+  and remain idempotent across retries/restarts. After merge, run a bounded live acceptance
+  over a small set of genuine recent watch events.
 
 blockers:
-  - "Live observation-only acceptance has not yet been run against a new Plex watch event."
+  - "Ongoing observation is not yet automated; no durable Tautulli reconciliation cursor/runner exists in production."
   - "Hardlink fix awaits one fresh post-fix torrent import."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
   - component: "Watched Event Ledger v0.1"
-    dependency: "Merged and verified on main at commit 9578817 with 104 passing tests."
+    dependency: "Merged and live observation-accepted for one real episode event."
+  - component: "Tautulli"
+    dependency: "Next phase should use read-only incremental reconciliation with durable cursor semantics."
   - component: "Trakt"
-    dependency: "Historical backfill is complete; ongoing write enablement remains a later phase."
+    dependency: "Historical backfill is complete; ongoing write enablement remains deferred until observation automation is accepted."
 
 important_open_loops:
-  - "Run one live observation-only acceptance for a new Plex watch event."
-  - "After observation acceptance, separately accept one controlled media.db to Trakt delivery."
+  - "Implement and accept the restart-safe Tautulli reconciliation runner with source cursor."
+  - "After observation automation is accepted, separately accept one controlled media.db to Trakt delivery."
   - "Run one fresh post-fix Sonarr torrent hardlink acceptance check."
   - "Do not start historical Plex backfill implicitly."
-  - "Iterate Kometa v2 after the ongoing-sync foundation is accepted live."
+  - "Plan layered server backup/restore for configuration, databases and durable media-brain state."
+  - "Iterate Kometa v2 after the ongoing-sync observation path is automated."
 
 stale_or_unknown:
-  - "Live observation behavior of the merged ledger is not yet accepted on a real watch event."
+  - "Automated ongoing reconciliation behavior is unverified until the cursor runner exists and is live-accepted."
   - "End-to-end hardlink behavior after the fix is unverified until a new torrent import completes."
 
 portfolio:
   milestone: true
   signal: >
-    Watched Event Ledger v0.1 is merged and verified with 104 passing tests, turning the
-    ongoing-sync design into an implemented deterministic foundation.
+    Ongoing-sync moved from unit/component confidence to a real live episode observation.
+    Stable TV identity, provenance and idempotency are now proven on the homelab with zero
+    external write risk.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 merge verified on main at commit 9578817."
-    - "2026-10-06 CI passed and 104 tests passed after merge."
-    - "2026-10-06 historical watched-history coverage remains 558/558."
+    - "2026-10-06 live observation acceptance: Rick and Morty S09E06 Erickerhead; watched_at 2026-10-06T13:20:09Z."
+    - "2026-10-06 stable episode identity resolved via TMDb/IMDb/TVDB; exactly one canonical event inserted."
+    - "2026-10-06 duplicate replay created no second event; provenance correct; zero Trakt/Plex writes."
+    - "2026-10-06 ledger state after acceptance: 1 watch_event, 1 external_event_link, 0 deliveries, 0 cursors."
+    - "2026-10-06 original media.db tables logically unchanged; private backup created."
 
 sync:
   status: "synced"
