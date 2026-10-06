@@ -1,5 +1,13 @@
 # Roadmap
 
+## Ongoing watched-sync acceptance — 2026-10-06
+
+- **Verified PASS:** first real episode observation accepted for Rick and Morty S09E06 (*Erickerhead*) at `2026-10-06T13:20:09Z`.
+- Stable episode identity resolved via TMDb/IMDb/TVDB; exactly one canonical watch event and one external event link were stored.
+- Immediate replay was idempotent; no duplicate event was created.
+- No Trakt or Plex write occurred.
+- **Next:** separate Change/Review PR for a restart-safe Tautulli reconciliation runner with durable source cursor; keep it observation-only until live-accepted.
+
 ## Hardlink acceptance follow-up — 2026-10-06
 
 - **Verified FAIL (pre-fix):** a fresh completed Sonarr torrent import produced separate source/library copies; same device and size, different inodes, link count 1 on both.
