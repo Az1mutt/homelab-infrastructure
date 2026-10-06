@@ -8,41 +8,40 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "watched-history-rate-limit-checkpoint"
+phase: "watched-history-final-production-checkpoint"
 
 current_gate: >
-  The final 243-title production remainder was identity-processed but Trakt execution
-  paused safely before any new POSTs because the read-only freshness/preflight calls
-  hit an API rate limit. Of 243 candidates, 238 identities were resolved and five were
-  deferred as ambiguous. All 238 identity-qualified titles remain resumable; zero new
-  Trakt writes were attempted, so there are zero write anomalies and zero duplicates.
-  The normal production remainder is now 238 identity-qualified titles waiting only
-  for Trakt rate-limit recovery, while the known ambiguity backlog grows from 15 to 20.
+  The resumed final production backlog processed 223 of the 238 identity-qualified
+  titles successfully before Trakt rate-limited a POST. All 223 completed writes were
+  verified with zero duplicates and rollback/history IDs captured privately. The
+  rate-limited POST is ambiguous and was correctly not retried. Fifteen production
+  titles remain resumable from the saved checkpoint. The separate ambiguity backlog
+  remains at 20 titles.
 
 current_state: >
-  Prior verified state had 300 fully accounted watched movies, 258 remaining total,
-  15 ambiguity-backlog titles and 243 production-eligible titles. The attempted final
-  production pass considered all 243. Stable TMDb/IMDb identities were resolved for
-  238 and five additional titles were deferred as ambiguous. Before any history writes,
-  the Trakt read-only freshness/preflight stage hit an API rate limit; all 238 were
-  therefore preserved as pre-POST resumable items. No new Trakt events were written,
-  no duplicates were introduced, and no rollback IDs were needed for this paused pass.
-  Total fully accounted remains 300 and total remaining remains 258, now composed of
-  238 identity-qualified production titles plus 20 ambiguity-backlog titles. Plex was
-  not modified.
+  Prior verified state had 300 fully accounted watched movies, 238 identity-qualified
+  production titles waiting for Trakt execution, and 20 ambiguity-backlog titles.
+  After rate-limit recovery, 223 production titles were written and verified in Trakt
+  with zero duplicates. One new anomaly occurred when Trakt rate-limited during a POST;
+  the request was not retried, so its final event state is not yet accepted. The saved
+  checkpoint reports 15 production titles remaining/resumable. Derived fully-accounted
+  count is now 523, with 35 watched movies still outside full acceptance: 15 production
+  checkpoint titles plus 20 ambiguity-backlog titles. Plex was not modified.
 
 exact_next_action: >
-  Resume only the 238 already identity-qualified titles after Trakt read access has
-  recovered. Do not repeat identity enrichment or reselect the cohort. First perform
-  a minimal read-only rate-limit/freshness probe. If reads are healthy, continue the
-  saved checkpoint using the accepted production pattern: minimal freshness check,
-  preserve already-present events, otherwise one POST, immediate read-back with correct
-  Trakt internal-ID semantics, identity/date/exactly-one verification and private
-  rollback capture. If the API is still rate-limited, stop without consuming the
-  checkpoint. Keep the 20 ambiguity-backlog titles out of this production resume.
+  Resume only from the saved 15-title checkpoint after Trakt access is healthy. First
+  reconcile the ambiguous rate-limited POST READ-ONLY using the retained request/response
+  evidence and correct Trakt internal-ID history semantics. Do not retry the POST.
+  If exactly one intended event exists, capture/confirm its rollback ID privately and
+  mark it accepted. If absent, duplicated, mismatched, or still ambiguous, stop and
+  report the observed state before any retry decision. Only after reconciliation
+  succeeds should the remaining unstarted checkpoint titles continue through the
+  accepted minimal freshness check -> single POST -> immediate read-back -> verify ->
+  private rollback-ID pattern. Do not revisit the 223 verified writes or repeat
+  identity enrichment.
 
 blockers:
-  - "Trakt read-only API rate limit currently blocks freshness/preflight for the 238 saved identity-qualified titles."
+  - "One Trakt POST is currently ambiguous because the API rate-limited during the request; reconcile read-only before any retry."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
@@ -50,18 +49,19 @@ dependencies:
     workstream: "Infrastructure & Agent Control Plane"
     dependency: "Own media.db and stable identity enrichment."
   - component: "Trakt"
-    dependency: "Resume only after read access recovers; use correct Trakt internal-ID semantics and never repeat an ambiguous POST."
+    dependency: "Resume only after API access is healthy; use correct Trakt internal-ID semantics and never repeat an ambiguous POST."
 
 important_open_loops:
-  - "Resume 238 already identity-qualified titles from the saved checkpoint after Trakt rate-limit recovery."
-  - "Keep 20 known ambiguity-backlog titles out of the normal production resume."
-  - "Do not repeat identity enrichment for the 238 resolved titles."
+  - "Reconcile the ambiguous rate-limited POST read-only, then finish the saved 15-title production checkpoint if safe."
+  - "Keep the 20 known ambiguity-backlog titles out of the normal production resume."
+  - "Do not repeat identity enrichment for already resolved checkpoint titles."
   - "Preserve provenance and never infer watch dates from CSFD rating dates."
   - "Confirm a safe Plex historical watched-date write/read-back/rollback path."
   - "Keep Backrooms excluded until its Plex event/title linkage is resolved."
   - "Handle ambiguity cases in a dedicated later pass."
 
 stale_or_unknown:
+  - "Final state of the single rate-limited POST is unknown until read-only reconciliation completes."
   - "Exact Trakt rate-limit reset timing is not recorded in public state."
   - "Programmatic Plex historical watched-date editing remains unverified."
   - "Exact ambiguity-title identities remain in operational checkpoints."
@@ -69,18 +69,18 @@ stale_or_unknown:
 portfolio:
   milestone: true
   signal: >
-    The remaining production backlog has been identity-qualified almost completely:
-    238 titles are ready for Trakt execution and only 20 total titles are now isolated
-    in the ambiguity backlog. The production stream paused before writes on an external
-    API rate limit, preserving a clean resumable checkpoint with no duplicate risk.
+    The final normal-production backlog is nearly exhausted: 223 additional titles
+    were verified with zero duplicates, leaving only a 15-title resumable checkpoint
+    plus the separate 20-title ambiguity backlog. The stop-on-ambiguous-POST rule again
+    prevented duplicate risk under an external API rate limit.
 
 verification:
   last_verified: "2026-10-06"
   sources:
-    - "2026-10-06 final-remainder attempt: 243 candidates considered, 238 identities resolved, 5 identity skips."
-    - "2026-10-06 final-remainder attempt: 238 pre-POST skips due read-only Trakt API rate limit; 0 new writes, 0 write anomalies, 0 duplicates."
-    - "2026-10-06 final-remainder checkpoint: 238 remaining/resumable identity-qualified titles; batch paused safely."
-    - "Derived from prior verified state: ambiguity backlog rises from 15 to 20; fully accounted remains 300; total remaining remains 258."
+    - "2026-10-06 resumed final-production checkpoint: 223 titles processed, 223 new writes verified, 0 already-present skips, 0 duplicates."
+    - "2026-10-06 resumed final-production checkpoint: 1 anomaly and 1 rate-limit stop during POST; ambiguous request was not retried."
+    - "2026-10-06 resumed final-production checkpoint: 15 titles remain/resumable."
+    - "Derived from prior verified state: fully accounted increases from 300 to 523; 35 remain outside full acceptance, comprising 15 production checkpoint titles and 20 ambiguity-backlog titles."
 
 sync:
   status: "synced"
