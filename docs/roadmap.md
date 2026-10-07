@@ -1,5 +1,9 @@
 # Roadmap
 
+## Media parked — 2026-10-07
+
+Media work is parked. Mortgully remains ambiguous and must not be retried automatically; inspect the saved POST audit only when the Media workstream resumes. Torrent cleanup acceptance is a separate non-blocking follow-up. Media services, identity, watch history and policy remain owned by Homelab/Media; Personal AI Brain may reuse generic capability, cursor, idempotency, audit and delivery-state patterns without taking ownership of Media semantics.
+
 ## First ongoing Trakt delivery — ambiguous safe checkpoint — 2026-10-06
 
 - Durable `in_flight` created for Mortgully.
