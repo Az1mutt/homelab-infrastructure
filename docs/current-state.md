@@ -1,5 +1,9 @@
 # Current State
 
+## Media parking and ownership — 2026-10-07
+
+Media is safely parked with the Mortgully Trakt delivery retained as an ambiguous blocker; no POST was issued during closure. Plex, Tautulli, Trakt, Seerr, Radarr/Sonarr, Movie Intelligence/media.db, media identity, watch history and media policy belong to the Homelab/Media domain. Personal AI Brain may consume bounded capabilities and own reusable delivery, cursor, permission, audit and adapter patterns, but it does not own Media-domain semantics. Torrent cleanup acceptance remains a non-blocking follow-up.
+
 ## First ongoing Trakt delivery — SAFE CHECKPOINT after ambiguous POST — 2026-10-06
 
 For Rick and Morty — *Mortgully: The Last Rickforest*, a durable `in_flight` delivery was created and **exactly one** Trakt history POST was attempted. The POST outcome could not be confirmed. Immediate item-specific read-back and a subsequent read-only reconciliation both found **0 matching history events**.
