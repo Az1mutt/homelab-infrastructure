@@ -8,17 +8,14 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "trakt-delivery-ambiguous-safe-checkpoint"
+phase: "media-parked-trakt-delivery-ambiguous"
 
 current_gate: >
-  Historical Trakt backfill remains complete at 558/558. Watched Event Ledger v0.1 and the
-  merged restart-safe Tautulli reconciliation runner are now both live-accepted. A bounded
-  real reconciliation bootstrap created cursor 38 and advanced durably to 42 while
-  ingesting exactly two new Rick and Morty episode watches. Replay/re-entry created zero
-  duplicate rows, preserved cursor 42 and left the live ledger at 3 watch_events and
-  3 external_event_links. Identity, provenance and timestamps were correct, PRAGMA
-  quick_check passed, and zero Trakt/Plex writes occurred. The next watched-sync boundary
-  is one controlled real media.db -> Trakt delivery with read-back/rollback evidence.
+  Media is parked safely. The Mortgully delivery remains durably ambiguous after exactly
+  one POST and two zero-result read-backs; automatic retry is forbidden. The saved POST
+  audit was unavailable in the current Codex workspace and live inspection could not run
+  because the required homelab SSH alias was unavailable, so non-creation is not proven.
+  Torrent cleanup acceptance remains a separate non-blocking follow-up.
 
 current_state: >
   The first real media.db -> Trakt delivery reached a safe ambiguous checkpoint for
@@ -28,6 +25,10 @@ current_state: >
   zero matching history events. No Trakt history ID was captured, duplicate count is zero,
   and the delivery is durably marked ambiguous. No Plex writes or unexpected DB changes
   occurred and PRAGMA quick_check passed. The POST must not be retried automatically.
+  Plex, Tautulli, Trakt, Seerr, Radarr/Sonarr, Movie Intelligence/media.db, media
+  identity, watch history and media policy remain owned by the Homelab/Media domain.
+  Personal AI Brain may consume them only through bounded capabilities; it owns reusable
+  delivery, cursor, permission, audit and adapter-boundary patterns, not Media semantics.
   The next boundary is to inspect the sanitized original POST response/audit only; an
   explicit single retry may be considered only if that evidence definitively proves that
   Trakt did not create the event. Separately, the one-minute public torrent cleanup policy
@@ -57,7 +58,6 @@ dependencies:
 
 important_open_loops:
   - "Classify the sanitized original Mortgully POST response/audit. Keep delivery ambiguous unless the evidence definitively proves no Trakt event was created; only then consider one explicit retry."
-  - "After observation automation is accepted, separately accept one controlled media.db to Trakt delivery."
   - "Accept the one-minute public-indexer seed policy on the next qualifying ARR torrent. Keep Sk-CzTorrent unchanged until its seeding requirements are known."
   - "Do not start historical Plex backfill implicitly."
   - "Plan layered server backup/restore for configuration, databases and durable media-brain state."
@@ -70,13 +70,14 @@ stale_or_unknown:
 portfolio:
   milestone: true
   signal: >
-    Ongoing watched-sync observation automation is now proven live, including durable
-    cursor bootstrap/advance, idempotent replay/re-entry and correct TV identity/provenance.
-    The architecture can now advance to its first controlled outbound Trakt delivery.
+    Media is safely parked with historical backfill complete, observation reconciliation
+    accepted, and the sole outbound Mortgully attempt retained as an ambiguous blocker.
+    Media-domain ownership is explicit; general platform work may continue independently.
 
 verification:
-  last_verified: "2026-10-06"
+  last_verified: "2026-10-07"
   sources:
+    - "2026-10-07 closure reconciliation retained Mortgully as ambiguous; no Trakt POST was issued during closure."
     - "2026-10-06 PR #10 remains merged; main 0285d235c55b5d1d73c9eaaa12ae487f484e7e10; 118 tests passing."
     - "2026-10-06 feat/tautulli-reconciliation-runner deleted successfully; merged main remains intact."
     - "2026-10-06 The Pitt S01E04 fresh Sonarr import: same device 2049, same inode 256212996, link count 2, exact size 8008236700 bytes; hardlink PASS."
