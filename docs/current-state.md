@@ -2,7 +2,7 @@
 
 ## Media parking and ownership — 2026-10-07
 
-Media is safely parked with the Mortgully Trakt delivery retained as an ambiguous blocker; no POST was issued during closure. Plex, Tautulli, Trakt, Seerr, Radarr/Sonarr, Movie Intelligence/media.db, media identity, watch history and media policy belong to the Homelab/Media domain. Personal AI Brain may consume bounded capabilities and own reusable delivery, cursor, permission, audit and adapter patterns, but it does not own Media-domain semantics. Torrent cleanup acceptance remains a non-blocking follow-up.
+Media is safely parked with the Mortgully Trakt delivery retained as an ambiguous blocker; no POST was issued during closure. Plex, Tautulli, Trakt, Seerr, Radarr/Sonarr, Movie Intelligence/media.db, media identity, watch history and media policy belong to the Homelab/Media domain. Personal AI Brain may consume bounded capabilities and own reusable delivery, cursor, permission, audit and adapter patterns, but it does not own Media-domain semantics. Public-indexer torrent cleanup is now accepted end-to-end.
 
 ## First ongoing Trakt delivery — SAFE CHECKPOINT after ambiguous POST — 2026-10-06
 
@@ -36,13 +36,13 @@ The two new canonical events preserved stable episode identity, exact real watch
 
 **Next watched-sync boundary:** one controlled real `media.db -> Trakt` delivery with freshness check, single write, read-back verification and rollback ID capture. Do not repeat further observation-only acceptance unless new evidence warrants it.
 
-## Public ARR torrent one-minute cleanup policy applied — 2026-10-06
+## Public ARR torrent one-minute cleanup policy — accepted end-to-end — 2026-10-14
 
 Prowlarr 2.3.5.5327 now applies `torrentBaseSettings.seedTime = 1` minute with seed ratio left `null` to ten confirmed public torrent indexers: Bangumi Moe, dmhy, Knaben, LimeTorrents, nekoBT, Nyaa.si, SubsPlease, The Pirate Bay, TorrentDownload and YTS. Sk-CzTorrent remains unchanged because its ratio requirements are not yet known.
 
 qBittorrent global ratio/time remain unlimited with action `Stop`; Sonarr/Radarr Completed Download Handling and removal remain enabled. No existing torrents or data were deleted while applying the policy, and a private rollback snapshot was created.
 
-**Next acceptance:** on the next qualifying public-indexer ARR grab, verify the torrent receives a 1-minute seed-time limit, imports by hardlink, stops after roughly one minute, is removed by ARR with its download-side file, and leaves the library file intact and playable.
+**Verified acceptance:** a fresh Radarr grab of *Scream 7* from public Prowlarr indexer Knaben received the policy. qBittorrent logged that the torrent reached its seeding-time limit after about 70 seconds. Radarr imported the movie, then requested torrent removal; qBittorrent removed the torrent job and download-side content. This closes the public-indexer cleanup acceptance loop. An older The Pitt S01E06 job still had unlimited limits, but its timing relative to policy application could not be established and is not evidence against the fresh accepted path.
 
 ## qBittorrent 5.2.4 zero-seed preflight — NO-GO — 2026-10-06
 
