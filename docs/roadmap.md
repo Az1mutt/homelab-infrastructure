@@ -2,7 +2,7 @@
 
 ## Media parked — 2026-10-07
 
-Media work is parked. Mortgully remains ambiguous and must not be retried automatically; inspect the saved POST audit only when the Media workstream resumes. Torrent cleanup acceptance is a separate non-blocking follow-up. Media services, identity, watch history and policy remain owned by Homelab/Media; Personal AI Brain may reuse generic capability, cursor, idempotency, audit and delivery-state patterns without taking ownership of Media semantics.
+Media work is parked. Mortgully remains ambiguous and must not be retried automatically; inspect the saved POST audit only when the Media workstream resumes. Public-indexer torrent cleanup is accepted end-to-end. Media services, identity, watch history and policy remain owned by Homelab/Media; Personal AI Brain may reuse generic capability, cursor, idempotency, audit and delivery-state patterns without taking ownership of Media semantics.
 
 ## First ongoing Trakt delivery — ambiguous safe checkpoint — 2026-10-06
 
@@ -39,13 +39,15 @@ Media work is parked. Mortgully remains ambiguous and must not be retried automa
 - Trakt writes: 0. Plex writes: 0. DB integrity check passed.
 - **Next:** one controlled real `media.db -> Trakt` delivery. This is the next unverified boundary; no additional observation-only ceremony is required without new evidence.
 
-## Public ARR torrent cleanup — policy applied, acceptance pending — 2026-10-06
+## Public ARR torrent cleanup — accepted end-to-end — 2026-10-14
 
 - Ten confirmed public Prowlarr torrent indexers now use a **1-minute seed-time goal** with ratio unset.
 - Sk-CzTorrent is intentionally unchanged until its seeding/ratio requirements are known.
 - qBittorrent global unlimited policy is unchanged; ARR Completed Download Handling/removal is unchanged.
 - No existing torrents/data were deleted when applying the policy; private rollback snapshot exists.
-- **Next gate:** accept on one new public-indexer ARR torrent: hardlink import -> ~1 minute seed -> Stop -> ARR removes job/download-side data -> library file remains playable.
+- **PASS:** fresh Radarr/Knaben grab of *Scream 7* received the one-minute policy; qBittorrent stopped after 70 seconds, Radarr imported the movie and then removed the torrent job and download-side content.
+- Older The Pitt S01E06 remained unlimited, but its timing relative to policy application was not established; it is historical/non-diagnostic rather than a failure of the current accepted path.
+- Cleanup acceptance is closed. Reopen only if a future qualifying public-indexer ARR grab contradicts this behavior.
 
 ## ARR torrent cleanup exact zero-seed — deferred — 2026-10-06
 
