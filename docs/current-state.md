@@ -1,5 +1,22 @@
 # Current State
 
+## Kometa Phase 1 — execution verified, row visibility unresolved — 2026-10-14
+
+Kometa 2.4.8 now has a pinned, bounded daily one-shot job at 03:15 UTC using the
+existing reboot-enabled cron service. The scheduled command is restricted to
+Movies / `basic` / `Newly Released`. Its first manual invocation exited 0; the
+first time-triggered invocation and reboot remain unobserved.
+
+The previous run skipped this collection because no items met its minimum of one;
+the fresh run applied the existing valid visibility configuration. Plex now stores
+owner Home and Movies Recommended promotion, with shared Home disabled. However,
+both hub-content endpoints still omit the row, so actual visibility is **not accepted**.
+Both members, all eight collections, director metadata/membership, native hub settings,
+TV collections and private configuration were preserved. No overlays were run.
+
+See the [execution and acceptance record](../tools/kometa/README.md). Next: check
+the owner's Plex client surfaces and resolve the hub discrepancy before adding rows.
+
 ## Media parking and ownership — 2026-10-07
 
 Media is safely parked with the Mortgully Trakt delivery retained as an ambiguous blocker; no POST was issued during closure. Plex, Tautulli, Trakt, Seerr, Radarr/Sonarr, Movie Intelligence/media.db, media identity, watch history and media policy belong to the Homelab/Media domain. Personal AI Brain may consume bounded capabilities and own reusable delivery, cursor, permission, audit and adapter patterns, but it does not own Media-domain semantics. Public-indexer torrent cleanup is now accepted end-to-end.
@@ -192,7 +209,7 @@ This document is the concise source of truth for what exists, what has been veri
 | Host | Verified | Dedicated Ubuntu Server desktop |
 | Data disk | Verified | Toshiba MG09 18 TB, ext4, mounted at `/data` |
 | Media stack | Verified running | Plex, Radarr, Sonarr, Prowlarr, qBittorrent, SABnzbd |
-| Kometa | Verified | 2.4.8; Home/Recommended `Newly Released` is visibly working |
+| Kometa | Component-tested | 2.4.8; daily one-shot installed and manually tested; promotion persisted but Home/Recommended hub visibility unresolved |
 | Recyclarr | Verified | Separate Compose project managing Radarr and Sonarr TRaSH configuration |
 | Tautulli | Verified | Re-authorized and healthy |
 | Netdata | Verified | Local diagnostics dashboard deployed |

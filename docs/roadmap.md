@@ -1,5 +1,15 @@
 # Roadmap
 
+## Kometa v2 Phase 1 — 2026-10-14
+
+- **Verified:** pinned Kometa 2.4.8 one-shot runner, daily 03:15 UTC cron entry,
+  non-overlap lock, timeout, private logs and successful single-row live execution.
+- **Component-tested:** Newly Released promotion persisted for owner Home and Movies
+  Recommended, but the row is still absent from the queried hub content.
+- **Next:** owner-client visibility check and narrow hub diagnosis; observe the first
+  scheduled invocation. See the [acceptance record](../tools/kometa/README.md).
+- Directors, TV configuration, overlays and the broader v2 layout remain deferred.
+
 ## Media parked — 2026-10-07
 
 Media work is parked. Mortgully remains ambiguous and must not be retried automatically; inspect the saved POST audit only when the Media workstream resumes. Public-indexer torrent cleanup is accepted end-to-end. Media services, identity, watch history and policy remain owned by Homelab/Media; Personal AI Brain may reuse generic capability, cursor, idempotency, audit and delivery-state patterns without taking ownership of Media semantics.
