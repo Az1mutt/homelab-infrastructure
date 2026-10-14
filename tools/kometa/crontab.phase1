@@ -1,0 +1,2 @@
+# Host cron uses UTC: 03:15 UTC daily (04:15 CET / 05:15 CEST).
+15 3 * * * /usr/bin/python3 /data/docker/kometa/run_phase1.py >> /data/docker/kometa/logs/phase1-scheduler.log 2>&1

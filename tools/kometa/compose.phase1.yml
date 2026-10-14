@@ -1,0 +1,4 @@
+services:
+  kometa:
+    image: kometateam/kometa@sha256:6c3971a4aaa928b045e5f22514196b6db7f9b2b186158ebfe3239f4b328dfb0a
+    restart: "no"

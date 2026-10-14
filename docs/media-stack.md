@@ -125,11 +125,12 @@ For some 4K WEB-DL playback on a Samsung S90F client, forcing Direct Play previo
 
 ## Kometa
 
-Kometa is currently run manually as a one-off Compose job:
+Kometa Phase 1 now runs daily at 03:15 UTC as a bounded one-shot Compose job,
+restricted to Movies / Newly Released. See the [runner and acceptance record](../tools/kometa/README.md).
+Manual execution of the same job **modifies Plex collection metadata/promotion**:
 
 ```bash
-cd /data/docker
-docker compose run --rm kometa --run
+python3 /data/docker/kometa/run_phase1.py
 ```
 
 Verified behavior:
@@ -141,7 +142,9 @@ Verified behavior:
 - Director collection configuration uses `depth: 10` and `limit: 5`.
 - `use_separator: false` was applied and verified; the unwanted `Director Collections` separator is no longer present.
 
-Persistent Kometa scheduling remains unverified. A rotating `Director Spotlight` remains planned and is intentionally deferred until after migration.
+The cron entry is installed and its runner passed live acceptance; the first scheduled
+firing remains unobserved. Promotion flags persist, but actual Home/Recommended hub
+visibility requires an active Plex Pass (currently inactive). A rotating `Director Spotlight` remains planned.
 
 ## Pre-migration backup and freeze
 
