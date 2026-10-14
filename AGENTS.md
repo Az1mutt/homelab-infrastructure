@@ -71,6 +71,30 @@ Run a secret scan before every commit that introduces configuration, logs, or ge
 - Treat partition deletion, filesystem creation, formatting, burn-in tests, recursive permission changes, and data movement as destructive operations requiring explicit confirmation and exact targets.
 - Keep rollback options until acceptance criteria are met and retirement is explicitly decided.
 
+## Codex execution routing
+
+Owner chats such as Plex/Media own scope, priorities and decisions. Codex tasks are
+bounded execution units; do not use an old task as the durable project memory.
+
+Use this routing rule:
+
+| Need | Codex lane |
+| --- | --- |
+| Repository-only docs, tests, analysis or implementation with no live Homelab dependency | Codex Cloud `pab-homelab-dev` |
+| Plex/ARR/Docker/service/log/filesystem inspection, deployment, runtime acceptance, or a task likely to need any of them | Codex Desktop Local/Worktree using `local-homelab-admin` |
+| Local Git/worktree/task recovery or machine-state reconciliation where the canonical checkout itself matters | Codex Desktop Local on the canonical checkout |
+
+If one bounded task will implement and then deploy or accept on the Homelab, start
+with `local-homelab-admin` rather than splitting the same task across Cloud and Local.
+
+The project-local declaration is `.codex/environments/environment.toml`. It is not
+a credential store. The Homelab SSH identity remains machine-local and must never
+be copied into this repository, a task workspace or Codex Cloud.
+
+Durable implementation truth is pushed GitHub history. Durable status/next action
+belongs in the owned Project State. Codex task/worktree state is disposable once
+needed work is preserved.
+
 ## Codex live homelab access
 
 For tasks that explicitly authorize live homelab access, use the Codex environment's preconfigured SSH host alias `homelab`.
