@@ -1,6 +1,30 @@
 # Current State
 
+## Kometa Phase 2A — Movies discovery accepted — 2026-10-14
+
+Five ordinary collections are live-accepted: Newly Released (2), Trending Now (3),
+Movie of the Day (1: Inglourious Basterds), Director Spotlight (4: Martin Scorsese),
+and Genre Spotlight (12: Thriller). Sort titles are `!010_` through `!050_`.
+Newly Released retains its existing smart collection and 90-day window. Trending
+uses TMDb weekly top 100 intersected with local Movies, capped at 12 and minimum 3.
+
+The accepted pinned 2.4.8 runner now generates only these five definitions. The
+03:15 UTC schedule is unchanged. Daily selection is persisted for the Bratislava
+calendar day; explicit director and genre pools use Monday and Thursday weekly
+cadences, respectively. Only Scorsese currently meets the director minimum of 3;
+the threshold is not weakened to manufacture rotation.
+
+All pre-existing collection IDs and seven browsing directors were preserved,
+along with native hub settings, TV collections and overlay labels. Eleven offline
+tests and corrected live acceptance passed. No collection was omitted. Plex Pass
+is **not** required for these collections; publishing was not retested.
+
+See [policy, rotation and acceptance](../tools/kometa/README.md). Next: observe the
+scheduled daily/Thursday rotation and gather feedback before another bounded milestone.
+
 ## Kometa Phase 1 — execution verified, Plex Pass prerequisite unmet — 2026-10-14
+
+Historical Phase 1 checkpoint; Phase 2A above supersedes its single-row execution scope.
 
 Kometa 2.4.8 now has a pinned, bounded daily one-shot job at 03:15 UTC using the
 existing reboot-enabled cron service. The scheduled command is restricted to
@@ -211,7 +235,7 @@ This document is the concise source of truth for what exists, what has been veri
 | Host | Verified | Dedicated Ubuntu Server desktop |
 | Data disk | Verified | Toshiba MG09 18 TB, ext4, mounted at `/data` |
 | Media stack | Verified running | Plex, Radarr, Sonarr, Prowlarr, qBittorrent, SABnzbd |
-| Kometa | Component-tested | 2.4.8; daily one-shot installed and manually tested; promotion persisted; published collection rows require currently inactive Plex Pass |
+| Kometa | Verified | Pinned 2.4.8; five Movies discovery collections accepted; daily bounded runner; optional Home publishing requires Plex Pass |
 | Recyclarr | Verified | Separate Compose project managing Radarr and Sonarr TRaSH configuration |
 | Tautulli | Verified | Re-authorized and healthy |
 | Netdata | Verified | Local diagnostics dashboard deployed |
@@ -230,7 +254,7 @@ Verified:
 - Plex reclaim after credential invalidation;
 - TV clients working again after Plex reclaim;
 - Kometa Plex/TMDb connectivity;
-- Kometa `Newly Released` visible on Home/Recommended;
+- historical Kometa `Newly Released` Home/Recommended observation; current publishing is gated by Plex Pass;
 - Tautulli re-authorization;
 - SAB API/NZB credential rotation after accidental disclosure;
 - historical ext4 hardlink recovery for migrated torrent/media duplicates.
@@ -279,7 +303,9 @@ The shared philosophy remains sensible 2160p, 1080p fallback, no mass upgrades, 
 
 ## Kometa direction
 
-Kometa v2 will be iterative rather than fixed in advance. `Newly Released` is already visible; future Home/Recommended additions such as Trending/Popular, Director Spotlight or seasonal rows will be judged by how the actual TV experience looks.
+Kometa v2 proceeds iteratively as ordinary collections. Phase 2A's five Movies
+collections are accepted; assess their usefulness before adding further concepts.
+Home/Recommended publishing is optional and requires active Plex Pass.
 
 ## Remaining open issues
 

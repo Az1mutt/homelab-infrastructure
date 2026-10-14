@@ -125,8 +125,9 @@ For some 4K WEB-DL playback on a Samsung S90F client, forcing Direct Play previo
 
 ## Kometa
 
-Kometa Phase 1 now runs daily at 03:15 UTC as a bounded one-shot Compose job,
-restricted to Movies / Newly Released. See the [runner and acceptance record](../tools/kometa/README.md).
+Kometa runs daily at 03:15 UTC as a bounded one-shot Compose job. Phase 2A executes
+only five Movies discovery collections: Newly Released, Trending Now, Movie of the
+Day, Director Spotlight and Genre Spotlight. See the [runner and acceptance record](../tools/kometa/README.md).
 Manual execution of the same job **modifies Plex collection metadata/promotion**:
 
 ```bash
@@ -138,13 +139,15 @@ Verified behavior:
 - Connects to TMDb.
 - Connects to Plex using a LAN endpoint represented publicly as `<HOST_LAN_IP>`.
 - Creates `Newly Released`.
-- Creates five dynamic director collections.
+- Preserves seven existing browsing director collections; the discovery runner excludes the old dynamic director builder.
 - Director collection configuration uses `depth: 10` and `limit: 5`.
 - `use_separator: false` was applied and verified; the unwanted `Director Collections` separator is no longer present.
 
-The cron entry is installed and its runner passed live acceptance; the first scheduled
-firing remains unobserved. Promotion flags persist, but actual Home/Recommended hub
-visibility requires an active Plex Pass (currently inactive). A rotating `Director Spotlight` remains planned.
+The cron entry is installed and its extended runner passed live acceptance; first
+scheduled firing remains unobserved. A single Director Spotlight now uses a curated
+weekly pool (minimum three films); Genre Spotlight rotates on Thursdays. Ordinary
+collections are accepted without Plex Pass. Optional Home/Recommended publishing
+requires active Plex Pass and was not retested in Phase 2A.
 
 ## Pre-migration backup and freeze
 
