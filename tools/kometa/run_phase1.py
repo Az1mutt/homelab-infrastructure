@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Bounded, non-overlapping Movies/Newly Released job; no credentials in arguments."""
+"""Accepted bounded runner, extended to the five Movies discovery collections.
+
+The Phase 1 filename/lock/container identity remain stable for the existing cron.
+"""
 import datetime
 import fcntl
 import os
@@ -27,9 +30,8 @@ def main():
         log_path = ROOT / 'logs' / ('phase1-' + stamp + '.log')
         command = [DOCKER, 'compose', '-f', '/data/docker/docker-compose.yml',
                    '-f', str(ROOT / 'compose.phase1.yml'), 'run', '--no-deps',
-                   '--pull', 'never', '-d', '--name', NAME, 'kometa', '--run',
-                   '--run-libraries', 'Movies', '--run-files', 'basic',
-                   '--run-collections', 'Newly Released', '--collections-only']
+                   '--pull', 'never', '-d', '--name', NAME, '--entrypoint', 'python',
+                   'kometa', '/config/discovery.py', '--run-kometa']
         with log_path.open('w') as log:
             started = subprocess.run(command, stdout=log, stderr=log, timeout=120)
             if started.returncode:

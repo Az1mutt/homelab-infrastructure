@@ -8,20 +8,32 @@ project:
   owner: "Plex, Kometa & Media Automation specialist chat"
 
 status: "active"
-phase: "kometa-phase1-execution-verified-plex-pass-required"
+phase: "kometa-phase2a-movies-discovery-accepted"
+
+kometa_phase2a:
+  status: "Verified"
+  verified_on: "2026-10-14"
+  collections: "Newly Released 2; Trending Now 3; Movie of the Day 1; Director Spotlight 4; Genre Spotlight 12."
+  daily_pick: "Inglourious Basterds; stable date/identity hash, persisted for the Bratislava calendar day; no watched-state dependency."
+  director: "Martin Scorsese; explicit pool with minimum 3 local films, Monday cadence. Only Scorsese currently qualifies, so meaningful rotation awaits deeper library coverage."
+  genre: "Thriller; explicit six-genre pool with minimum 5 local films, Thursday cadence."
+  execution: "Existing 03:15 UTC bounded runner extended to generated Movies-only definitions; Kometa 2.4.8 digest and cron unchanged."
+  preservation: "Existing smart collection retained; all seven browsing directors, native hub settings, TV collections and overlay labels unchanged. No additional v2 concepts implemented."
+  next_action: "Observe next daily/Thursday rotation and collect usefulness feedback before separately scoping another Movies milestone. Plex Pass is optional for future promotion, not a collections gate."
 
 kometa_phase1:
-  status: "Component-tested"
+  status: "Historical"
   verified_on: "2026-10-14"
   execution: "Pinned Kometa 2.4.8 bounded one-shot; user cron daily 03:15 UTC; existing cron active and enabled at boot. First scheduled firing and reboot not observed."
   scope: "Movies / basic / Newly Released only; directors, TV and overlays excluded."
   result: "Manual invocation exited 0 and applied owner Home plus Recommended promotion. Both hub-content endpoints omit the row; Plex reports subscriptionActive=0 and publishing collection rows requires an active Plex Pass."
   preservation: "Two members retained; all eight collections survived; seven director metadata/membership snapshots, native hub settings, TV collections and private config hash unchanged."
-  next_action: "Owner decision on the Plex Pass prerequisite; if enabled later, repeat single-row visibility acceptance before adding rows."
+  next_action: "Superseded by Phase 2A collections-first acceptance; Plex Pass is optional for later publishing."
 
 current_gate: >
-  Kometa Phase 1 execution and persisted promotion are verified, but actual Home and
-  Movies Recommended collection rows require the currently inactive Plex Pass entitlement.
+  Kometa Phase 2A ordinary Movies collections are accepted independently of Plex Pass.
+  Observe the next scheduled daily/Thursday rotation before expanding the content set.
+  Home/Recommended publishing remains optional and requires active Plex Pass.
   The Mortgully delivery remains durably ambiguous after exactly
   one POST and two zero-result read-backs; automatic retry is forbidden. The saved POST
   audit was unavailable in the current Codex workspace and live inspection could not run
@@ -31,6 +43,9 @@ current_gate: >
   the movie and then removed the torrent job and download-side content.
 
 current_state: >
+  Five Movies discovery collections are live-accepted with counts 2/3/1/4/12, stable
+  sort order and deterministic persisted daily/weekly selection. Existing director
+  browsing collections remain intact; TV and overlays are still outside Kometa scope.
   The first real media.db -> Trakt delivery reached a safe ambiguous checkpoint for
   Mortgully: The Last Rickforest. A durable in_flight delivery was created and exactly
   one Trakt history POST was attempted. The POST result could not be confirmed, and both
@@ -49,8 +64,9 @@ current_state: >
   that policy until its seeding requirements are known.
 
 exact_next_action: >
-  Decide whether to enable the Plex Pass prerequisite before expanding the layout;
-  if enabled later, repeat only single-row visibility acceptance. Observe the first daily invocation.
+  Observe the next daily pick and Thursday genre rotation and gather feedback on the
+  five Movies collections. Do not add remaining Movies concepts or TV v2 implicitly.
+  Plex Pass is only a prerequisite for optional future Home/Recommended publishing.
   Keep the independent Trakt boundary unchanged:
   Inspect only the sanitized original Mortgully POST response/audit and classify the
   ambiguous attempt. Do not issue another POST. If the saved response definitively proves
@@ -76,7 +92,7 @@ important_open_loops:
   - "Classify the sanitized original Mortgully POST response/audit. Keep delivery ambiguous unless the evidence definitively proves no Trakt event was created; only then consider one explicit retry."
   - "Do not start historical Plex backfill implicitly."
   - "Plan layered server backup/restore for configuration, databases and durable media-brain state."
-  - "Kometa Phase 1: owner decision on Plex Pass prerequisite and first daily cron observation; no layout expansion yet."
+  - "Kometa Phase 2A: observe first scheduled daily/Thursday rotation and gather collection usefulness feedback; additional Movies concepts and TV v2 remain deferred."
 
 stale_or_unknown:
   - "The first outbound write was attempted exactly once but remains ambiguous; no matching history event is visible and no rollback history ID exists."
@@ -84,7 +100,7 @@ stale_or_unknown:
 portfolio:
   milestone: true
   signal: >
-    Media is safely parked with historical backfill complete, observation reconciliation
+    Kometa Phase 2A Movies discovery is accepted. Media retains historical backfill complete, observation reconciliation
     accepted, the public-indexer torrent cleanup path accepted end-to-end, and the sole
     outbound Mortgully attempt retained as an ambiguous blocker. Media-domain ownership is
     explicit; general platform work may continue independently.
@@ -92,6 +108,8 @@ portfolio:
 verification:
   last_verified: "2026-10-14"
   sources:
+    - "2026-10-14 Kometa Phase 2A PASS: Newly Released 2, Trending Now 3, Movie of the Day 1 (Inglourious Basterds), Director Spotlight 4 (Martin Scorsese), Genre Spotlight 12 (Thriller); exact !010 through !050 ordering."
+    - "2026-10-14 corrected Kometa 2.4.8 run succeeded for all five collections; 11 offline tests passed; all original collection IDs, seven director metadata/membership snapshots, native Movies/TV settings, TV collections and overlay labels preserved."
     - "2026-10-14 Plex reports subscriptionActive=0; Plex publishing-collections documentation requires an active Plex Pass. Persisted flags with omitted hub content are consistent with that unmet prerequisite."
     - "2026-10-14 Kometa 2.4.8 bounded single-row run exited 0, Collection Visibility Updated; owner Home and Recommended flags persisted, shared Home false; hub-content responses still omit Newly Released."
     - "2026-10-14 Kometa execution deployed with pinned Compose override, daily 03:15 UTC user cron, lock and 30-minute timeout; Compose validation, CLI compatibility and three offline lifecycle tests passed."

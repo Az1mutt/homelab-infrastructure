@@ -1,6 +1,19 @@
 # Roadmap
 
+## Kometa v2 Phase 2A — accepted — 2026-10-14
+
+- **Verified:** five Movies collections with member counts 2/3/1/4/12, deterministic
+  persisted rotation, ordered namespace, and preserved existing browsing directors.
+- **Next:** observe the next daily pick/Thursday genre rotation and gather usefulness
+  feedback. Only Scorsese currently qualifies for the minimum-three director pool.
+- Ordinary collections do not require Plex Pass. Home/Recommended publishing remains
+  optional and outside acceptance. See [Kometa policy](../tools/kometa/README.md).
+- Mood, Critically Acclaimed, Hidden Gems, Rediscover, Because You Watched,
+  My Cinema and all TV v2 work remain deferred.
+
 ## Kometa v2 Phase 1 — 2026-10-14
+
+Historical checkpoint; the Phase 2A section above owns the current next action.
 
 - **Verified:** pinned Kometa 2.4.8 one-shot runner, daily 03:15 UTC cron entry,
   non-overlap lock, timeout, private logs and successful single-row live execution.
@@ -176,7 +189,7 @@ The desktop media stack is effectively at final acceptance:
 - Radarr and Sonarr use TRaSH/Recyclarr-managed profiles.
 - Usenet-first automation and failed-release fallback are verified.
 - Kometa 2.4.8 is revalidated.
-- `Newly Released` is visibly working on Plex Home/Recommended.
+- Five Movies discovery collections are accepted; Home/Recommended publishing remains optional and gated by Plex Pass.
 - Tautulli is healthy after re-authorization.
 - Netdata monitoring is deployed.
 - SAB API/NZB credentials were rotated.
@@ -244,9 +257,9 @@ Design principles:
 
 ### 5. Kometa v2 iteration
 
-- tune Home/Recommended based on real TV usage;
-- add Trending/Popular, Director Spotlight and seasonal rows only where they improve the UI;
-- avoid turning Plex Home into a wall of automated collections.
+- observe Phase 2A daily/weekly rotation and assess collection usefulness;
+- scope additional Movies concepts separately; do not add TV or more rows implicitly;
+- evaluate optional Home/Recommended publishing only if Plex Pass becomes active.
 
 ### 6. Mobile / remote access
 
