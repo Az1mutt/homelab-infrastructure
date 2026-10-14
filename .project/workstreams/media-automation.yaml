@@ -15,7 +15,9 @@ current_gate: >
   one POST and two zero-result read-backs; automatic retry is forbidden. The saved POST
   audit was unavailable in the current Codex workspace and live inspection could not run
   because the required homelab SSH alias was unavailable, so non-creation is not proven.
-  Torrent cleanup acceptance remains a separate non-blocking follow-up.
+  Public-indexer torrent cleanup is now accepted end-to-end on a fresh Radarr/Knaben grab:
+  the one-minute seed goal propagated, qBittorrent stopped after 70 seconds, Radarr imported
+  the movie and then removed the torrent job and download-side content.
 
 current_state: >
   The first real media.db -> Trakt delivery reached a safe ambiguous checkpoint for
@@ -31,8 +33,9 @@ current_state: >
   delivery, cursor, permission, audit and adapter-boundary patterns, not Media semantics.
   The next boundary is to inspect the sanitized original POST response/audit only; an
   explicit single retry may be considered only if that evidence definitively proves that
-  Trakt did not create the event. Separately, the one-minute public torrent cleanup policy
-  remains applied and awaits its next qualifying public torrent for final cleanup acceptance.
+  Trakt did not create the event. The one-minute public torrent cleanup policy is now
+  accepted end-to-end for qualifying public-indexer ARR grabs; Sk-CzTorrent remains outside
+  that policy until its seeding requirements are known.
 
 exact_next_action: >
   Inspect only the sanitized original Mortgully POST response/audit and classify the
@@ -40,12 +43,11 @@ exact_next_action: >
   not_found/added=0/no event created, surface that as evidence for one explicit retry
   decision; otherwise keep the delivery ambiguous. Do not repeat observation, identity,
   OAuth or freshness diagnostics except a narrow read if required to interpret the saved
-  audit. Separately, accept the one-minute public torrent cleanup policy on the next
-  qualifying public-indexer ARR grab.
+  audit. Do not reopen torrent cleanup unless a future qualifying public-indexer grab
+  contradicts the accepted behavior.
 
 blockers:
   - "First media.db -> Trakt POST is durably ambiguous: exactly one POST was attempted, read-back found 0 events, and automatic retry is forbidden pending audit classification."
-  - "One-minute public-indexer cleanup policy is applied but has not yet been accepted end-to-end on a new qualifying ARR torrent."
   - "Safe programmable Plex historical watched-date writes remain unconfirmed."
 
 dependencies:
@@ -54,29 +56,30 @@ dependencies:
   - component: "Tautulli reconciliation runner"
     dependency: "Merged in PR #10; main 0285d235c55b5d1d73c9eaaa12ae487f484e7e10; 118 tests passing; feature branch deleted."
   - component: "Sonarr/qBittorrent"
-    dependency: "Hardlink topology is now accepted end-to-end; future cleanup depends only on the chosen qBittorrent seeding/share policy."
+    dependency: "Hardlink topology and the one-minute public-indexer cleanup path are both accepted end-to-end; Sk-CzTorrent remains intentionally outside that cleanup policy."
 
 important_open_loops:
   - "Classify the sanitized original Mortgully POST response/audit. Keep delivery ambiguous unless the evidence definitively proves no Trakt event was created; only then consider one explicit retry."
-  - "Accept the one-minute public-indexer seed policy on the next qualifying ARR torrent. Keep Sk-CzTorrent unchanged until its seeding requirements are known."
   - "Do not start historical Plex backfill implicitly."
   - "Plan layered server backup/restore for configuration, databases and durable media-brain state."
   - "Iterate Kometa v2 after the ongoing-sync observation path is automated."
 
 stale_or_unknown:
   - "The first outbound write was attempted exactly once but remains ambiguous; no matching history event is visible and no rollback history ID exists."
-  - "End-to-end automatic cleanup after the new one-minute seed policy is unverified until the next qualifying public-indexer torrent completes."
 
 portfolio:
   milestone: true
   signal: >
     Media is safely parked with historical backfill complete, observation reconciliation
-    accepted, and the sole outbound Mortgully attempt retained as an ambiguous blocker.
-    Media-domain ownership is explicit; general platform work may continue independently.
+    accepted, the public-indexer torrent cleanup path accepted end-to-end, and the sole
+    outbound Mortgully attempt retained as an ambiguous blocker. Media-domain ownership is
+    explicit; general platform work may continue independently.
 
 verification:
-  last_verified: "2026-10-07"
+  last_verified: "2026-10-14"
   sources:
+    - "2026-10-14 torrent-cleanup acceptance PASS on fresh Radarr grab Scream 7 from public Knaben: one-minute policy propagated; qBittorrent logged seed-time limit reached after 70 seconds; Radarr imported, then removed the torrent job and download-side content."
+    - "2026-10-14 read-only check of older The Pitt S01E06 showed unlimited effective limits; because its timing relative to policy application was not established, it is retained only as historical/non-diagnostic evidence and does not contradict the fresh Scream 7 acceptance."
     - "2026-10-07 closure reconciliation retained Mortgully as ambiguous; no Trakt POST was issued during closure."
     - "2026-10-06 PR #10 remains merged; main 0285d235c55b5d1d73c9eaaa12ae487f484e7e10; 118 tests passing."
     - "2026-10-06 feat/tautulli-reconciliation-runner deleted successfully; merged main remains intact."
