@@ -50,16 +50,18 @@ Disabling scheduling does not undo the collection's Plex promotion.
 - All eight collection IDs survived. Seven director metadata fingerprints and
   memberships matched exactly; native Movies/TV hub settings, TV collections,
   and the private Kometa configuration hash were unchanged.
-- **Visibility FAIL / unresolved:** despite persisted promotion, `Newly Released`
+- **Visibility unsupported under current entitlement:** despite persisted promotion, `Newly Released`
   was absent from both `/hubs/promoted?contentDirectoryID=1` and
   `/hubs/sections/1`, also with explicit client headers and count 50. No TV-client
-  visual verification was performed. This is an observed server-response
-  limitation, not proof Plex universally does not support collection rows.
+  visual verification was performed. Plex reports `subscriptionActive=0`.
+  Plex documents an active Plex Pass as a prerequisite for publishing collection
+  rows; this unmet requirement is consistent with the observed omission.
+  No subscription change or unsupported visibility workaround was applied.
 - A pre-existing unmatched local movie warning appeared during library mapping;
   it did not prevent updating the selected collection and was not changed.
 
-Next: verify the owner's actual Plex client surfaces and narrowly diagnose the
-persisted-promotion/absent-hub discrepancy before expanding Kometa v2 rows.
+Next: owner decision on the Plex Pass prerequisite. If enabled later, repeat only
+single-row Home/Recommended visibility acceptance before expanding Kometa v2 rows.
 
 ## Validation
 

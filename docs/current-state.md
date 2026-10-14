@@ -1,6 +1,6 @@
 # Current State
 
-## Kometa Phase 1 — execution verified, row visibility unresolved — 2026-10-14
+## Kometa Phase 1 — execution verified, Plex Pass prerequisite unmet — 2026-10-14
 
 Kometa 2.4.8 now has a pinned, bounded daily one-shot job at 03:15 UTC using the
 existing reboot-enabled cron service. The scheduled command is restricted to
@@ -10,12 +10,14 @@ first time-triggered invocation and reboot remain unobserved.
 The previous run skipped this collection because no items met its minimum of one;
 the fresh run applied the existing valid visibility configuration. Plex now stores
 owner Home and Movies Recommended promotion, with shared Home disabled. However,
-both hub-content endpoints still omit the row, so actual visibility is **not accepted**.
+both hub-content endpoints omit the row. Plex reports `subscriptionActive=0`;
+publishing collection rows requires an active Plex Pass. Both surfaces are
+**unsupported under the current entitlement**, not a Kometa syntax failure.
 Both members, all eight collections, director metadata/membership, native hub settings,
 TV collections and private configuration were preserved. No overlays were run.
 
 See the [execution and acceptance record](../tools/kometa/README.md). Next: check
-the owner's Plex client surfaces and resolve the hub discrepancy before adding rows.
+the owner's decision on Plex Pass; if enabled later, repeat single-row visibility acceptance before adding rows.
 
 ## Media parking and ownership — 2026-10-07
 
@@ -209,7 +211,7 @@ This document is the concise source of truth for what exists, what has been veri
 | Host | Verified | Dedicated Ubuntu Server desktop |
 | Data disk | Verified | Toshiba MG09 18 TB, ext4, mounted at `/data` |
 | Media stack | Verified running | Plex, Radarr, Sonarr, Prowlarr, qBittorrent, SABnzbd |
-| Kometa | Component-tested | 2.4.8; daily one-shot installed and manually tested; promotion persisted but Home/Recommended hub visibility unresolved |
+| Kometa | Component-tested | 2.4.8; daily one-shot installed and manually tested; promotion persisted; published collection rows require currently inactive Plex Pass |
 | Recyclarr | Verified | Separate Compose project managing Radarr and Sonarr TRaSH configuration |
 | Tautulli | Verified | Re-authorized and healthy |
 | Netdata | Verified | Local diagnostics dashboard deployed |

@@ -5,8 +5,8 @@
 - **Verified:** pinned Kometa 2.4.8 one-shot runner, daily 03:15 UTC cron entry,
   non-overlap lock, timeout, private logs and successful single-row live execution.
 - **Component-tested:** Newly Released promotion persisted for owner Home and Movies
-  Recommended, but the row is still absent from the queried hub content.
-- **Next:** owner-client visibility check and narrow hub diagnosis; observe the first
+  Recommended; row rendering requires the currently inactive Plex Pass entitlement.
+- **Next:** owner decision on the Plex Pass prerequisite; observe the first
   scheduled invocation. See the [acceptance record](../tools/kometa/README.md).
 - Directors, TV configuration, overlays and the broader v2 layout remain deferred.
 

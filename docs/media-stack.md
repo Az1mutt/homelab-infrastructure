@@ -144,7 +144,7 @@ Verified behavior:
 
 The cron entry is installed and its runner passed live acceptance; the first scheduled
 firing remains unobserved. Promotion flags persist, but actual Home/Recommended hub
-visibility remains unresolved. A rotating `Director Spotlight` remains planned.
+visibility requires an active Plex Pass (currently inactive). A rotating `Director Spotlight` remains planned.
 
 ## Pre-migration backup and freeze
 
