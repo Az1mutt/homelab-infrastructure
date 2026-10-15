@@ -4,33 +4,45 @@ state_scope: "project_rollup"
 
 project:
   name: "Homelab & Media Stack"
-  owner: "Project OS rollup"
+  owner: "Core Project Brain rollup"
 
 status: "active"
-phase: "migration-acceptance-closure"
+phase: "post-migration-operations-and-media-automation"
 
 current_gate: >
-  Complete the media workstream's final torrent import/hardlink acceptance
-  check, then let the infrastructure workstream formally close the desktop
-  migration and decide the disposition of the old rollback disk.
+  The desktop migration is formally closed. Current project work is split across
+  two independent verified gates: Media Automation is observing the accepted
+  Kometa Phase 2A rotation and must classify the saved Mortgully Trakt POST audit
+  without retrying the ambiguous delivery; Infrastructure & Agent Control Plane
+  has a read-only 39-entry history proposal that requires separate authorization
+  before any write. Neither gate reopens migration closure.
 
 current_state: >
-  The dedicated Ubuntu Server desktop is operational and the media stack is
-  functioning end to end. Infrastructure migration is substantially complete.
-  Media validation has progressed through Plex, Kometa, Tautulli, TRaSH/
-  Recyclarr, Usenet fallback behavior and monitoring. One live torrent
-  import/hardlink acceptance check remains before formal migration closure.
-  Infrastructure-specific cleanup such as rollback-disk disposition, permanent
-  image pin/update policy and backup hardening remains owned by the
-  Infrastructure workstream.
+  The dedicated desktop is the production Homelab and the notebook-to-desktop
+  migration is accepted as closed. Media Automation has accepted Plex/ARR/Usenet
+  operation, public-indexer torrent cleanup, Tautulli/ledger foundations and
+  Kometa Phase 2A Movies discovery; its remaining hard blocker is the single
+  ambiguous Mortgully Trakt delivery, where exactly one POST was attempted and
+  automatic retry is forbidden pending audit classification. Infrastructure &
+  Agent Control Plane has stable identity for 40 movie-history candidates and a
+  read-only preflight proposing 39 safe history entries while excluding one
+  unresolved Plex link; no history writes are authorized. Post-migration
+  infrastructure cleanup such as rollback-disk retirement, image policy,
+  backup/restore hardening and monitoring remains follow-up work rather than a
+  migration blocker.
 
 exact_next_action: >
-  Media Automation completes the in-progress torrent import/hardlink test and
-  records its result in its workstream state. If it passes, Infrastructure
-  refreshes its workstream state and performs formal migration closure.
+  Perform no history write. Media Automation should observe the next scheduled
+  daily/Thursday Kometa rotation and inspect only the sanitized original
+  Mortgully POST response/audit, keeping the delivery ambiguous unless that
+  evidence definitively proves no event was created. Infrastructure may present
+  its 39-entry read-only history proposal for a separately authorized batch, but
+  must not execute it under the current gate.
 
 blockers:
-  - "Final migration closure waits on the media workstream's torrent import/hardlink acceptance check."
+  - "Mortgully Trakt delivery remains durably ambiguous after exactly one POST; automatic retry is forbidden pending audit classification."
+  - "Safe programmable Plex historical watched-date writes remain unconfirmed."
+  - "The 39-entry history proposal requires separate explicit authorization before any write."
 
 workstreams:
   - id: "infrastructure"
@@ -49,16 +61,17 @@ rollup_policy:
 portfolio:
   milestone: true
   signal: >
-    Homelab migration and media-stack stabilization together provide a strong
-    portfolio story around safe infrastructure migration, rollback discipline,
-    storage/filesystem design, Docker service recovery, monitoring and
-    application-level validation.
+    The Homelab story has moved beyond migration into a durable self-hosted
+    automation/control platform: the desktop migration is closed, media workflows
+    and bounded Kometa discovery are accepted, Movie Intelligence and scheduled
+    ingestion are operational, and current write boundaries preserve explicit
+    authorization and ambiguity rather than hiding uncertain outcomes.
 
 verification:
-  last_verified: "2026-09-08"
+  last_verified: "2026-10-14"
   sources:
-    - ".project/workstreams/infrastructure.yaml"
-    - ".project/workstreams/media-automation.yaml"
+    - ".project/workstreams/infrastructure.yaml (last verified 2026-10-05)"
+    - ".project/workstreams/media-automation.yaml (last verified 2026-10-14)"
 
 sync:
   status: "synced"
