@@ -12,14 +12,19 @@ phase: "kometa-phase2a-movies-discovery-accepted"
 
 kometa_phase2a:
   status: "Verified"
-  verified_on: "2026-10-14"
-  collections: "Newly Released 2; Trending Now 3; Movie of the Day 1; Director Spotlight 4; Genre Spotlight 12."
-  daily_pick: "Inglourious Basterds; stable date/identity hash, persisted for the Bratislava calendar day; no watched-state dependency."
+  verified_on: "2026-10-16"
+  collections: "October 16: Newly Released 2; Trending Now 3; Movie of the Day 1; Director Spotlight 4; Genre Spotlight 20."
+  daily_pick: "October 14-16: Inglourious Basterds -> Margin Call -> The Wailing; deterministic selection and same-day retention verified."
   director: "Martin Scorsese; explicit pool with minimum 3 local films, Monday cadence. Only Scorsese currently qualifies, so meaningful rotation awaits deeper library coverage."
-  genre: "Thriller; explicit six-genre pool with minimum 5 local films, Thursday cadence."
-  execution: "Existing 03:15 UTC bounded runner extended to generated Movies-only definitions; Kometa 2.4.8 digest and cron unchanged."
+  genre: "Thursday October 15 rotation verified: Thriller 12 -> Drama 20; minimum 5 unchanged."
+  execution: "October 15 and 16 cron invocations at 03:15:01 UTC both completed with exit 0; no overlap/timeout; private logs and rotation verified. Kometa 2.4.8 digest and cron unchanged."
+  trending_minimum:
+    status: "Component-tested"
+    correction: "Trending Now alone now has minimum_items=3 and delete_below_minimum=true; generator and generated definition deployed. Other collection/global retention unchanged."
+    evidence: "16 tests passed in pinned 2.4.8, including actual Kometa gates for valid sizes, below-minimum absence/deletion, recovery, old-defect reproduction and scope. No manual live run."
+    remaining: "Optional natural below-minimum live deletion/recovery observation; do not manufacture a shortage."
   preservation: "Existing smart collection retained; all seven browsing directors, native hub settings, TV collections and overlay labels unchanged. No additional v2 concepts implemented."
-  next_action: "Observe next daily/Thursday rotation and collect usefulness feedback before separately scoping another Movies milestone. Plex Pass is optional for future promotion, not a collections gate."
+  next_action: "Optionally verify Trending deletion/recovery on a natural below-minimum recurrence; gather usefulness feedback before separately scoping another milestone."
 
 kometa_phase1:
   status: "Historical"
@@ -32,7 +37,8 @@ kometa_phase1:
 
 current_gate: >
   Kometa Phase 2A ordinary Movies collections are accepted independently of Plex Pass.
-  Observe the next scheduled daily/Thursday rotation before expanding the content set.
+  Scheduled execution and daily/Thursday rotation are runtime accepted; the Trending
+  minimum-size correction is component-tested, with natural live recurrence optional.
   Home/Recommended publishing remains optional and requires active Plex Pass.
   The Mortgully delivery remains durably ambiguous after exactly
   one POST and two zero-result read-backs; automatic retry is forbidden. The saved POST
@@ -43,7 +49,7 @@ current_gate: >
   the movie and then removed the torrent job and download-side content.
 
 current_state: >
-  Five Movies discovery collections are live-accepted with counts 2/3/1/4/12, stable
+  Five Movies discovery collections have October 16 counts 2/3/1/4/20, stable
   sort order and deterministic persisted daily/weekly selection. Existing director
   browsing collections remain intact; TV and overlays are still outside Kometa scope.
   The first real media.db -> Trakt delivery reached a safe ambiguous checkpoint for
@@ -64,7 +70,7 @@ current_state: >
   that policy until its seeding requirements are known.
 
 exact_next_action: >
-  Observe the next daily pick and Thursday genre rotation and gather feedback on the
+  Optionally observe natural Trending below-minimum deletion/recovery and gather feedback on the
   five Movies collections. Do not add remaining Movies concepts or TV v2 implicitly.
   Plex Pass is only a prerequisite for optional future Home/Recommended publishing.
   Keep the independent Trakt boundary unchanged:
@@ -92,7 +98,7 @@ important_open_loops:
   - "Classify the sanitized original Mortgully POST response/audit. Keep delivery ambiguous unless the evidence definitively proves no Trakt event was created; only then consider one explicit retry."
   - "Do not start historical Plex backfill implicitly."
   - "Plan layered server backup/restore for configuration, databases and durable media-brain state."
-  - "Kometa Phase 2A: observe first scheduled daily/Thursday rotation and gather collection usefulness feedback; additional Movies concepts and TV v2 remain deferred."
+  - "Kometa Phase 2A: scheduler/rotations accepted; Trending minimum fix component-tested. Natural below-minimum live observation is optional; additional Movies concepts and TV v2 remain deferred."
 
 stale_or_unknown:
   - "The first outbound write was attempted exactly once but remains ambiguous; no matching history event is visible and no rollback history ID exists."
@@ -106,8 +112,9 @@ portfolio:
     explicit; general platform work may continue independently.
 
 verification:
-  last_verified: "2026-10-14"
+  last_verified: "2026-10-16"
   sources:
+    - "2026-10-16: October 15/16 scheduled runs succeeded; deterministic daily and Thursday genre rotations and regressions passed. Trending-only deletion flag fixed and deployed; 16 pinned-image tests passed. Below-minimum live behavior after the fix remains unobserved."
     - "2026-10-14 Kometa Phase 2A PASS: Newly Released 2, Trending Now 3, Movie of the Day 1 (Inglourious Basterds), Director Spotlight 4 (Martin Scorsese), Genre Spotlight 12 (Thriller); exact !010 through !050 ordering."
     - "2026-10-14 corrected Kometa 2.4.8 run succeeded for all five collections; 11 offline tests passed; all original collection IDs, seven director metadata/membership snapshots, native Movies/TV settings, TV collections and overlay labels preserved."
     - "2026-10-14 Plex reports subscriptionActive=0; Plex publishing-collections documentation requires an active Plex Pass. Persisted flags with omitted hub content are consistent with that unmet prerequisite."

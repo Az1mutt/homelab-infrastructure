@@ -98,7 +98,7 @@ def build(movies, today, previous):
     }
     for index, (title, definition) in enumerate(definitions.items(), 1):
         definition.update({'sort_title': '!' + str(index * 10).zfill(3) + '_' + title,
-                           'sync_mode': 'sync', 'delete_below_minimum': False,
+                           'sync_mode': 'sync', 'delete_below_minimum': title == 'Trending Now',
                            'delete_not_scheduled': False,
                            'label': ['Kometa', 'Kometa v2']})
     state = {'movie': {'day': today.isoformat(), 'identity': motd['identity'], 'title': motd['title']},
