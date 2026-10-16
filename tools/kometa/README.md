@@ -44,9 +44,10 @@ collections rather than silently reducing minimums.
 
 Trending uses supported `tmdb_trending_weekly: 100`, `limit: 12`, source ordering
 and `sync_mode: sync`. Missing movies are never acquired or replaced with unrelated
-ones. Below three local matches, Kometa skips the update; an existing collection
-is retained and its minimum-not-met result must be reviewed before describing it
-as current trending. No automatic collection deletion is configured.
+ones. Trending Now alone uses `minimum_items: 3` and
+`delete_below_minimum: true`: below three local matches it is deleted or remains
+absent, then can be recreated when at least three matches return. All other
+definitions retain `delete_below_minimum: false`; global retention is unchanged.
 
 ## Runtime and private configuration
 
@@ -80,8 +81,8 @@ The existing daily cron remains 03:15 UTC (04:15 CET / 05:15 CEST), backed by th
 boot-enabled host cron service. A nonblocking lock prevents overlap; an existing
 named container is refused. Jobs have a 30-minute timeout and cleanup removes
 only the job container. No image pull or always-running container is required.
-Missed runs while powered off are not replayed. First timed firing and actual
-reboot remain unobserved; the scheduled entry point passed manual live runs.
+Missed runs while powered off are not replayed. Automatic runs on October 15 and
+16, 2026 succeeded at the scheduled time; an actual reboot remains unobserved.
 
 **Modifies the five collections:**
 
@@ -116,6 +117,31 @@ logs are not automatically pruned.
 
 Linux tests: `python3 -m unittest discover -s tools/kometa -p 'test_*.py'`.
 
+## Runtime acceptance and Trending correction — 2026-10-16
+
+- Cron invoked both October 15 and 16 jobs at 03:15:01 UTC. Both exited zero,
+  without lock conflict or timeout; private wrapper logs and Kometa log rotation
+  were verified.
+- Daily picks October 14–16: Inglourious Basterds → Margin Call → The Wailing.
+  Deterministic selection and same-day retention passed. Thursday's genre changed
+  Thriller (12) → Drama (20). Scorsese remains the only eligible director (4).
+- Counts on October 16: 2/3/1/4/20; ordering, seven standalone directors, TV,
+  overlay labels and native settings passed regression checks.
+- October 15 exposed a retention defect: sync removed two Trending members, then
+  `Minimum 3 Not Met` left one member because deletion was disabled. The generated
+  Trending-only flag is now corrected and deployed; no manual Kometa run was made.
+- Sixteen tests passed in the pinned 2.4.8 image with networking disabled. Five
+  compatibility tests execute the actual installed Kometa AST branches with an
+  in-memory Plex boundary: valid sizes, 0–2 matches, recovery, old-defect
+  reproduction, and collection-specific scope. This is **Component-tested**;
+  natural below-minimum live deletion has not yet been observed after the fix.
+
+Run compatibility coverage inside the pinned image, mounting this directory at
+`/tests:ro`, setting `KOMETA_SOURCE=/kometa.py`, `PYTHONDONTWRITEBYTECODE=1`, working
+directory `/tests`, and using `--network none`. Run `python -m unittest discover
+-s /tests -p 'test_*.py'`. Without `KOMETA_SOURCE`, the five compatibility tests
+are explicitly skipped; ordinary rotation and runner tests still run on Linux.
+
 ## Rollback and next boundary
 
 Private `config.yml.pre-discovery` and `run_phase1.py.pre-discovery` remain on the
@@ -126,7 +152,9 @@ runner does not delete the four new collections; removal needs a separate decisi
 
 Phase 1 established execution/promotion settings and found inactive Plex Pass.
 Phase 2A accepts ordinary collections independently of that optional feature.
-Next: observe the next daily pick and Thursday genre rotation, then gather feedback
+Runtime scheduling and rotation are accepted; the Trending correction is
+component-tested. Optionally confirm deletion on the next naturally below-minimum
+day and recovery afterward; do not manufacture a shortage. Gather feedback
 before separately scoping more Movies collections. Mood, Critically Acclaimed,
 Hidden Gems, Rediscover, Because You Watched, My Cinema and TV v2 remain deferred.
 

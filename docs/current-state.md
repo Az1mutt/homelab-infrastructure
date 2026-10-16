@@ -1,5 +1,21 @@
 # Current State
 
+## Kometa Phase 2A — runtime accepted; Trending correction component-tested — 2026-10-16
+
+October 15 and 16 automatic 03:15 UTC runs completed successfully without overlap
+or timeout. Daily picks were Inglourious Basterds → Margin Call → The Wailing;
+Thursday Genre Spotlight rotated Thriller (12) → Drama (20). Scorsese remains the
+only eligible director (4). October 16 counts are 2/3/1/4/20; ordering and existing
+director, TV, overlay and native-setting regressions passed.
+
+October 15 Trending fell to one item because minimum enforcement did not enable
+deletion. Trending alone now uses `delete_below_minimum: true` with minimum 3;
+all other retention semantics remain unchanged. The fix is deployed and 16 tests
+passed, including pinned Kometa's actual minimum gates. No manual run or artificial
+shortage was used. Natural below-minimum live deletion/recovery is an optional
+remaining observation, not a claim of completed live acceptance for that branch.
+See [policy and evidence](../tools/kometa/README.md). Earlier checkpoints below are historical.
+
 ## Kometa Phase 2A — Movies discovery accepted — 2026-10-14
 
 Five ordinary collections are live-accepted: Newly Released (2), Trending Now (3),

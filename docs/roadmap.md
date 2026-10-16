@@ -1,11 +1,13 @@
 # Roadmap
 
-## Kometa v2 Phase 2A — accepted — 2026-10-14
+## Kometa v2 Phase 2A — runtime accepted — 2026-10-16
 
-- **Verified:** five Movies collections with member counts 2/3/1/4/12, deterministic
+- **Verified:** October 15/16 scheduled runs; five Movies collections with October 16 counts 2/3/1/4/20, deterministic
   persisted rotation, ordered namespace, and preserved existing browsing directors.
-- **Next:** observe the next daily pick/Thursday genre rotation and gather usefulness
-  feedback. Only Scorsese currently qualifies for the minimum-three director pool.
+- **Component-tested:** Trending-only deletion below three local matches and recovery;
+  fix deployed, 16 tests passed. Global retention remains unchanged.
+- **Next:** optionally observe a natural below-minimum Trending day/recovery and gather
+  usefulness feedback. Daily/Thursday rotations passed; only Scorsese qualifies for the director pool.
 - Ordinary collections do not require Plex Pass. Home/Recommended publishing remains
   optional and outside acceptance. See [Kometa policy](../tools/kometa/README.md).
 - Mood, Critically Acclaimed, Hidden Gems, Rediscover, Because You Watched,
@@ -257,7 +259,7 @@ Design principles:
 
 ### 5. Kometa v2 iteration
 
-- observe Phase 2A daily/weekly rotation and assess collection usefulness;
+- optionally observe natural Trending below-minimum deletion/recovery and assess Phase 2A usefulness;
 - scope additional Movies concepts separately; do not add TV or more rows implicitly;
 - evaluate optional Home/Recommended publishing only if Plex Pass becomes active.
 
